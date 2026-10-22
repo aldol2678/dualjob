@@ -1,0 +1,10 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"project_id\":\"dualjob-v0618-energy\",\"metadata_structure\":\"PASS\",\"asset_count\":5,\"total_declared_bytes\":5824,\"issues\":[{\"id\":\"energy_battery_0\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"energy_battery_1\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"energy_battery_2\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"energy_battery_3\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"energy_battery_4\",\"caller_status\":\"UNKNOWN\"}],\"declared_status_only\":true,\"content_integrity\":\"UNKNOWN\",\"visual_qa\":\"UNKNOWN\",\"engine_import_qa\":\"UNKNOWN\",\"rights_qa\":\"UNKNOWN\",\"evidence\":{\"basis\":\"caller_supplied_metadata\",\"metadata_sha256\":\"7399835775ee50a6407244f7237159b0f22b47b4e501025267500b51c78410f0\",\"files_read\":0,\"writes\":0,\"persisted\":false,\"hash_scope\":\"normalized request metadata, not asset bytes\"}}"
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}
