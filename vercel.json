@@ -1,4 +1,8 @@
 {
+  "buildCommand": "python3 scripts/build.py",
+  "outputDirectory": "dist",
+  "installCommand": "",
+  "framework": null,
   "headers": [
     {
       "source": "/(.*)",
