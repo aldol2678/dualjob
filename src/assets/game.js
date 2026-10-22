@@ -90,6 +90,19 @@ const rooms=[
  {label:'인사 대기실',desc:'호출 벨이 울린다. 사표를 다시 확인한다.',speaker:'인사부장 · 면담 통지',line:'퇴사 사유는 직접 듣겠습니다. 살아서 올라오세요.'},
  {label:'인사부장실',desc:'마지막 결재자는 사표 대신 무기를 들었다.',speaker:'인사부장 마왕',line:'이 문을 나가고 싶다면, 먼저 저를 설득하시죠.'}
 ].map((r,i)=>({...r,type:i===8?'boss':'map'}));
+const FLOOR_DECISIONS={
+ 5:{title:'📑 결산 처리',desc:'지난 미수금을 지금 정산하거나 다음 전투 보상으로 이월할 수 있어.',options:[['지금 정산','즉시 +12G'],['다음 실적에 이월','다음 전투 승리 시 +28G · 지속 피로 +1']]},
+ 6:{title:'🌙 야근 결재',desc:'성과급을 위해 추가 근무할까, 회복 시간을 확보할까?',options:[['야근 수당 신청','즉시 +26G · 지속 피로 +2'],['퇴근권 사용','체력 8 회복']]}
+};
+function floorDecisionPending(level=state.stage){return !!FLOOR_DECISIONS[level]&&!Object.hasOwn(state.floorDecisions||{},level)}
+function takeFloorDecision(level,choice){
+ if(!state||state.phase!=='map'||state.stage!==level||!FLOOR_DECISIONS[level]||!Number.isInteger(choice)||choice<0||choice>1||!floorDecisionPending(level))return false;
+ state.floorDecisions=state.floorDecisions||{};state.floorDecisions[level]=choice;
+ if(level===5){if(choice===0)state.gold+=12;else{state.deferredBonus=28;state.workFatigue=Math.min(6,(state.workFatigue||0)+1)}}
+ if(level===6){if(choice===0){state.gold+=26;state.workFatigue=Math.min(6,(state.workFatigue||0)+2)}else state.hp=Math.min(state.maxHp,state.hp+8)}
+ log(level===5?(choice===0?'📑 미수금 정산 +12G':'📑 이월 승인 · 다음 승리 +28G'):(choice===0?'🌙 야근 수당 +26G · 피로 +2':'🏠 퇴근권 사용 · 체력 회복'));
+ save();render();return true;
+}
 const ENCOUNTERS={
  intake:{ids:['clerk','minion'],name:'누락 서류 접수',hint:'서류 정령부터 줄일지, 슬라임을 몰아칠지 선택해.'},
  archive:{ids:['clerk','healer'],name:'보호 중인 서류',hint:'주술사가 동료를 보호해. 보호자를 먼저 노려 봐.'},
@@ -217,6 +230,8 @@ function sanitizeRun(raw){
  x.rewardOptions=Array.isArray(x.rewardOptions)?x.rewardOptions:[];
  if(x.phase==='event')x.eventId=Number.isInteger(x.eventId)?x.eventId:0;
  x.workFatigue=Math.max(0,Math.min(6,num(x.workFatigue,0)));
+  x.floorDecisions=x.floorDecisions&&typeof x.floorDecisions==='object'&&!Array.isArray(x.floorDecisions)?Object.fromEntries([5,6].filter(i=>[0,1].includes(x.floorDecisions[i])).map(i=>[i,x.floorDecisions[i]])):{};
+  x.deferredBonus=x.deferredBonus===28?28:0;x.floorCopy=cards[x.floorCopy]?x.floorCopy:null;
  x.ingredient=Math.max(0,num(x.ingredient,0));x.reagent=Math.max(0,num(x.reagent,0));
  x.synergies=num(x.synergies,0);x.defeated=num(x.defeated,0);x.overtimes=num(x.overtimes,0);
  // C1 '전술 선택' 상태 → C2 자동 규칙으로 변환
@@ -501,22 +516,23 @@ function spawnEnemy(){
  state.targetIndex=0;ensureTarget();state.block=hasRelic('lunchVoucher')?6:0;state.energy=3;
  state.drawPile=shuffle([...state.deck]);state.discard=[];state.hand=[];state.turn=1;state.usedReal=false;state.usedFantasy=false;state.synergy=false;state.dualTurnUsed=false;state.lastDual=null;
  state.lastHitIndex=null;state.lastHitDamage=0;state.overtimeUsed=false;state.ingredient=0;state.reagent=0;state.logs=[];
- state.relicTurn={};state.relicUsed={severancePackage:!!state.relicUsed?.severancePackage};state.phase='battle';
+ state.relicTurn={};state.relicUsed={severancePackage:!!state.relicUsed?.severancePackage};state.bossPhase=nt==='boss'?1:0;state.floorCopy=null;state.phase='battle';
  dealFrom=0;if(state.workFatigue>=3){draw(4);state.hand.push('fatigue');log('💤 피로도 '+state.workFatigue+': 시작 손패 1장이 임시 피로 카드')}else draw(5);
- chooseIntent();log('🚪 '+rooms[state.stage].label+' · '+encounter.name);log(encounter.hint);
+ if(state.stage===2){state.floorCopy=pair().sig;state.hand.push(pair().sig);log('🖨️ 복사실 특전 · '+cards[pair().sig].name+' 임시 사본 1장 (이번 전투 한정)')}
+  chooseIntent();log('🚪 '+rooms[state.stage].label+' · '+encounter.name);log(encounter.hint);
 }
 function newRun(){
  meta.attempts=(meta.attempts||0)+1;const key=pickReal+'-'+pickFantasy;if(!meta.combos.includes(key))meta.combos.push(key);saveMeta();
  state={version:4,workFatigue:0,dualTurnUsed:false,lastDual:null,overtimes:0,tutorial:meta.tutorialDone?null:{step:0},phase:'map',stage:0,real:pickReal,fantasy:pickFantasy,maxHp:72,hp:72,block:0,energy:3,gold:30,
  ingredient:0,reagent:0,deck:[...initialDeck[pickReal],...initialDeck[pickFantasy],pairs[key].sig],drawPile:[],discard:[],hand:[],enemy:null,
  turn:1,usedReal:false,usedFantasy:false,synergy:false,synergies:0,overtimeUsed:false,sigUpgrade:false,defeated:0,logs:[],message:'',rewardOptions:[],rewardFor:0,
- relics:[],upgrades:{},path:[],nodeType:null,relicTurn:{},relicUsed:{},shop:null,eventId:null,eventHistory:[]};
+ relics:[],upgrades:{},path:[],nodeType:null,relicTurn:{},relicUsed:{},shop:null,eventId:null,eventHistory:[],floorDecisions:{},deferredBonus:0,floorCopy:null,bossPhase:0};
  savedRun=null;save();render();
 }
 function finishRun(win){state.phase=win?'victory':'defeat';if(win)meta.wins=(meta.wins||0)+1;meta.best=Math.max(meta.best||0,state.stage+(win?1:0));safeSet(METAKEY,meta);save();render();}
 function victory(){
  const nt=state.nodeType||'battle';state.defeated++;let earned=nt==='boss'?40:nt==='elite'?24:12;
- if(hasRelic('paydayCoupon'))earned+=10;state.gold+=earned;log('🏅 전투 승리! 급여 '+earned+'G');
+ if(hasRelic('paydayCoupon'))earned+=10;if(state.deferredBonus){earned+=state.deferredBonus;state.deferredBonus=0;log('📑 이월 미수금 지급 · 추가 28G')}state.gold+=earned;log('🏅 전투 승리! 급여 '+earned+'G');
  if(state.workFatigue>0){state.workFatigue--;log('🌿 전투 승리 · 피로도 -1')}
  if(nt==='boss'){finishRun(true);return}
  if(nt==='elite'){
@@ -594,7 +610,7 @@ function nextStage(){
  state.phase='map';state.message='새로운 갈림길에서 다음 목적지를 선택해.';save();render();
 }
 function chooseNode(index){
- if(state.phase!=='map')return;const opts=mapRows[state.stage],t=opts[index];if(!t)return;
+ if(state.phase!=='map'||floorDecisionPending())return;const opts=mapRows[state.stage],t=opts[index];if(!t)return;
  state.nodeType=t;state.path[state.stage]={type:t,choice:index};
  state.message='';
  if(t==='battle'||t==='elite'||t==='boss')spawnEnemy();
@@ -799,12 +815,17 @@ function renderReward(){
  return `<main class="flow-screen reward-flow">${flowHeader()}<section class="journey-panel"><div class="flow-kicker">${rooms[state.stage].label} 완료 · 다음: ${rooms[state.stage+1]?.label||'퇴근'}</div><h1>업무 해결!</h1><p class="flow-lead">카드 1장 또는 급여 8G를 선택하세요.</p>${pstats()}<div class="reward-grid journey-rewards">${state.rewardOptions.map((card,i)=>renderCard(card,{reward:true,index:i}).replace('data-act="inspectReward"','data-act="selectJourneyReward" aria-pressed="'+(journeyReward?.index===i)+'"').replace('class="card ','class="card '+(journeyReward?.index===i?'reward-picked ':'')).replace('⊕ 상세',journeyReward?.index===i?'✓ 선택됨':'선택')).join('')}</div>${detail}</section><footer class="journey-dock reward-dock"><button class="btn calm" data-act="reward" data-index="-1">건너뛰고 +8G</button><button class="btn primary" data-act="takeJourneyReward" ${c?'':'disabled'}>${c?esc(c.name)+' 획득':'카드를 선택하세요'}</button></footer></main>`;
 }
 function validJourneyRoute(){return journeyRoute&&state?.phase==='map'&&journeyRoute.run===state&&journeyRoute.stage===state.stage&&mapRows[state.stage]?.[journeyRoute.index]===journeyRoute.type}
+function floorSpecialMarkup(level){
+ const info=FLOOR_DECISIONS[level];if(!info)return '';
+ const picked=state.floorDecisions?.[level];const pending=floorDecisionPending(level);
+ return '<section class="floor-special" aria-label="구역 특수 선택"><h2>'+info.title+'</h2><p>'+info.desc+'</p><div class="floor-special-options">'+info.options.map((entry,i)=>'<button type="button" class="floor-special-choice" data-act="floorDecision" data-choice="'+i+'" '+(pending?'':'disabled')+' aria-pressed="'+(picked===i)+'"><b>'+entry[0]+'</b><small>'+entry[1]+'</small></button>').join('')+'</div><p class="floor-special-feedback" role="status">'+(pending?'선택 후 경로를 이동할 수 있어. 선택은 되돌릴 수 없어.':'✓ 결재 완료 · 다음 구역까지 효과 유지')+'</p></section>';
+}
 function renderMap(){
  if(!validJourneyRoute())journeyRoute=null;
  const level=state.stage,room=rooms[level],selected=journeyRoute?nodeInfo[journeyRoute.type]:null;
  const route=mapRows.map((row,i)=>`<li class="route-overview-row ${i===level?'current':i<level?'past':''}"><b>${i+1}</b><div><strong class="route-floor-name">${esc(rooms[i].label)}</strong><small class="route-floor-desc">${esc(rooms[i].desc)}</small>${row.map((type,j)=>`<span class="route-stop ${state.path?.[i]?.choice===j?'visited':''}">${state.path?.[i]?.choice===j?'✓ ':''}${nodeInfo[type].icon} ${nodeInfo[type].label}</span>`).join('')}</div>${i===level?'<small>현재</small>':''}</li>`).join('');
  const history=(state.path||[]).slice(0,level).map((x,i)=>x?`${rooms[i].label} · ${nodeInfo[x.type]?.label||''}`:'').filter(Boolean).join(' → ');
- return `<main class="flow-screen map-flow">${flowHeader()}<section class="journey-panel"><div class="flow-kicker">구역 ${level+1}/9</div><h1>${esc(room.label)}</h1>${pstats()}<p class="flow-lead floor-intro">${room.line?`<strong>${esc(room.speaker)}</strong> “${esc(room.line)}”`:esc(room.desc)}</p><div class="current-routes" aria-label="현재 선택 가능한 목적지">${mapRows[level].map((type,index)=>{const n=nodeInfo[type],picked=journeyRoute?.index===index;return `<button type="button" class="route-choice ${picked?'selected':''}" data-act="selectJourneyRoute" data-index="${index}" aria-pressed="${picked}"><span class="route-symbol" aria-hidden="true">${n.icon}</span><span><b>${n.label}</b><small>${esc(routeHint(type,level))}</small></span><span class="route-check" aria-hidden="true">${picked?'✓':'›'}</span></button>`}).join('')}</div><details class="flow-details route-overview"><summary>전체 경로 보기 · 9개 구역</summary><ol>${route}</ol></details>${history?`<p class="route-history">지나온 길 · ${esc(history)}</p>`:''}</section><footer class="journey-dock route-dock"><div class="dock-copy" aria-live="polite"><b>${selected?selected.label:'목적지를 선택하세요'}</b><small>${selected?esc(routeNotes[journeyRoute.type]):'이동하면 되돌릴 수 없어요.'}</small></div><button class="btn primary" data-act="goJourneyRoute" ${selected?'':'disabled'}>이동하기 →</button></footer></main>`;
+ return `<main class="flow-screen map-flow">${flowHeader()}<section class="journey-panel"><div class="flow-kicker">구역 ${level+1}/9</div><h1>${esc(room.label)}</h1>${pstats()}<p class="flow-lead floor-intro">${room.line?`<strong>${esc(room.speaker)}</strong> “${esc(room.line)}”`:esc(room.desc)}</p>${floorSpecialMarkup(level)}<div class="current-routes" aria-label="현재 선택 가능한 목적지">${mapRows[level].map((type,index)=>{const n=nodeInfo[type],picked=journeyRoute?.index===index;return `<button type="button" class="route-choice ${picked?'selected':''}" data-act="selectJourneyRoute" data-index="${index}" aria-pressed="${picked}"><span class="route-symbol" aria-hidden="true">${n.icon}</span><span><b>${n.label}</b><small>${esc(routeHint(type,level))}</small></span><span class="route-check" aria-hidden="true">${picked?'✓':'›'}</span></button>`}).join('')}</div><details class="flow-details route-overview"><summary>전체 경로 보기 · 9개 구역</summary><ol>${route}</ol></details>${history?`<p class="route-history">지나온 길 · ${esc(history)}</p>`:''}</section><footer class="journey-dock route-dock"><div class="dock-copy" aria-live="polite"><b>${selected?selected.label:'목적지를 선택하세요'}</b><small>${selected?esc(routeNotes[journeyRoute.type]):'이동하면 되돌릴 수 없어요.'}</small></div><button class="btn primary" data-act="goJourneyRoute" ${selected&&!floorDecisionPending()?'':'disabled'}>이동하기 →</button></footer></main>`;
 }
 function handleJourneyAction(act,el){
  if(modal)return false;
@@ -815,7 +836,10 @@ function handleJourneyAction(act,el){
  if(act==='takeJourneyReward'){
   if(validJourneyReward()){const index=journeyReward.index;journeyReward=null;pickReward(index)}return true;
  }
- if(act==='selectJourneyRoute'){
+ if(act==='floorDecision'){
+   if(state?.phase==='map')takeFloorDecision(state.stage,Number(el.dataset.choice));return true;
+  }
+  if(act==='selectJourneyRoute'){
   if(state?.phase!=='map')return true;const index=Number(el.dataset.index),type=mapRows[state.stage]?.[index];if(!Number.isInteger(index)||!type)return true;
   journeyRoute={run:state,stage:state.stage,index,type};render();document.querySelector('.current-routes [data-index="'+index+'"]')?.focus({preventScroll:true});return true;
  }
