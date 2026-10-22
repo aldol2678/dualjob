@@ -21,5 +21,5 @@ const localFiles=requestInterceptor(async request=>{const u=new URL(request.url)
  d.querySelector('[data-act=saveManager]').click();assert(d.querySelector('#backup-output'));d.querySelector('[data-act=closeModal]').click();
  d.querySelector('[data-act=start]').click();assert(d.querySelector('.current-routes'));
  assert(loaded.some(x=>x.endsWith('.js'))&&loaded.some(x=>x.endsWith('.css')));assert.deepEqual(errors,[]);dom.window.close();
- console.log('PASS web build: 36 asset hashes; CSS/JS paths; external-resource DOM boot; save menu; game start; no public debug hook. HTTP headers/rendered device behavior unverified.');
+ console.log('PASS web build: '+Object.keys(manifest.assets).length+' asset hashes; CSS/JS paths; external-resource DOM boot; save menu; game start; no public debug hook. HTTP headers/rendered device behavior unverified.');
 })().catch(e=>{console.error(e);process.exitCode=1});
