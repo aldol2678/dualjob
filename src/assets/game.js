@@ -616,7 +616,13 @@ function chooseNode(index){
  if(t==='battle'||t==='elite'||t==='boss')spawnEnemy();
  else if(t==='shop'){state.phase='shop';state.shop={cards:shuffle(allCardKeys().filter(k=>k!=='fatigue')).slice(0,3),relics:relicOptions(2),removed:0,cardBought:{},relicBought:{}}}
  else if(t==='rest'){state.phase='rest'}
- else if(t==='event'){state.phase='event';const unseen=eventCatalog.map((_,i)=>i).filter(i=>!state.eventHistory.includes(i));state.eventId=shuffle(unseen.length?unseen:eventCatalog.map((_,i)=>i))[0];state.eventHistory.push(state.eventId)}
+ else if(t==='event'){
+   state.phase='event';
+   const eligible=eventCatalog.map((evt,i)=>({evt,i})).filter(x=>!x.evt.pair||x.evt.pair===keyPair()).map(x=>x.i);
+   const unseen=eligible.filter(i=>!state.eventHistory.includes(i)),special=unseen.filter(i=>eventCatalog[i].pair);
+   state.eventId=shuffle(special.length&&Math.random()<0.65?special:unseen.length?unseen:eligible)[0];
+   state.eventHistory.push(state.eventId);
+  }
  save();render();
 }
 function pickReward(i){if(state.phase!=='reward')return;if(i>=0){const id=state.rewardOptions[i];if(!id||!cards[id])return;awardCard(id)}else{state.gold+=8;log('💰 카드 대신 8G 획득')}nextStage()}
@@ -651,6 +657,10 @@ function selectEvent(option){if(state.phase!=='event')return;
  else if(id===11){if(option===0||option===1){const j=option===0?state.real:state.fantasy;const pool=availableUpgrades().filter(k=>cards[k].job===j);if(!pool.length||(option===1&&state.gold<15))ok=false;else{const cid=shuffle(pool)[0];state.upgrades[cid]=true;log('✨ '+cards[cid].name+' 강화');if(option===0)state.hp=Math.max(1,state.hp-4);else state.gold-=15}}else if(option===2)state.gold+=10;else ok=false}
  else if(id===12){if(option===0){if(Math.random()<0.5)state.gold+=50;else state.gold=Math.max(0,state.gold-10)}else if(option===1)state.gold+=12;else if(option!==2)ok=false}
  else if(id===13){if(option===0){state.maxHp+=8;state.hp=Math.max(1,state.hp-8);state.deck.push('fatigue')}else if(option===1){awardCard(pair().sig);state.deck.push('fatigue')}else if(option===2)heal(8);else ok=false}
+  else if(id===14){if(option===0){state.gold+=36;state.deck.push('fatigue')}else if(option===1){state.hp=Math.min(state.maxHp,state.hp+14)}else if(option===2)state.gold+=6;else ok=false}
+  else if(id===15){if(option===0){awardCard('goldAudit');state.gold+=8}else if(option===1){if(state.gold<18)ok=false;else{state.gold-=18;state.maxHp+=6;state.hp+=6}}else if(option===2)state.gold+=8;else ok=false}
+  else if(id===16){if(option===0){awardCard('infernalMenu');state.deck.push('fatigue')}else if(option===1){state.hp=Math.min(state.maxHp,state.hp+16);state.gold=Math.max(0,state.gold-8)}else if(option===2)state.gold+=8;else ok=false}
+  else if(id===17){if(option===0){awardCard('grandFeast');state.deck.push('fatigue')}else if(option===1){const pool=availableUpgrades().filter(k=>['chef','alchemist'].includes(cards[k].job));if(!pool.length)ok=false;else{state.upgrades[pool[0]]=true;state.hp=Math.max(1,state.hp-5)}}else if(option===2)state.gold+=8;else ok=false}
  if(ok)nextStage();else render();
 }
 function restart(){state=null;savedRun=null;safeRemove(KEY);modal='';pendingAction=null;render()}
@@ -1327,11 +1337,17 @@ const eventCatalog=[
  {icon:'🌀',title:'불안정한 통근 포털',desc:'포털의 행선지가 「회사」와 「집」 사이에서 깜빡인다.',options:[['지름길 통과','35G · HP -9 (최소 1)'],['안전장치 설치','최대 HP +6 · 피로 카드 1장'],['계단으로 이동','HP +5']]},
  {icon:'🎓',title:'사내 특별 세미나',desc:'강사는 현실과 마법의 업무를 각각 가르치고 있다.',options:[['현실 실습','무작위 현실 카드 1종 강화 · HP -4 (최소 1)'],['마법 실습','15G 지불 · 무작위 판타지 카드 1종 강화'],['출석만 하기','10G 획득']]},
  {icon:'🎰',title:'인사 평가 룰렛',desc:'매우 공정하다고 쓰인 룰렛. 단, 평가 기준은 공개되지 않는다.',options:[['승부 걸기','50%: +50G / 실패: -10G (최대 보유량)'],['안전한 근무평가','12G 확정 획득'],['평가 거부','아무 변화 없음']]},
- {icon:'⏳',title:'멈춰 버린 사무실',desc:'초침이 멈췄다. 오래된 계약서에서 시간의 냄새가 난다.',options:[['시간을 팔기','최대 HP +8 · HP -8 (최소 1) · 피로 카드 1장'],['융합 야근','융합 카드 1장 · 피로 카드 1장'],['시계를 다시 돌리기','HP +8']]}
+ {icon:'⏳',title:'멈춰 버린 사무실',desc:'초침이 멈췄다. 오래된 계약서에서 시간의 냄새가 난다.',options:[['시간을 팔기','최대 HP +8 · HP -8 (최소 1) · 피로 카드 1장'],['융합 야근','융합 카드 1장 · 피로 카드 1장'],['시계를 다시 돌리기','HP +8']]},
+  {pair:'accountant-warlock',icon:'🕯️',title:'망자의 세금 체납',desc:'사망한 직원의 미납 세금이 생전에 발행한 급여명세서로 돌아왔다.',options:[['사후 추심','36G · 이번 전투 한정 피로 카드 1장'],['추모 공제','체력 14 회복'],['추심 보류','6G 확보']]},
+  {pair:'accountant-alchemist',icon:'⚗️',title:'황금 분식 회계',desc:'연금술로 매출을 부풀린 장부에서 노란빛이 새어 나온다.',options:[['황금 손익 정리','현자의 손익계산 카드 1장 · 8G'],['신체 자산 재평가','18G 지불 · 최대 HP +6 · HP +6'],['외부 감사','8G 확보']]},
+  {pair:'chef-warlock',icon:'🍖',title:'마왕의 구내식당 감사',desc:'지옥에서 식중독은 당연하다는 규정에 조리장이 반기를 들었다.',options:[['지옥 신메뉴 개발','금단의 풀코스 카드 1장 · 영구 피로 카드 1장'],['직원 식사 제공','체력 16 회복 · 최대 8G 소모'],['위생 교육만','8G 확보']]},
+  {pair:'chef-alchemist',icon:'🧪',title:'금지된 조리 실험',desc:'연금 냄비가 내일의 메뉴를 미리 끓여 버렸다.',options:[['미래의 연회','연금 연회 카드 1장 · 영구 피로 카드 1장'],['재료 연구','요리·연금 카드 1종 강화 · HP -5'],['일반식 제공','8G 확보']]}
 
 ];
 function eventAllowed(id,i){
  if(i===2)return true;
+  if(id===15&&i===1)return state.gold>=18;
+  if(id===17&&i===1)return availableUpgrades().some(k=>['chef','alchemist'].includes(cards[k].job));
  if(id===2&&i===0)return state.gold>=35&&relicOptions(1).length>0;
  if(id===7&&i===0)return state.gold>=18;
  if(id===9&&i===0)return state.gold>=45&&relicOptions(1).length>0;
