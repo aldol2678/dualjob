@@ -500,7 +500,7 @@ function endTurn(){
  for(const e of livingEnemies()){
   const ei=state.enemies.indexOf(e);
   if(e.curse>0){const d=e.curse*2;e.hp=Math.max(0,e.hp-d);e.curse--;ticks+=d;rec({k:'tick',i:ei,n:d,kill:e.hp<=0});log('🕯️ '+e.name+' 저주 피해 '+d);captureCombatBeat('tick',ei,e.name+' · 저주 피해 '+d)}
-  if(e.hp<=0)continue;
+  enterBossPhase(e);if(e.hp<=0)continue;
   const a=enemyAction(e);
   if(e.id==='boss'&&e.intent?.pattern==='hr-verdict'&&state.usedReal&&state.usedFantasy)hrReward=true;
    if(a.type==='guard'){
@@ -851,7 +851,7 @@ function renderMap(){
  const level=state.stage,room=rooms[level],selected=journeyRoute?nodeInfo[journeyRoute.type]:null;
  const route=mapRows.map((row,i)=>`<li class="route-overview-row ${i===level?'current':i<level?'past':''}"><b>${i+1}</b><div><strong class="route-floor-name">${esc(rooms[i].label)}</strong><small class="route-floor-desc">${esc(rooms[i].desc)}</small>${row.map((type,j)=>`<span class="route-stop ${state.path?.[i]?.choice===j?'visited':''}">${state.path?.[i]?.choice===j?'✓ ':''}${nodeInfo[type].icon} ${nodeInfo[type].label}</span>`).join('')}</div>${i===level?'<small>현재</small>':''}</li>`).join('');
  const history=(state.path||[]).slice(0,level).map((x,i)=>x?`${rooms[i].label} · ${nodeInfo[x.type]?.label||''}`:'').filter(Boolean).join(' → ');
- return `<main class="flow-screen map-flow">${flowHeader()}<section class="journey-panel"><div class="flow-kicker">구역 ${level+1}/9</div><h1>${esc(room.label)}</h1>${pstats()}<p class="flow-lead floor-intro">${room.line?`<strong>${esc(room.speaker)}</strong> “${esc(room.line)}”`:esc(room.desc)}</p>${floorSpecialMarkup(level)}<div class="current-routes" aria-label="현재 선택 가능한 목적지">${mapRows[level].map((type,index)=>{const n=nodeInfo[type],picked=journeyRoute?.index===index;return `<button type="button" class="route-choice ${picked?'selected':''}" data-act="selectJourneyRoute" data-index="${index}" aria-pressed="${picked}"><span class="route-symbol" aria-hidden="true">${n.icon}</span><span><b>${n.label}</b><small>${esc(routeHint(type,level))}</small></span><span class="route-check" aria-hidden="true">${picked?'✓':'›'}</span></button>`}).join('')}</div><details class="flow-details route-overview"><summary>전체 경로 보기 · 9개 구역</summary><ol>${route}</ol></details>${history?`<p class="route-history">지나온 길 · ${esc(history)}</p>`:''}</section><footer class="journey-dock route-dock"><div class="dock-copy" aria-live="polite"><b>${selected?selected.label:'목적지를 선택하세요'}</b><small>${selected?esc(routeNotes[journeyRoute.type]):'이동하면 되돌릴 수 없어요.'}</small></div><button class="btn primary" data-act="goJourneyRoute" ${selected&&!floorDecisionPending()?'':'disabled'}>이동하기 →</button></footer></main>`;
+ return `<main class="flow-screen map-flow">${flowHeader()}<section class="journey-panel"><div class="flow-kicker">구역 ${level+1}/9</div><h1>${esc(room.label)}</h1>${pstats()}<p class="flow-lead floor-intro">${room.line?`<strong>${esc(room.speaker)}</strong> “${esc(room.line)}”`:esc(room.desc)}</p>${level===2?'<p class="floor-special-feedback">🖨️ 복사실 전투 특전 · 전투를 선택하면 융합 카드 임시 사본을 손패에 1장 추가해. 영구 덱에는 남지 않아.</p>':''}${floorSpecialMarkup(level)}<div class="current-routes" aria-label="현재 선택 가능한 목적지">${mapRows[level].map((type,index)=>{const n=nodeInfo[type],picked=journeyRoute?.index===index;return `<button type="button" class="route-choice ${picked?'selected':''}" data-act="selectJourneyRoute" data-index="${index}" aria-pressed="${picked}"><span class="route-symbol" aria-hidden="true">${n.icon}</span><span><b>${n.label}</b><small>${esc(routeHint(type,level))}</small></span><span class="route-check" aria-hidden="true">${picked?'✓':'›'}</span></button>`}).join('')}</div><details class="flow-details route-overview"><summary>전체 경로 보기 · 9개 구역</summary><ol>${route}</ol></details>${history?`<p class="route-history">지나온 길 · ${esc(history)}</p>`:''}</section><footer class="journey-dock route-dock"><div class="dock-copy" aria-live="polite"><b>${selected?selected.label:'목적지를 선택하세요'}</b><small>${selected?esc(routeNotes[journeyRoute.type]):'이동하면 되돌릴 수 없어요.'}</small></div><button class="btn primary" data-act="goJourneyRoute" ${selected&&!floorDecisionPending()?'':'disabled'}>이동하기 →</button></footer></main>`;
 }
 function handleJourneyAction(act,el){
  if(modal)return false;
@@ -1354,7 +1354,7 @@ const eventCatalog=[
  {icon:'🎓',title:'사내 특별 세미나',desc:'강사는 현실과 마법의 업무를 각각 가르치고 있다.',options:[['현실 실습','무작위 현실 카드 1종 강화 · HP -4 (최소 1)'],['마법 실습','15G 지불 · 무작위 판타지 카드 1종 강화'],['출석만 하기','10G 획득']]},
  {icon:'🎰',title:'인사 평가 룰렛',desc:'매우 공정하다고 쓰인 룰렛. 단, 평가 기준은 공개되지 않는다.',options:[['승부 걸기','50%: +50G / 실패: -10G (최대 보유량)'],['안전한 근무평가','12G 확정 획득'],['평가 거부','아무 변화 없음']]},
  {icon:'⏳',title:'멈춰 버린 사무실',desc:'초침이 멈췄다. 오래된 계약서에서 시간의 냄새가 난다.',options:[['시간을 팔기','최대 HP +8 · HP -8 (최소 1) · 피로 카드 1장'],['융합 야근','융합 카드 1장 · 피로 카드 1장'],['시계를 다시 돌리기','HP +8']]},
-  {pair:'accountant-warlock',icon:'🕯️',title:'망자의 세금 체납',desc:'사망한 직원의 미납 세금이 생전에 발행한 급여명세서로 돌아왔다.',options:[['사후 추심','36G · 이번 전투 한정 피로 카드 1장'],['추모 공제','체력 14 회복'],['추심 보류','6G 확보']]},
+  {pair:'accountant-warlock',icon:'🕯️',title:'망자의 세금 체납',desc:'사망한 직원의 미납 세금이 생전에 발행한 급여명세서로 돌아왔다.',options:[['사후 추심','36G · 영구 피로 카드 1장'],['추모 공제','체력 14 회복'],['추심 보류','6G 확보']]},
   {pair:'accountant-alchemist',icon:'⚗️',title:'황금 분식 회계',desc:'연금술로 매출을 부풀린 장부에서 노란빛이 새어 나온다.',options:[['황금 손익 정리','현자의 손익계산 카드 1장 · 8G'],['신체 자산 재평가','18G 지불 · 최대 HP +6 · HP +6'],['외부 감사','8G 확보']]},
   {pair:'chef-warlock',icon:'🍖',title:'마왕의 구내식당 감사',desc:'지옥에서 식중독은 당연하다는 규정에 조리장이 반기를 들었다.',options:[['지옥 신메뉴 개발','금단의 풀코스 카드 1장 · 영구 피로 카드 1장'],['직원 식사 제공','체력 16 회복 · 최대 8G 소모'],['위생 교육만','8G 확보']]},
   {pair:'chef-alchemist',icon:'🧪',title:'금지된 조리 실험',desc:'연금 냄비가 내일의 메뉴를 미리 끓여 버렸다.',options:[['미래의 연회','연금 연회 카드 1장 · 영구 피로 카드 1장'],['재료 연구','요리·연금 카드 1종 강화 · HP -5'],['일반식 제공','8G 확보']]}
@@ -1484,7 +1484,7 @@ function parseBackup(text){
  return {schema:1,run:validateBackupRun(x.run),meta:cleanMeta(x.meta),settings:{readableBattle:x.settings.readableBattle}};
 }
 function currentSavePacket(){return {schema:1,run:state?(RUN_PHASES.includes(state.phase)?JSON.parse(JSON.stringify(state)):null):(savedRun?JSON.parse(JSON.stringify(savedRun)):null),meta:JSON.parse(JSON.stringify(meta)),settings:{readableBattle}}}
-function backupText(){const x=currentSavePacket();return JSON.stringify({game:'aldol-dualjob',backupVersion:1,gameVersion:'0.6.17',createdAt:new Date().toISOString(),run:x.run,meta:x.meta,settings:x.settings},null,2)}
+function backupText(){const x=currentSavePacket();return JSON.stringify({game:'aldol-dualjob',backupVersion:1,gameVersion:'0.6.19',createdAt:new Date().toISOString(),run:x.run,meta:x.meta,settings:x.settings},null,2)}
 function downloadBackup(){
  try{const blob=new Blob([backupText()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='dualjob-save-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);saveMessage='백업 파일 다운로드를 요청했어요. 저장이 안 되면 아래 백업 텍스트를 복사해 주세요.'}
  catch{saveMessage='다운로드를 시작하지 못했어요. 아래 백업 텍스트를 복사해 주세요.'}
