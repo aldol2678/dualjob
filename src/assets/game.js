@@ -78,7 +78,42 @@ const initialDeck={
  warlock:['curse','curse','drain','veil','soul'],
  alchemist:['extract','blast','transmute','transmute','catalyst']
 };
-const rooms=Array.from({length:9},(_,i)=>({label:i===8?'마왕실':`구역 ${i+1}`,type:i===8?'boss':'map'}));
+// Presentation-only floor data: saved stage numbers and route choices stay compatible.
+const rooms=[
+ {label:'출입 심사대',desc:'출입증은 발급됐다. 퇴실증은 아직 개발 중이다.'},
+ {label:'서류 보관실',desc:'문서는 보관되지만 담당자는 잊힌다.'},
+ {label:'복사실',desc:'종이가 걸렸다. 누군가의 퇴근도 함께 걸렸다.'},
+ {label:'사내 복지층',desc:'휴식도 구매도 자유다. 마감 시간만 그대로다.'},
+ {label:'계약 심사부',desc:'작은 글씨일수록 큰 대가가 적혀 있다.',speaker:'인사부장 · 사내 방송',line:'두 직업을 겸한다니, 업무도 두 배면 되겠군요.'},
+ {label:'결산실',desc:'장부를 닫아야 하루가 끝난다. 장부가 계속 늘어난다.'},
+ {label:'야근 전용층',desc:'창밖은 밤이다. 사내 시계만 오후 여섯 시 전이다.'},
+ {label:'인사 대기실',desc:'호출 벨이 울린다. 사표를 다시 확인한다.',speaker:'인사부장 · 면담 통지',line:'퇴사 사유는 직접 듣겠습니다. 살아서 올라오세요.'},
+ {label:'인사부장실',desc:'마지막 결재자는 사표 대신 무기를 들었다.',speaker:'인사부장 마왕',line:'이 문을 나가고 싶다면, 먼저 저를 설득하시죠.'}
+].map((r,i)=>({...r,type:i===8?'boss':'map'}));
+const ENCOUNTERS={
+ intake:{ids:['clerk','minion'],name:'누락 서류 접수',hint:'서류 정령부터 줄일지, 슬라임을 몰아칠지 선택해.'},
+ archive:{ids:['clerk','healer'],name:'보호 중인 서류',hint:'주술사가 동료를 보호해. 보호자를 먼저 노려 봐.'},
+ overtime:{ids:['ghost','clerk','minion'],name:'야근 인수인계',hint:'망령의 야근 예고를 확인하고 피로 카드에 대비해.'},
+ watch:{ids:['ghost','healer'],name:'야근 당직조',hint:'보호자를 먼저 잡을까, 야근 예고부터 끊을까?'},
+ contract:{ids:['wraith','ghost','minion'],name:'끝나지 않는 계약',hint:'계약서 악령의 공격과 망령의 야근 예고를 함께 살펴봐.'},
+ review:{ids:['wraith','healer','minion'],name:'계약 보호반',hint:'주술사의 보호를 끊어 악령에게 피해를 집중해.'},
+ copier:{ids:['golem','healer','minion'],name:'복사실 안전 점검',hint:'골렘이 충전하는 동안 보호자를 처리하거나 방어를 준비해.'},
+ nightShift:{ids:['golem','ghost'],name:'심야 복사 작업',hint:'강타와 야근 예고가 겹쳐. 다음 턴 방어와 집중 공격을 준비해.'},
+ interview:{ids:['boss','healer','minion'],name:'퇴사 면담',hint:'마왕을 보호하는 주술사와 보조 정령부터 살펴봐.'}
+};
+function encounterPool(stage,type){
+ if(type==='boss')return ['interview'];
+ if(type==='elite')return stage>=4?['copier','nightShift']:['copier'];
+ if(stage===0)return ['intake']; // First battle stays fixed for the tutorial.
+ if(stage===1)return ['intake','archive'];
+ if(stage<4)return ['overtime','watch'];
+ return stage===6?['contract','watch']:['contract','review'];
+}
+function routeHint(type,stage){
+ if(!['battle','elite','boss'].includes(type))return routeNotes[type];
+ const choices=encounterPool(stage,type);
+ return choices.length===1?ENCOUNTERS[choices[0]].name+' · '+routeNotes[type]:choices.map(id=>ENCOUNTERS[id].name).join(' / ')+' 중 조우';
+}
 const enemies={
  minion:{name:'보조 서류 정령',icon:'📎',maxHp:20,attack:5,flavor:'보조 업무를 수행한다.'},
  healer:{name:'고블린 주술사',icon:'🧙',maxHp:23,attack:6,flavor:'동료를 보호한다.'},
@@ -461,14 +496,14 @@ function endTurn(){
 }
 
 function spawnEnemy(){
- const nt=state.nodeType;let ids=nt==='boss'?['boss','healer','minion']:nt==='elite'?['golem','healer','minion']:state.stage>=4?['wraith','ghost','minion']:state.stage>=2?['ghost','clerk','minion']:['clerk','minion'];
+ const nt=state.nodeType,encounter=ENCOUNTERS[shuffle(encounterPool(state.stage,nt))[0]],ids=encounter.ids;
  state.enemies=ids.map(id=>{const e=enemies[id],scale=nt==='boss'?0:Math.floor(state.stage/2)*3;return {id,name:e.name,icon:e.icon,hp:e.maxHp+scale,maxHp:e.maxHp+scale,baseAttack:e.attack+Math.floor(state.stage/3),block:0,debt:0,curse:0}});
  state.targetIndex=0;ensureTarget();state.block=hasRelic('lunchVoucher')?6:0;state.energy=3;
  state.drawPile=shuffle([...state.deck]);state.discard=[];state.hand=[];state.turn=1;state.usedReal=false;state.usedFantasy=false;state.synergy=false;state.dualTurnUsed=false;state.lastDual=null;
  state.lastHitIndex=null;state.lastHitDamage=0;state.overtimeUsed=false;state.ingredient=0;state.reagent=0;state.logs=[];
  state.relicTurn={};state.relicUsed={severancePackage:!!state.relicUsed?.severancePackage};state.phase='battle';
  dealFrom=0;if(state.workFatigue>=3){draw(4);state.hand.push('fatigue');log('💤 피로도 '+state.workFatigue+': 시작 손패 1장이 임시 피로 카드')}else draw(5);
- chooseIntent();log('🚪 '+state.enemies.length+'명의 적 등장! 공격은 적에게, 보조 카드는 내 캐릭터에게.');
+ chooseIntent();log('🚪 '+rooms[state.stage].label+' · '+encounter.name);log(encounter.hint);
 }
 function newRun(){
  meta.attempts=(meta.attempts||0)+1;const key=pickReal+'-'+pickFantasy;if(!meta.combos.includes(key))meta.combos.push(key);saveMeta();
@@ -700,7 +735,7 @@ function mobileSelectionMarkup(){
 function renderMobileBattle(){
  ensureTarget();const p=pair(),{incoming,net,fatigue}=turnForecast(state),n=state.hand.length;
  return `<main class="compact-battle redesign-battle c2-battle mobile-battle">
- <header class="mb-header"><span class="brand">겸직<b>금지!</b></span><span>${esc(rooms[state.stage].label)} · <b>${state.turn}턴</b></span><button data-act="battleMenu" aria-label="게임 메뉴 및 전체화면">☰</button></header>
+ <header class="mb-header"><span class="brand">겸직<b>금지!</b></span><span class="mb-location"><span>${esc(rooms[state.stage].label)}</span> · <b>${state.turn}턴</b></span><button data-act="battleMenu" aria-label="게임 메뉴 및 전체화면">☰</button></header>
  <section class="multi-arena mb-arena" aria-label="전투 전장"><div class="enemies-row count-${state.enemies.length}">${state.enemies.map(enemyMarkup).join('')}</div><div class="player-lane"><button data-act="targetSelf" class="hero-unit" aria-label="내 캐릭터 ${p.name}, 체력 ${state.hp}/${state.maxHp}, 방어 ${state.block}. 방어·회복 카드 사용 대상"><span class="hero-avatar">${heroMarkup()}</span><span class="hero-details"><b>${p.name}</b>${bar(state.hp,state.maxHp)}<span class="hero-health">${statIcon('health')}${state.hp}/${state.maxHp}<span class="block-chip">${statIcon('block')}${state.block}</span></span></span><span class="self-preview" aria-hidden="true">나에게 사용 ✓</span></button><div class="battle-sidebar"><button class="forecast ${net?'danger':'safe'}" data-act="status" data-key="intent" aria-label="적 턴 예상 피해 ${net}, 임시 피로 카드 ${fatigue}장. 행동 상세 보기"><small>다음 피해 ›</small><b>${incoming?(net?'−'+net+' HP':'전부 막음'):'공격 없음'}</b>${fatigue?`<small>피로 카드 +${fatigue}</small>`:''}</button></div></div></section>
  ${mobileResourcesMarkup()}${mobileSelectionMarkup()}
  <section class="compact-hand mb-hand" aria-label="손패 ${n}장"><div class="hand-zone"><div class="hand fanned" data-small-hand="${n<=5}" aria-label="손패. 카드 선택 후 대상 탭. 6장부터 좌우로 넘겨 탐색.">${state.hand.map(renderHandSlot).join('')||'<span class="empty">손패가 비었어요. 턴을 종료해 주세요.</span>'}</div></div>${handNavigationMarkup()}<span class="mb-hand-caption">손패 ${n}장${n>5?' · ↔ 좌우로 넘기기':' · 탭해서 펼치기'}</span></section>
@@ -708,7 +743,7 @@ function renderMobileBattle(){
  </main>`;
 }
 
-function header(){return `<header class="mast"><div><div class="mini">THE SECOND SHIFT · ROGUELITE</div><div class="brand">겸직<b>금지!</b> <span class="ver-tag">v0.6.15</span></div></div><div class="mast-buttons"><button class="btn small" data-act="battleMenu" aria-label="화면 설정 및 게임 메뉴">☰</button><button class="btn small" data-act="guide" aria-label="규칙 안내">❔ 규칙</button>${state?`<button class="btn small" data-act="deck" aria-label="내 덱 보기">🗂️ 덱 ${state.deck.length}</button><button class="btn small danger" data-act="restartPrompt" aria-label="도전 재시작">↻</button>`:''}</div></header>`}
+function header(){return `<header class="mast"><div><div class="mini">THE SECOND SHIFT · ROGUELITE</div><div class="brand">겸직<b>금지!</b> <span class="ver-tag">v0.6.16</span></div></div><div class="mast-buttons"><button class="btn small" data-act="battleMenu" aria-label="화면 설정 및 게임 메뉴">☰</button><button class="btn small" data-act="guide" aria-label="규칙 안내">❔ 규칙</button>${state?`<button class="btn small" data-act="deck" aria-label="내 덱 보기">🗂️ 덱 ${state.deck.length}</button><button class="btn small danger" data-act="restartPrompt" aria-label="도전 재시작">↻</button>`:''}</div></header>`}
 // v0.6.15: selection belongs to the current screen, never to the saved run.
 let journeyReward=null,journeyRoute=null;
 let journeyDockObserver=null;
@@ -727,7 +762,7 @@ function flowPairTile(k){
 function flowPairDetail(k){const p=pairs[k],g=JOB_GUIDE[k];return `<details class="flow-details career-details"><summary>${p.name} · 직업 자세히</summary><div class="flow-detail-body"><p>${esc(g.style)}</p><h3>기본 전략</h3><ol>${g.strategy.map(s=>'<li>'+esc(s)+'</li>').join('')}</ol><h3>대표 카드 조합</h3>${comboMarkup(k)}<p>${esc(g.comboNote)}</p><h3>겸직 효과 · 턴당 1회</h3><p>${dualSummary(k)}</p><p class="flow-muted">복잡도는 자원과 규칙 관리의 난이도이며 직업의 강함을 뜻하지 않아요.</p></div></details>`}
 function renderTitle(){
  const k=pickReal+'-'+pickFantasy,p=pairs[k],imp=importCandidate();
- const resume=savedRun?`<section class="journey-resume"><div><b>${pairs[savedRun.real+'-'+savedRun.fantasy].name}</b><small>구역 ${savedRun.stage+1}/9 · 체력 ${savedRun.hp}/${savedRun.maxHp}</small></div><button class="btn calm" data-act="resume">이어하기 →</button></section>`:imp?`<details class="flow-details legacy-import"><summary>이전 기록 가져오기 · ${pairs[imp.run.real+'-'+imp.run.fantasy].name}</summary><div class="flow-detail-body"><p>${esc(imp.label)} · 구역 ${imp.run.stage+1}/9. 원본을 보존하고 복사본으로 이어갑니다.</p><button class="btn calm" data-act="importRun">복사해서 이어하기</button></div></details>`:'';
+ const resume=savedRun?`<section class="journey-resume"><div><b>${pairs[savedRun.real+'-'+savedRun.fantasy].name}</b><small>${rooms[savedRun.stage].label} ${savedRun.stage+1}/9 · 체력 ${savedRun.hp}/${savedRun.maxHp}</small></div><button class="btn calm" data-act="resume">이어하기 →</button></section>`:imp?`<details class="flow-details legacy-import"><summary>이전 기록 가져오기 · ${pairs[imp.run.real+'-'+imp.run.fantasy].name}</summary><div class="flow-detail-body"><p>${esc(imp.label)} · 구역 ${imp.run.stage+1}/9. 원본을 보존하고 복사본으로 이어갑니다.</p><button class="btn calm" data-act="importRun">복사해서 이어하기</button></div></details>`:'';
  return `<main class="flow-screen title-flow">${flowHeader()}${resume}<section class="journey-intro"><span class="release-tag">공개 테스트</span><h1>퇴근했더니 <em>던전으로 출근?</em></h1><p>현실 × 판타지 직업으로 9개 구역을 돌파하세요.</p></section><section class="career-select" aria-labelledby="career-heading"><h2 id="career-heading">출근할 직업</h2><div class="career-grid">${JOB_ORDER.map(flowPairTile).join('')}</div></section>${flowPairDetail(k)}<p class="flow-muted flow-help">${meta.tutorialDone?'규칙은 메뉴에서 다시 볼 수 있어요.':'첫 전투에서 조작과 겸직을 알려드려요.'} 시작할 때 전체화면을 시도하며, 지원하지 않으면 일반 화면으로 진행해요.</p><p class="flow-record">승리 ${meta.wins||0} · 도전 ${meta.attempts||0} · 경험한 직업 ${meta.combos.length}/4</p><div class="release-links"><button class="btn small" data-act="saveManager">저장 및 백업</button><button class="btn small" data-act="releaseAbout">게임 소개 · 문의</button></div><footer class="journey-dock start-dock"><div class="dock-copy" aria-live="polite"><b>${p.name}</b><small>${savedRun?'새 출근 시 기존 진행을 덮어씁니다.':'선택한 직업 · 자동 저장'}</small></div><button class="btn primary" data-act="start" aria-label="${p.name} · 출근하기">출근하기 →</button></footer></main>`;
 }
 function validJourneyReward(){return journeyReward&&state?.phase==='reward'&&journeyReward.run===state&&journeyReward.stage===state.stage&&state.rewardOptions[journeyReward.index]===journeyReward.id}
@@ -735,15 +770,15 @@ function renderReward(){
  if(!validJourneyReward())journeyReward=null;
  const id=journeyReward?.id,c=cards[id];
  const detail=c?`<div class="reward-copy" aria-live="polite"><h2>${esc(c.name)}</h2><p>${esc(c.desc)}</p><small>내 덱에 ${state.deck.filter(x=>x===id).length}장 보유 · 획득 후 ${state.deck.length+1}장</small><button class="reward-more" data-act="inspectReward" data-index="${journeyReward.index}">카드 상세 보기 ›</button></div>`:'<div class="reward-copy reward-empty"><p>카드를 선택하면 효과와 획득 버튼이 표시됩니다.</p></div>';
- return `<main class="flow-screen reward-flow">${flowHeader()}<section class="journey-panel"><div class="flow-kicker">구역 ${state.stage+1} 완료 · 다음 구역 ${state.stage+2}</div><h1>업무 해결!</h1><p class="flow-lead">카드 1장 또는 급여 8G를 선택하세요.</p>${pstats()}<div class="reward-grid journey-rewards">${state.rewardOptions.map((card,i)=>renderCard(card,{reward:true,index:i}).replace('data-act="inspectReward"','data-act="selectJourneyReward" aria-pressed="'+(journeyReward?.index===i)+'"').replace('class="card ','class="card '+(journeyReward?.index===i?'reward-picked ':'')).replace('⊕ 상세',journeyReward?.index===i?'✓ 선택됨':'선택')).join('')}</div>${detail}</section><footer class="journey-dock reward-dock"><button class="btn calm" data-act="reward" data-index="-1">건너뛰고 +8G</button><button class="btn primary" data-act="takeJourneyReward" ${c?'':'disabled'}>${c?esc(c.name)+' 획득':'카드를 선택하세요'}</button></footer></main>`;
+ return `<main class="flow-screen reward-flow">${flowHeader()}<section class="journey-panel"><div class="flow-kicker">${rooms[state.stage].label} 완료 · 다음: ${rooms[state.stage+1]?.label||'퇴근'}</div><h1>업무 해결!</h1><p class="flow-lead">카드 1장 또는 급여 8G를 선택하세요.</p>${pstats()}<div class="reward-grid journey-rewards">${state.rewardOptions.map((card,i)=>renderCard(card,{reward:true,index:i}).replace('data-act="inspectReward"','data-act="selectJourneyReward" aria-pressed="'+(journeyReward?.index===i)+'"').replace('class="card ','class="card '+(journeyReward?.index===i?'reward-picked ':'')).replace('⊕ 상세',journeyReward?.index===i?'✓ 선택됨':'선택')).join('')}</div>${detail}</section><footer class="journey-dock reward-dock"><button class="btn calm" data-act="reward" data-index="-1">건너뛰고 +8G</button><button class="btn primary" data-act="takeJourneyReward" ${c?'':'disabled'}>${c?esc(c.name)+' 획득':'카드를 선택하세요'}</button></footer></main>`;
 }
 function validJourneyRoute(){return journeyRoute&&state?.phase==='map'&&journeyRoute.run===state&&journeyRoute.stage===state.stage&&mapRows[state.stage]?.[journeyRoute.index]===journeyRoute.type}
 function renderMap(){
  if(!validJourneyRoute())journeyRoute=null;
- const level=state.stage,selected=journeyRoute?nodeInfo[journeyRoute.type]:null;
- const route=mapRows.map((row,i)=>`<li class="route-overview-row ${i===level?'current':i<level?'past':''}"><b>${i+1}</b><div>${row.map((type,j)=>`<span class="route-stop ${state.path?.[i]?.choice===j?'visited':''}">${state.path?.[i]?.choice===j?'✓ ':''}${nodeInfo[type].icon} ${nodeInfo[type].label}</span>`).join('')}</div>${i===level?'<small>현재</small>':''}</li>`).join('');
- const history=(state.path||[]).slice(0,level).map((x,i)=>x?`${i+1} ${nodeInfo[x.type]?.label||''}`:'').filter(Boolean).join(' → ');
- return `<main class="flow-screen map-flow">${flowHeader()}<section class="journey-panel"><div class="flow-kicker">구역 ${level+1}/9</div><h1>${level===8?'마지막 출근':'다음 목적지'}</h1>${pstats()}<p class="flow-lead">목적지를 고른 뒤 이동하세요.</p><div class="current-routes" aria-label="현재 선택 가능한 목적지">${mapRows[level].map((type,index)=>{const n=nodeInfo[type],picked=journeyRoute?.index===index;return `<button type="button" class="route-choice ${picked?'selected':''}" data-act="selectJourneyRoute" data-index="${index}" aria-pressed="${picked}"><span class="route-symbol" aria-hidden="true">${n.icon}</span><span><b>${n.label}</b><small>${routeNotes[type]}</small></span><span class="route-check" aria-hidden="true">${picked?'✓':'›'}</span></button>`}).join('')}</div><details class="flow-details route-overview"><summary>전체 경로 보기 · 9개 구역</summary><ol>${route}</ol></details>${history?`<p class="route-history">지나온 길 · ${esc(history)}</p>`:''}</section><footer class="journey-dock route-dock"><div class="dock-copy" aria-live="polite"><b>${selected?selected.label:'목적지를 선택하세요'}</b><small>이동하면 되돌릴 수 없어요.</small></div><button class="btn primary" data-act="goJourneyRoute" ${selected?'':'disabled'}>이동하기 →</button></footer></main>`;
+ const level=state.stage,room=rooms[level],selected=journeyRoute?nodeInfo[journeyRoute.type]:null;
+ const route=mapRows.map((row,i)=>`<li class="route-overview-row ${i===level?'current':i<level?'past':''}"><b>${i+1}</b><div><strong class="route-floor-name">${esc(rooms[i].label)}</strong><small class="route-floor-desc">${esc(rooms[i].desc)}</small>${row.map((type,j)=>`<span class="route-stop ${state.path?.[i]?.choice===j?'visited':''}">${state.path?.[i]?.choice===j?'✓ ':''}${nodeInfo[type].icon} ${nodeInfo[type].label}</span>`).join('')}</div>${i===level?'<small>현재</small>':''}</li>`).join('');
+ const history=(state.path||[]).slice(0,level).map((x,i)=>x?`${rooms[i].label} · ${nodeInfo[x.type]?.label||''}`:'').filter(Boolean).join(' → ');
+ return `<main class="flow-screen map-flow">${flowHeader()}<section class="journey-panel"><div class="flow-kicker">구역 ${level+1}/9</div><h1>${esc(room.label)}</h1>${pstats()}<p class="flow-lead floor-intro">${room.line?`<strong>${esc(room.speaker)}</strong> “${esc(room.line)}”`:esc(room.desc)}</p><div class="current-routes" aria-label="현재 선택 가능한 목적지">${mapRows[level].map((type,index)=>{const n=nodeInfo[type],picked=journeyRoute?.index===index;return `<button type="button" class="route-choice ${picked?'selected':''}" data-act="selectJourneyRoute" data-index="${index}" aria-pressed="${picked}"><span class="route-symbol" aria-hidden="true">${n.icon}</span><span><b>${n.label}</b><small>${esc(routeHint(type,level))}</small></span><span class="route-check" aria-hidden="true">${picked?'✓':'›'}</span></button>`}).join('')}</div><details class="flow-details route-overview"><summary>전체 경로 보기 · 9개 구역</summary><ol>${route}</ol></details>${history?`<p class="route-history">지나온 길 · ${esc(history)}</p>`:''}</section><footer class="journey-dock route-dock"><div class="dock-copy" aria-live="polite"><b>${selected?selected.label:'목적지를 선택하세요'}</b><small>${selected?esc(routeNotes[journeyRoute.type]):'이동하면 되돌릴 수 없어요.'}</small></div><button class="btn primary" data-act="goJourneyRoute" ${selected?'':'disabled'}>이동하기 →</button></footer></main>`;
 }
 function handleJourneyAction(act,el){
  if(modal)return false;
@@ -1305,7 +1340,7 @@ function detailsForTransaction(){const a=pendingAction;if(!a)return '<p>선택 �
  return '<p>선택 정보가 없어.</p>';
 }
 function jobBriefMarkup(k){const p=pairs[k],g=JOB_GUIDE[k];return `<div class="transaction-head"><span class="txn-icon">${p.icon}</span><div><div class="eyebrow">처음 출근하는 직업 · ${stars(g.level)} ${g.label}</div><h2>${p.name}</h2><p>${g.core}</p></div></div><div class="txn-description"><strong>핵심 자원</strong><p>${g.resourceBrief}</p></div><div class="pd-box" style="margin-top:10px"><b class="h">기본 전략</b><ol>${g.strategy.map(x=>`<li>${x}</li>`).join('')}</ol><b class="h" style="margin-top:8px">대표 조합</b>${comboMarkup(k)}<div class="pd-note">${g.comboNote}</div></div><div class="info-note">✨ 겸직 자동 효과: <b>${dualSummary(k)}</b> (현실+판타지 카드를 같은 턴에, 턴당 1회)</div><div class="txn-actions"><button class="btn primary" data-act="closeModal">확인, 전투 시작</button></div>`}
-const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.6.15</h2>
+const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.6.16</h2>
 <div class="guide-actions"><button class="btn primary small" data-act="tutReplay">🎓 튜토리얼 다시 보기</button></div>
 <div class="guide-sec"><b>⚔ 기본 전투</b><p>카드를 탭하면 전장을 보면서 효과를 확인할 수 있어. 적 또는 내 캐릭터를 탭하면 사용해. 「상세」에서 전체 설명을 볼 수 있어. 손패를 좌우로 넘겨 탐색하고, 위로 끌어 대상에 놓으면 바로 사용해. 에너지는 매 턴 ⚡3, 손패는 5장. 「턴 종료」를 누르면 적이 예고한 행동을 해. 오른쪽 <b>예상 피해</b>를 보고 방어를 챙기자.</p></div>
 <div class="guide-sec"><b>✨ 겸직 (자동)</b><p>같은 턴에 청록 「현실」 카드와 보라 「판타지」 카드를 쓰면 직업 고유 효과가 자동 발동해. 턴당 1번. 공용·융합 카드는 조건에 포함되지 않아. 한쪽만 썼으면 나머지 계열 카드에 <b>✦겸직</b> 표시가 떠.</p></div>
@@ -1313,7 +1348,7 @@ const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.6.15</h2>
 <div class="guide-sec"><b>💤 피로도 vs 🥱 피로 카드</b><p><b>피로도</b>(0~6)는 다음 전투까지 이어지는 게이지야. 3↑이면 전투 시작 손패 1장이 임시 피로 카드, 5↑이면 초과근무 불가. 승리 −1, 휴식 「피로 회복」 −3. <b>피로 카드</b>는 사용 불가 카드야. 적의 📜 특수 공격은 이번 전투에만 임시로, 일부 이벤트는 덱에 영구로 넣어. 영구 피로 카드는 상점 덱 정리로 지울 수 있어.</p></div>
 <div class="guide-sec"><b>🧬 직업별 핵심 자원</b>${JOB_ORDER.map(k=>`<div class="guide-job"><span>${pairs[k].icon} <b>${pairs[k].name}</b> ${stars(JOB_GUIDE[k].level)}</span><span>${JOB_GUIDE[k].resources.map(resChip).join('')}</span><small>${JOB_GUIDE[k].core} · 겸직: ${dualSummary(k)}</small></div>`).join('')}<p class="footnote">★은 규칙 복잡도야. 별이 많다고 더 강하지 않아.</p></div>
 <div class="guide-sec"><b>🗺 갈림길·보상</b><p>9개 지점마다 길을 골라. 일반 전투는 카드, 정예는 유물(12종), 상점은 구매·제거, 휴식은 회복·피로 회복·강화 중 하나. 구매·제거·강화·이벤트 선택은 모두 <b>미리보기 → 확정</b> 2단계야.</p></div>
-<div class="guide-sec"><b>💾 저장</b><p>v0.6.15는 v0.6 계열과 같은 저장 키에 자동 저장돼. 이전 C2.2·C2.1·C2·C1·v0.4.1 진행은 원본을 건드리지 않고 복사본으로만 가져와. 브라우저 데이터를 지우면 기록도 지워져.</p></div>`;
+<div class="guide-sec"><b>💾 저장</b><p>v0.6.16은 v0.6 계열과 같은 저장 키에 자동 저장돼. 이전 C2.2·C2.1·C2·C1·v0.4.1 진행은 원본을 건드리지 않고 복사본으로만 가져와. 브라우저 데이터를 지우면 기록도 지워져.</p></div>`;
 const backupOwn=(o,k)=>!!o&&Object.hasOwn(o,k);
 const backupPlain=o=>!!o&&typeof o==='object'&&!Array.isArray(o);
 function checkedBackupTree(value,depth=0,budget={n:0}){
@@ -1364,7 +1399,7 @@ function parseBackup(text){
  return {schema:1,run:validateBackupRun(x.run),meta:cleanMeta(x.meta),settings:{readableBattle:x.settings.readableBattle}};
 }
 function currentSavePacket(){return {schema:1,run:state?(RUN_PHASES.includes(state.phase)?JSON.parse(JSON.stringify(state)):null):(savedRun?JSON.parse(JSON.stringify(savedRun)):null),meta:JSON.parse(JSON.stringify(meta)),settings:{readableBattle}}}
-function backupText(){const x=currentSavePacket();return JSON.stringify({game:'aldol-dualjob',backupVersion:1,gameVersion:'0.6.15',createdAt:new Date().toISOString(),run:x.run,meta:x.meta,settings:x.settings},null,2)}
+function backupText(){const x=currentSavePacket();return JSON.stringify({game:'aldol-dualjob',backupVersion:1,gameVersion:'0.6.16',createdAt:new Date().toISOString(),run:x.run,meta:x.meta,settings:x.settings},null,2)}
 function downloadBackup(){
  try{const blob=new Blob([backupText()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='dualjob-save-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);saveMessage='백업 파일 다운로드를 요청했어요. 저장이 안 되면 아래 백업 텍스트를 복사해 주세요.'}
  catch{saveMessage='다운로드를 시작하지 못했어요. 아래 백업 텍스트를 복사해 주세요.'}
@@ -1391,7 +1426,7 @@ function saveManagerMarkup(){
  return `<h2>저장 및 백업</h2><p>진행과 누적 기록은 이 브라우저에 저장됩니다. 다른 주소·기기에서는 백업 파일을 가져와 주세요.</p><div class="save-summary">${run?esc(pairs[run.real+'-'+run.fantasy].name)+' · 구역 '+(run.stage+1)+'/9':'진행 중인 도전 없음'}<br/>누적 승리 ${meta.wins} · 도전 ${meta.attempts}</div>${saveIssue?`<p class="save-error" role="alert">${esc(saveIssue)}</p>`:'<p class="save-ok">자동 저장 사용 중 · 브라우저 데이터 삭제 시 기록도 사라집니다.</p>'}${saveMessage?`<p role="status">${esc(saveMessage)}</p>`:''}<div class="save-actions"><button class="btn primary" data-act="exportSave">백업 파일 내보내기</button><button class="btn calm" data-act="retrySave">현재 기록 저장 재시도</button></div><label class="save-file">백업 파일 가져오기<input id="backup-file" type="file" accept=".json,application/json"/></label><details class="save-text"><summary>파일 저장이 안 되나요? 백업 텍스트 보기</summary><textarea id="backup-output" readonly aria-label="현재 기록 백업 텍스트">${esc(backupText())}</textarea><button class="btn small" data-act="selectBackupText">텍스트 전체 선택</button></details><details class="save-text"><summary>백업 텍스트 붙여넣기</summary><textarea id="backup-input" maxlength="524288" spellcheck="false" aria-label="복원할 백업 텍스트"></textarea><button class="btn calm" data-act="previewBackupText">내용 확인</button></details>`;
 }
 function restoreSaveMarkup(){const x=restoreCandidate,r=x?.run;if(!x)return '';return `<h2>이 기록으로 복원할까요?</h2><div class="save-summary">${r?esc(pairs[r.real+'-'+r.fantasy].name)+' · 구역 '+(r.stage+1)+'/9 · 체력 '+r.hp+'/'+r.maxHp:'진행 중인 도전 없음'}<br/>누적 승리 ${x.meta.wins} · 도전 ${x.meta.attempts}</div><p>현재 진행과 누적 기록, 화면 설정을 위 내용으로 교체합니다. 지금 기록이 필요하면 먼저 백업해 주세요.</p><div class="save-actions"><button class="btn calm" data-act="cancelRestore">취소</button><button class="btn primary" data-act="commitRestore">이 기록으로 복원</button></div>`}
-function releaseAboutMarkup(){return `<h2>겸직금지!</h2><p class="release-tag">공개 테스트 · v0.6.15</p><p>낮에는 직장인, 밤에는 던전 출근. 현실과 판타지 직업을 조합하고 카드를 모아 인사부장 마왕에게 퇴사를 통보하세요.</p><p>직업 4종 · 갈림길 9개 구역 · 싱글플레이 카드 로그라이트</p><h3>기록과 개인정보</h3><p>게임에는 계정·클라우드 저장·게임 분석 전송 기능이 없습니다. 기록은 이 브라우저에 저장됩니다. 배포 후 호스팅 서비스의 접속 로그는 게임 저장과 별도로 처리될 수 있습니다.</p><h3>제작</h3><p>ALDOL · AI 도구를 활용해 제작한 일러스트를 포함합니다. 글꼴 출처와 라이선스는 규칙 안내에서 확인할 수 있어요.</p><h3>버그 제보</h3><p>버전, 기기·브라우저, 문제가 생긴 행동과 스크린샷을 함께 알려 주세요. 백업 파일에는 플레이 기록이 포함되므로 필요할 때만 첨부해 주세요.</p><a class="btn calm" href="mailto:jiseuk96@gmail.com?subject=%5B%EA%B2%B8%EC%A7%81%EA%B8%88%EC%A7%80%5D%20v0.6.15%20%EB%B2%84%EA%B7%B8%20%EC%A0%9C%EB%B3%B4">이메일로 제보하기</a>`}
+function releaseAboutMarkup(){return `<h2>겸직금지!</h2><p class="release-tag">공개 테스트 · v0.6.16</p><p>낮에는 직장인, 밤에는 던전 출근. 현실과 판타지 직업을 조합하고 카드를 모아 인사부장 마왕에게 퇴사를 통보하세요.</p><p>직업 4종 · 갈림길 9개 구역 · 싱글플레이 카드 로그라이트</p><h3>기록과 개인정보</h3><p>게임에는 계정·클라우드 저장·게임 분석 전송 기능이 없습니다. 기록은 이 브라우저에 저장됩니다. 배포 후 호스팅 서비스의 접속 로그는 게임 저장과 별도로 처리될 수 있습니다.</p><h3>제작</h3><p>ALDOL · AI 도구를 활용해 제작한 일러스트를 포함합니다. 글꼴 출처와 라이선스는 규칙 안내에서 확인할 수 있어요.</p><h3>버그 제보</h3><p>버전, 기기·브라우저, 문제가 생긴 행동과 스크린샷을 함께 알려 주세요. 백업 파일에는 플레이 기록이 포함되므로 필요할 때만 첨부해 주세요.</p><a class="btn calm" href="mailto:jiseuk96@gmail.com?subject=%5B%EA%B2%B8%EC%A7%81%EA%B8%88%EC%A7%80%5D%20v0.6.16%20%EB%B2%84%EA%B7%B8%20%EC%A0%9C%EB%B3%B4">이메일로 제보하기</a>`}
 function handleReleaseAction(act){
  if(act==='saveManager'){restoreSerial++;restoreCandidate=null;saveMessage='';modal='saveManager';render();return true}
  if(act==='releaseAbout'){modal='releaseAbout';render();return true}
