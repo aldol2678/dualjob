@@ -1176,3 +1176,11 @@ body.mobile-stage .mobile-battle.c2-battle{grid-template-rows:44px clamp(174px,2
 .floor-special-feedback{font-size:.81rem;color:#ddc7ef}
 .boss-phase{margin:8px 12px;padding:9px 12px;border:1px solid #e5a26c;border-radius:10px;background:rgba(105,40,44,.85);color:#fff0d6;font-size:.86rem;font-weight:650;line-height:1.4}
 @media(max-width:420px){.floor-special-options{grid-template-columns:1fr}.floor-special-choice{min-height:56px}.boss-phase{margin:4px 8px;font-size:.78rem;padding:7px 10px}}
+
+/* v0.6.20 mobile legibility and recovery-warning visibility */
+@media(max-width:700px){
+ .mobile-stage .mobile-battle.c2-battle .compact-hand .hand-slot .card .face-chip,
+ .mobile-stage .mobile-battle.c2-battle .compact-hand .hand-slot .card .face-chip:first-child{font-size:12px;min-height:18px}
+ .mobile-stage .mb-selection-title b{font-size:13px}
+ #save-alert:not([hidden]){z-index:1100}
+}
