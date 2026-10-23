@@ -165,17 +165,27 @@ const costBase=id=>id===pair().sig&&state.sigUpgrade?1:cards[id].cost;
 function availableUpgrades(){return [...new Set(state.deck)].filter(k=>k!=='fatigue'&&!state.upgrades[k]&&upgradeDiff(k).length>0);}
 function awardCard(id){if(cards[id]&&id!=='fatigue'){state.deck.push(id);log('🎴 '+cards[id].name+' 획득')}}
 // One atomic storage entry owns run + meta + preferences. Legacy keys remain untouched.
-const SAVE_SLOT='dualJobSave_v1', SAVE_LIMIT=512*1024;
+const SAVE_SLOT='dualJobSave_v1', SAVE_RECOVERY_SLOT='dualJobSave_v1_recovery', SAVE_LIMIT=512*1024;
 let saveCache=null,saveLoaded=false,saveBlocked=false,saveIssue='',saveMessage='',restoreCandidate=null,restoreSerial=0;
 function saveFault(message){saveIssue=message;Promise.resolve().then(updateSaveNotice)}
 function updateSaveNotice(){const el=document.getElementById('save-alert');if(el){el.hidden=!saveIssue;el.textContent=saveIssue?'저장 문제 · 백업 및 복원':''}}
 function readOldJSON(key,def){try{const raw=localStorage.getItem(key);return raw===null?def:JSON.parse(raw)}catch{saveBlocked=true;saveFault('저장된 기록을 읽지 못했어요. 기존 기록 보호를 위해 자동 저장을 멈췄어요.');return def}}
+function validSavePacket(packet){
+ return !!(packet&&packet.schema===1&&Object.hasOwn(packet,'run')&&packet.meta&&typeof packet.meta==='object'&&!Array.isArray(packet.meta)&&
+  packet.settings&&typeof packet.settings==='object'&&!Array.isArray(packet.settings));
+}
 function loadSaveCache(){
  if(saveLoaded)return;saveLoaded=true;
  const packet=readOldJSON(SAVE_SLOT,null);
- if(packet!==null){
-  if(packet&&packet.schema===1&&Object.hasOwn(packet,'run')&&packet.meta&&typeof packet.meta==='object'&&!Array.isArray(packet.meta))saveCache=packet;
-  else {saveBlocked=true;saveFault('저장 형식을 읽지 못했어요. 백업 파일로 복원하거나 이전 게임 파일의 기록을 확인해 주세요.')}
+ if(validSavePacket(packet))saveCache=packet;
+ else{
+  if(packet!==null){saveBlocked=true;saveFault('기본 저장본이 손상됐어요. 원본을 덮어쓰지 않고 복구 저장본을 확인하고 있어요.')}
+  // Use recovery only when the primary is missing or invalid; run:null means intentional completion.
+  const recovered=readOldJSON(SAVE_RECOVERY_SLOT,null);
+  if(validSavePacket(recovered)){
+   saveCache=recovered;saveBlocked=false;
+   saveFault('기본 저장본을 읽을 수 없어 복구 저장본에서 이어하기를 준비했어요. 저장 및 백업에서 JSON을 내려받아 주세요.');
+  }
  }
  if(!saveCache)saveCache={schema:1,run:readOldJSON(KEY,null),meta:readOldJSON(METAKEY,null),settings:{readableBattle:readOldJSON('dualJobReadableBattle',0)===1}};
 }
@@ -185,7 +195,12 @@ function persistSavePacket(packet,allowReplace=false){
   const text=JSON.stringify(packet);if(text.length>SAVE_LIMIT)throw Error('size');
   localStorage.setItem(SAVE_SLOT,text);
   if(localStorage.getItem(SAVE_SLOT)!==text)throw Error('verify');
-  saveCache=JSON.parse(text);saveLoaded=true;saveBlocked=false;saveIssue='';updateSaveNotice();return true;
+  saveCache=JSON.parse(text);saveLoaded=true;saveBlocked=false;saveIssue='';updateSaveNotice();
+  // The auxiliary same-origin copy can recover a missing/corrupted primary.
+  try{localStorage.setItem(SAVE_RECOVERY_SLOT,text);
+   if(localStorage.getItem(SAVE_RECOVERY_SLOT)!==text)throw Error('recovery-verify');
+  }catch{saveFault('진행 기록은 저장됐지만 추가 복구 저장본을 만들지 못했어요. JSON 백업을 권장해요.')}
+  return true;
  }catch{saveFault('이 브라우저에 기록을 저장하지 못했어요. 창을 닫기 전에 현재 기록을 백업해 주세요.');return false}
 }
 const safeGet=(key,def)=>{
@@ -251,6 +266,7 @@ function sanitizeRun(raw){
  x.version=4;return x;
 }
 let savedRun=sanitizeRun(safeGet(KEY,null));
+if(saveCache?.run&&!savedRun)saveFault('기존 진행 기록이 올바르지 않아 자동 복원을 중단했어요. 저장 및 백업에서 원본을 확인해 주세요.');
 if(savedRun){pickReal=savedRun.real;pickFantasy=savedRun.fantasy}
 // C2 진행 저장이 없을 때만 이전 버전 진행을 '복사해 이어하기' 후보로 제시한다.
 function importCandidate(){if(savedRun||state)return null;for(const s of IMPORT_SOURCES){const run=sanitizeRun(safeGet(s.key,null));if(run)return {...s,run}}return null}
@@ -730,7 +746,7 @@ for(const name of ['fullscreenchange','webkitfullscreenchange'])document.addEven
  document.querySelectorAll('[data-fullscreen-label]').forEach(el=>{el.textContent=fullscreenActive()?'전체화면 종료':'전체화면'});
 });
 function battleMenuMarkup(){return `<h2>게임 메뉴</h2><div class="battle-menu-grid"><button class="btn" data-act="saveManager">저장 및 백업</button><button class="btn" data-act="releaseAbout">게임 소개 · 문의</button><button class="btn" data-act="fullscreen" data-fullscreen-label>${fullscreenActive()?'전체화면 종료':'전체화면'}</button><button class="btn" data-act="readingMode" aria-pressed="${readableBattle}">${readableBattle?'한 화면 모드로':'큰 카드 · 스크롤 모드'}</button><button class="btn" data-act="guide">규칙 안내</button>${state?`<button class="btn" data-act="deck">덱 ${state.deck.length}장</button><button class="btn" data-act="relics">유물 ${state.relics.length}개</button><button class="btn" data-act="log">전투 기록</button>${state.tutorial?'<button class="btn" data-act="mobileTutorial">튜토리얼</button>':''}<button class="btn danger" data-act="restartPrompt">도전 재시작</button>`:''}</div><p class="screen-help">시작·이어하기 시 모바일 전체화면을 시도해요. 종료 후에는 메뉴에서 직접 다시 켤 수 있어요. 화면이 낮거나 확대된 경우에는 스크롤 모드를 사용해요.</p>${fullscreenNotice?`<p role="status">${esc(fullscreenNotice)}</p>`:''}`}
-// v0.6.19: the action hint and energy preview share live combat costs.
+// v0.6.20: the action hint and energy preview share live combat costs.
 const ENERGY_ART=["assets/energy-battery-0-e0991b68df0d609b.svg", "assets/energy-battery-1-111f3700e64420c3.svg", "assets/energy-battery-2-625c5bb3a2854c89.svg", "assets/energy-battery-3-346ce767847b9cda.svg", "assets/energy-battery-4-cb24fc2c020e33ba.svg"];
 function battleAvailability(){
  const usable=state.hand.filter(id=>id!=='fatigue');
@@ -810,7 +826,7 @@ function renderMobileBattle(){
  </main>`;
 }
 
-function header(){return `<header class="mast"><div><div class="mini">THE SECOND SHIFT · ROGUELITE</div><div class="brand">겸직<b>금지!</b> <span class="ver-tag">v0.6.19</span></div></div><div class="mast-buttons"><button class="btn small" data-act="battleMenu" aria-label="화면 설정 및 게임 메뉴">☰</button><button class="btn small" data-act="guide" aria-label="규칙 안내">❔ 규칙</button>${state?`<button class="btn small" data-act="deck" aria-label="내 덱 보기">🗂️ 덱 ${state.deck.length}</button><button class="btn small danger" data-act="restartPrompt" aria-label="도전 재시작">↻</button>`:''}</div></header>`}
+function header(){return `<header class="mast"><div><div class="mini">THE SECOND SHIFT · ROGUELITE</div><div class="brand">겸직<b>금지!</b> <span class="ver-tag">v0.6.20</span></div></div><div class="mast-buttons"><button class="btn small" data-act="battleMenu" aria-label="화면 설정 및 게임 메뉴">☰</button><button class="btn small" data-act="guide" aria-label="규칙 안내">❔ 규칙</button>${state?`<button class="btn small" data-act="deck" aria-label="내 덱 보기">🗂️ 덱 ${state.deck.length}</button><button class="btn small danger" data-act="restartPrompt" aria-label="도전 재시작">↻</button>`:''}</div></header>`}
 // v0.6.15: selection belongs to the current screen, never to the saved run.
 let journeyReward=null,journeyRoute=null;
 let journeyDockObserver=null;
@@ -1425,7 +1441,7 @@ function detailsForTransaction(){const a=pendingAction;if(!a)return '<p>선택 �
  return '<p>선택 정보가 없어.</p>';
 }
 function jobBriefMarkup(k){const p=pairs[k],g=JOB_GUIDE[k];return `<div class="transaction-head"><span class="txn-icon">${p.icon}</span><div><div class="eyebrow">처음 출근하는 직업 · ${stars(g.level)} ${g.label}</div><h2>${p.name}</h2><p>${g.core}</p></div></div><div class="txn-description"><strong>핵심 자원</strong><p>${g.resourceBrief}</p></div><div class="pd-box" style="margin-top:10px"><b class="h">기본 전략</b><ol>${g.strategy.map(x=>`<li>${x}</li>`).join('')}</ol><b class="h" style="margin-top:8px">대표 조합</b>${comboMarkup(k)}<div class="pd-note">${g.comboNote}</div></div><div class="info-note">✨ 겸직 자동 효과: <b>${dualSummary(k)}</b> (현실+판타지 카드를 같은 턴에, 턴당 1회)</div><div class="txn-actions"><button class="btn primary" data-act="closeModal">확인, 전투 시작</button></div>`}
-const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.6.19</h2>
+const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.6.20</h2>
 <div class="guide-actions"><button class="btn primary small" data-act="tutReplay">🎓 튜토리얼 다시 보기</button></div>
 <div class="guide-sec"><b>⚔ 기본 전투</b><p>카드를 탭하면 전장을 보면서 효과를 확인할 수 있어. 적 또는 내 캐릭터를 탭하면 사용해. 「상세」에서 전체 설명을 볼 수 있어. 손패를 좌우로 넘겨 탐색하고, 위로 끌어 대상에 놓으면 바로 사용해. 에너지는 매 턴 ⚡3, 손패는 5장. 「턴 종료」를 누르면 적이 예고한 행동을 해. 오른쪽 <b>예상 피해</b>를 보고 방어를 챙기자.</p></div>
 <div class="guide-sec"><b>✨ 겸직 (자동)</b><p>같은 턴에 청록 「현실」 카드와 보라 「판타지」 카드를 쓰면 직업 고유 효과가 자동 발동해. 턴당 1번. 공용·융합 카드는 조건에 포함되지 않아. 한쪽만 썼으면 나머지 계열 카드에 <b>✦겸직</b> 표시가 떠.</p></div>
@@ -1433,7 +1449,7 @@ const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.6.19</h2>
 <div class="guide-sec"><b>💤 피로도 vs 🥱 피로 카드</b><p><b>피로도</b>(0~6)는 다음 전투까지 이어지는 게이지야. 3↑이면 전투 시작 손패 1장이 임시 피로 카드, 5↑이면 초과근무 불가. 승리 −1, 휴식 「피로 회복」 −3. <b>피로 카드</b>는 사용 불가 카드야. 적의 📜 특수 공격은 이번 전투에만 임시로, 일부 이벤트는 덱에 영구로 넣어. 영구 피로 카드는 상점 덱 정리로 지울 수 있어.</p></div>
 <div class="guide-sec"><b>🧬 직업별 핵심 자원</b>${JOB_ORDER.map(k=>`<div class="guide-job"><span>${pairs[k].icon} <b>${pairs[k].name}</b> ${stars(JOB_GUIDE[k].level)}</span><span>${JOB_GUIDE[k].resources.map(resChip).join('')}</span><small>${JOB_GUIDE[k].core} · 겸직: ${dualSummary(k)}</small></div>`).join('')}<p class="footnote">★은 규칙 복잡도야. 별이 많다고 더 강하지 않아.</p></div>
 <div class="guide-sec"><b>🗺 갈림길·보상</b><p>9개 지점마다 길을 골라. 일반 전투는 카드, 정예는 유물(12종), 상점은 구매·제거, 휴식은 회복·피로 회복·강화 중 하나. 구매·제거·강화·이벤트 선택은 모두 <b>미리보기 → 확정</b> 2단계야.</p></div>
-<div class="guide-sec"><b>💾 저장</b><p>v0.6.19은 v0.6 계열과 같은 저장 키에 자동 저장돼. 이전 C2.2·C2.1·C2·C1·v0.4.1 진행은 원본을 건드리지 않고 복사본으로만 가져와. 브라우저 데이터를 지우면 기록도 지워져.</p></div>`;
+<div class="guide-sec"><b>💾 저장</b><p>v0.6.20은 v0.6 계열과 같은 저장 키에 자동 저장돼. 이전 C2.2·C2.1·C2·C1·v0.4.1 진행은 원본을 건드리지 않고 복사본으로만 가져와. 브라우저 데이터를 지우면 기록도 지워져.</p></div>`;
 const backupOwn=(o,k)=>!!o&&Object.hasOwn(o,k);
 const backupPlain=o=>!!o&&typeof o==='object'&&!Array.isArray(o);
 function checkedBackupTree(value,depth=0,budget={n:0}){
@@ -1484,7 +1500,7 @@ function parseBackup(text){
  return {schema:1,run:validateBackupRun(x.run),meta:cleanMeta(x.meta),settings:{readableBattle:x.settings.readableBattle}};
 }
 function currentSavePacket(){return {schema:1,run:state?(RUN_PHASES.includes(state.phase)?JSON.parse(JSON.stringify(state)):null):(savedRun?JSON.parse(JSON.stringify(savedRun)):null),meta:JSON.parse(JSON.stringify(meta)),settings:{readableBattle}}}
-function backupText(){const x=currentSavePacket();return JSON.stringify({game:'aldol-dualjob',backupVersion:1,gameVersion:'0.6.19',createdAt:new Date().toISOString(),run:x.run,meta:x.meta,settings:x.settings},null,2)}
+function backupText(){const x=currentSavePacket();return JSON.stringify({game:'aldol-dualjob',backupVersion:1,gameVersion:'0.6.20',createdAt:new Date().toISOString(),run:x.run,meta:x.meta,settings:x.settings},null,2)}
 function downloadBackup(){
  try{const blob=new Blob([backupText()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='dualjob-save-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);saveMessage='백업 파일 다운로드를 요청했어요. 저장이 안 되면 아래 백업 텍스트를 복사해 주세요.'}
  catch{saveMessage='다운로드를 시작하지 못했어요. 아래 백업 텍스트를 복사해 주세요.'}
@@ -1511,7 +1527,7 @@ function saveManagerMarkup(){
  return `<h2>저장 및 백업</h2><p>진행과 누적 기록은 이 브라우저에 저장됩니다. 다른 주소·기기에서는 백업 파일을 가져와 주세요.</p><div class="save-summary">${run?esc(pairs[run.real+'-'+run.fantasy].name)+' · 구역 '+(run.stage+1)+'/9':'진행 중인 도전 없음'}<br/>누적 승리 ${meta.wins} · 도전 ${meta.attempts}</div>${saveIssue?`<p class="save-error" role="alert">${esc(saveIssue)}</p>`:'<p class="save-ok">자동 저장 사용 중 · 브라우저 데이터 삭제 시 기록도 사라집니다.</p>'}${saveMessage?`<p role="status">${esc(saveMessage)}</p>`:''}<div class="save-actions"><button class="btn primary" data-act="exportSave">백업 파일 내보내기</button><button class="btn calm" data-act="retrySave">현재 기록 저장 재시도</button></div><label class="save-file">백업 파일 가져오기<input id="backup-file" type="file" accept=".json,application/json"/></label><details class="save-text"><summary>파일 저장이 안 되나요? 백업 텍스트 보기</summary><textarea id="backup-output" readonly aria-label="현재 기록 백업 텍스트">${esc(backupText())}</textarea><button class="btn small" data-act="selectBackupText">텍스트 전체 선택</button></details><details class="save-text"><summary>백업 텍스트 붙여넣기</summary><textarea id="backup-input" maxlength="524288" spellcheck="false" aria-label="복원할 백업 텍스트"></textarea><button class="btn calm" data-act="previewBackupText">내용 확인</button></details>`;
 }
 function restoreSaveMarkup(){const x=restoreCandidate,r=x?.run;if(!x)return '';return `<h2>이 기록으로 복원할까요?</h2><div class="save-summary">${r?esc(pairs[r.real+'-'+r.fantasy].name)+' · 구역 '+(r.stage+1)+'/9 · 체력 '+r.hp+'/'+r.maxHp:'진행 중인 도전 없음'}<br/>누적 승리 ${x.meta.wins} · 도전 ${x.meta.attempts}</div><p>현재 진행과 누적 기록, 화면 설정을 위 내용으로 교체합니다. 지금 기록이 필요하면 먼저 백업해 주세요.</p><div class="save-actions"><button class="btn calm" data-act="cancelRestore">취소</button><button class="btn primary" data-act="commitRestore">이 기록으로 복원</button></div>`}
-function releaseAboutMarkup(){return `<h2>겸직금지!</h2><p class="release-tag">공개 테스트 · v0.6.19</p><p>낮에는 직장인, 밤에는 던전 출근. 현실과 판타지 직업을 조합하고 카드를 모아 인사부장 마왕에게 퇴사를 통보하세요.</p><p>직업 4종 · 갈림길 9개 구역 · 싱글플레이 카드 로그라이트</p><h3>기록과 개인정보</h3><p>게임에는 계정·클라우드 저장·게임 분석 전송 기능이 없습니다. 기록은 이 브라우저에 저장됩니다. 배포 후 호스팅 서비스의 접속 로그는 게임 저장과 별도로 처리될 수 있습니다.</p><h3>제작</h3><p>ALDOL · AI 도구를 활용해 제작한 일러스트를 포함합니다. 글꼴 출처와 라이선스는 규칙 안내에서 확인할 수 있어요.</p><h3>버그 제보</h3><p>버전, 기기·브라우저, 문제가 생긴 행동과 스크린샷을 함께 알려 주세요. 백업 파일에는 플레이 기록이 포함되므로 필요할 때만 첨부해 주세요.</p><a class="btn calm" href="mailto:jiseuk96@gmail.com?subject=%5B%EA%B2%B8%EC%A7%81%EA%B8%88%EC%A7%80%5D%20v0.6.19%20%EB%B2%84%EA%B7%B8%20%EC%A0%9C%EB%B3%B4">이메일로 제보하기</a>`}
+function releaseAboutMarkup(){return `<h2>겸직금지!</h2><p class="release-tag">공개 테스트 · v0.6.20</p><p>낮에는 직장인, 밤에는 던전 출근. 현실과 판타지 직업을 조합하고 카드를 모아 인사부장 마왕에게 퇴사를 통보하세요.</p><p>직업 4종 · 갈림길 9개 구역 · 싱글플레이 카드 로그라이트</p><h3>기록과 개인정보</h3><p>게임에는 계정·클라우드 저장·게임 분석 전송 기능이 없습니다. 기록은 이 브라우저에 저장됩니다. 배포 후 호스팅 서비스의 접속 로그는 게임 저장과 별도로 처리될 수 있습니다.</p><h3>제작</h3><p>ALDOL · AI 도구를 활용해 제작한 일러스트를 포함합니다. 글꼴 출처와 라이선스는 규칙 안내에서 확인할 수 있어요.</p><h3>버그 제보</h3><p>버전, 기기·브라우저, 문제가 생긴 행동과 스크린샷을 함께 알려 주세요. 백업 파일에는 플레이 기록이 포함되므로 필요할 때만 첨부해 주세요.</p><a class="btn calm" href="mailto:jiseuk96@gmail.com?subject=%5B%EA%B2%B8%EC%A7%81%EA%B8%88%EC%A7%80%5D%20v0.6.20%20%EB%B2%84%EA%B7%B8%20%EC%A0%9C%EB%B3%B4">이메일로 제보하기</a>`}
 function handleReleaseAction(act){
  if(act==='saveManager'){restoreSerial++;restoreCandidate=null;saveMessage='';modal='saveManager';render();return true}
  if(act==='releaseAbout'){modal='releaseAbout';render();return true}
@@ -1910,6 +1926,9 @@ document.addEventListener('pointerup',ev=>{
 },true);
 document.addEventListener('pointercancel',()=>{if(dragState){suppressClickUntil=performance.now()+450;cleanGesture()}});
 window.addEventListener('blur',()=>cleanGesture());
+const flushRunOnExit=()=>{if(state&&RUN_PHASES.includes(state.phase))save()};
+window.addEventListener('pagehide',flushRunOnExit);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushRunOnExit()});
 document.addEventListener('keydown',ev=>{if(turnVisualBusy()&&ev.key==='Escape'){finishCombatPlayback();return}if(ev.key==='Escape'){if(dragState)cleanGesture();if(modal){restoreSerial++;restoreCandidate=null;modal='';inspected=null;pendingAction=null}else selectedCard=null;render()}});
 render();
 })();
