@@ -69,7 +69,7 @@ check('mid-battle turn 2 reload resumes identical cards, enemies, and HP without
  assert.equal(resumedCombat.g.state,null,'resume must not silently auto-play');
  resumedCombat.d.querySelector('[data-act=resume]').click();
  assert.equal(resumedCombat.g.state.phase,'battle');
- for(const k of battleKeys)assert.deepEqual(resumedCombat.g.state[k],snapshot[k],'battle restore '+k);
+ for(const k of battleKeys)assert.deepEqual(JSON.parse(JSON.stringify(resumedCombat.g.state[k])),snapshot[k],'battle restore '+k);
  const persisted=JSON.parse(resumedCombat.read()[MAIN]).run;
  assert.equal(persisted.turn,2);
  assert.deepEqual(persisted.enemies,snapshot.enemies,'no enemy reroll on reload');
