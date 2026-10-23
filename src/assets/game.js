@@ -266,7 +266,19 @@ function sanitizeRun(raw){
  x.version=4;return x;
 }
 let savedRun=sanitizeRun(safeGet(KEY,null));
-if(saveCache?.run&&!savedRun)saveFault('기존 진행 기록이 올바르지 않아 자동 복원을 중단했어요. 저장 및 백업에서 원본을 확인해 주세요.');
+if(saveCache?.run&&!savedRun){
+ // The outer packet can be valid while its embedded run is not. Only then inspect
+ // the secondary copy; never revive it when the primary explicitly ended a run.
+ const recovery=readOldJSON(SAVE_RECOVERY_SLOT,null);
+ const rescued=validSavePacket(recovery)?sanitizeRun(recovery.run):null;
+ if(rescued){
+  savedRun=rescued;saveCache={...saveCache,run:rescued};
+  saveFault('진행 기록을 복구 저장본에서 되살렸어요. 이어하기 전에 JSON 백업을 권장해요.');
+ }else {
+  saveBlocked=true;
+  saveFault('진행 기록이 손상돼 자동 복원을 중단했어요. 기존 기록을 보호하기 위해 저장을 멈췄어요.');
+ }
+}
 if(savedRun){pickReal=savedRun.real;pickFantasy=savedRun.fantasy}
 // C2 진행 저장이 없을 때만 이전 버전 진행을 '복사해 이어하기' 후보로 제시한다.
 function importCandidate(){if(savedRun||state)return null;for(const s of IMPORT_SOURCES){const run=sanitizeRun(safeGet(s.key,null));if(run)return {...s,run}}return null}
