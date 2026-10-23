@@ -167,7 +167,7 @@ function awardCard(id){if(cards[id]&&id!=='fatigue'){state.deck.push(id);log('�
 // One atomic storage entry owns run + meta + preferences. Legacy keys remain untouched.
 const SAVE_SLOT='dualJobSave_v1', SAVE_RECOVERY_SLOT='dualJobSave_v1_recovery', SAVE_LIMIT=512*1024;
 let saveCache=null,saveLoaded=false,saveBlocked=false,saveIssue='',saveMessage='',restoreCandidate=null,restoreSerial=0;
-function saveFault(message){saveIssue=message;Promise.resolve().then(updateSaveNotice)}
+function saveFault(message){saveIssue=message;updateSaveNotice();Promise.resolve().then(updateSaveNotice)}
 function updateSaveNotice(){const el=document.getElementById('save-alert');if(el){el.hidden=!saveIssue;el.textContent=saveIssue?'저장 문제 · 백업 및 복원':''}}
 function readOldJSON(key,def){try{const raw=localStorage.getItem(key);return raw===null?def:JSON.parse(raw)}catch{saveBlocked=true;saveFault('저장된 기록을 읽지 못했어요. 기존 기록 보호를 위해 자동 저장을 멈췄어요.');return def}}
 function validSavePacket(packet){
