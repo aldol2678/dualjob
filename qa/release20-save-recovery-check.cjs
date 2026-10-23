@@ -55,6 +55,25 @@ check('primary write failure is prominently diagnosed, not called saved',()=>{
 });noSave.close();
 const exit=boot(raw);exit.d.querySelector('[data-act=resume]').click();exit.g.state.gold=66;exit.w.dispatchEvent(new exit.w.Event('pagehide'));
 check('pagehide flush retains last unsaved run state',()=>assert.equal(JSON.parse(exit.read()[MAIN]).run.gold,66));exit.close();
+// Resume a real active battle after enemies have acted, not just a map/save screen.
+const combat=boot();combat.g.meta.tutorialDone=true;combat.g.pick('chef-warlock');combat.g.newRun();
+combat.g.state.tutorial=null;combat.g.state.stage=1;combat.g.state.nodeType='battle';
+combat.g.spawnEnemy();combat.g.save();combat.g.endTurn();
+assert.equal(combat.g.state.phase,'battle');assert.equal(combat.g.state.turn,2);
+const snapshot=JSON.parse(combat.read()[MAIN]).run;
+const battleKeys=['phase','stage','real','fantasy','hp','maxHp','gold','turn','energy',
+ 'enemies','hand','drawPile','discard','deck','targetIndex','workFatigue','bossPhase','relics'];
+const resumedCombat=boot(combat.read());
+check('mid-battle turn 2 reload resumes identical cards, enemies, and HP without rerolling',()=>{
+ assert(resumedCombat.d.querySelector('[data-act=resume]'),'expected landing resume CTA');
+ assert.equal(resumedCombat.g.state,null,'resume must not silently auto-play');
+ resumedCombat.d.querySelector('[data-act=resume]').click();
+ assert.equal(resumedCombat.g.state.phase,'battle');
+ for(const k of battleKeys)assert.deepEqual(resumedCombat.g.state[k],snapshot[k],'battle restore '+k);
+ const persisted=JSON.parse(resumedCombat.read()[MAIN]).run;
+ assert.equal(persisted.turn,2);
+ assert.deepEqual(persisted.enemies,snapshot.enemies,'no enemy reroll on reload');
+});resumedCombat.close();combat.close();
 const isolated=boot();check('separate browser context is UNKNOWN/no shared localStorage',()=>assert.equal(isolated.d.querySelector('[data-act=resume]'),null));isolated.close();
 initial.close();assert.deepEqual(errors,[]);
-console.log('PASS v0.6.20 recovery/reload: 10 checks; JSDOM storage simulation only');
+console.log('PASS v0.6.20 recovery/reload: 11 checks; JSDOM storage simulation only');
