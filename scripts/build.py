@@ -18,7 +18,7 @@ for source,prefix,ext in [(js,'game','js'),(css,'styles','css')]:
 (DIST/'index.html').write_text(page)
 for name in ['404.html','robots.txt']:shutil.copy2(SRC/name,DIST/name)
 shutil.copy2(ROOT/'vercel.json',DIST/'vercel.json')
-manifest={'version':'0.6.19','assets':{}}
+manifest={'version':'0.6.20','assets':{}}
 for p in sorted((DIST/'assets').iterdir()):
  b=p.read_bytes();manifest['assets'][p.name]={'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()}
 (OUT/'asset-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
