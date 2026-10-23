@@ -34,6 +34,13 @@ const corrupt=boot({[MAIN]:'not-json',[RECOVERY]:raw[RECOVERY]});check('corrupt 
  corrupt.d.querySelector('[data-act=resume]').click();
  assert.equal(corrupt.g.state.gold,42);assert.equal(JSON.parse(corrupt.read()[MAIN]).run.gold,42);
 });corrupt.close();
+const malformed=JSON.stringify({...saved,run:{...saved.run,deck:[]}}),badRun=boot({[MAIN]:malformed,[RECOVERY]:raw[RECOVERY]});
+check('valid packet with corrupt embedded run falls back without overwriting source first',()=>{
+ assert(badRun.d.querySelector('[data-act=resume]'));assert(badRun.g.saveIssue.includes('복구'));
+ assert.equal(badRun.read()[MAIN],malformed);
+ badRun.d.querySelector('[data-act=resume]').click();
+ assert.equal(badRun.g.state.stage,1);assert.equal(badRun.g.state.deck.length,saved.run.deck.length);
+});badRun.close();
 const ended=JSON.stringify({...saved,run:null}),stale=boot({[MAIN]:ended,[RECOVERY]:raw[RECOVERY]});
 check('intentional run:null never resurrects stale recovery',()=>assert.equal(stale.d.querySelector('[data-act=resume]'),null));stale.close();
 const noMirror=boot({}, {failKey:RECOVERY});noMirror.g.meta.tutorialDone=true;noMirror.g.newRun();
@@ -50,4 +57,4 @@ const exit=boot(raw);exit.d.querySelector('[data-act=resume]').click();exit.g.st
 check('pagehide flush retains last unsaved run state',()=>assert.equal(JSON.parse(exit.read()[MAIN]).run.gold,66));exit.close();
 const isolated=boot();check('separate browser context is UNKNOWN/no shared localStorage',()=>assert.equal(isolated.d.querySelector('[data-act=resume]'),null));isolated.close();
 initial.close();assert.deepEqual(errors,[]);
-console.log('PASS v0.6.20 recovery/reload: 9 checks; JSDOM storage simulation only');
+console.log('PASS v0.6.20 recovery/reload: 10 checks; JSDOM storage simulation only');
