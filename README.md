@@ -2,7 +2,7 @@
 
 현실 직업과 판타지 직업을 조합하는 카드 로그라이트입니다. 네 가지 융합 직업으로 아홉 구역을 돌파하고 인사부장 마왕에게 퇴사를 통보하세요.
 
-**[게임 플레이](https://dualjob.aldol.app/)** · 공개 테스트 v0.6.20
+**[게임 플레이](https://dualjob.aldol.app/)** · 공개 테스트 v0.6.21
 
 ## 실행
 
@@ -43,12 +43,16 @@ node qa/release15-combat-flow-check.cjs output/dualjob-debug.html
 node qa/release15-mobile-journey-check.cjs output/dualjob-debug.html
 node qa/release15-web-check.cjs
 node qa/release16-content-check.cjs
+node qa/release17-art-check.cjs
 node qa/release18-mobile-check.cjs
 node qa/release19-content-check.cjs
 node qa/release20-save-recovery-check.cjs
+node qa/release21-training-check.cjs
 ```
 
 자동 검사는 JSDOM을 사용하므로 실제 모바일 터치·전체화면·브라우저별 렌더링 검증을 대체하지 않습니다. 자동 실행 GitHub Actions는 설정하지 않았습니다.
+
+전문화 규칙과 검증·밸런스 탐색 범위는 [docs/CAREER-v0621.md](docs/CAREER-v0621.md)에 정리했습니다.
 
 ## 저장
 

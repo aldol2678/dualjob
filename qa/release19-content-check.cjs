@@ -42,7 +42,7 @@ const goldBefore=s.gold,maxBefore=s.maxHp;
 assert(g.eventAllowed(15,1));g.selectEvent(1);
 assert.equal(s.gold,goldBefore-18);assert.equal(s.maxHp,maxBefore+6);
 console.log('PASS four job-specific encounter pools and choice effects');
-g.pick('chef-warlock');g.newRun();g.modal='';s=g.state;s.stage=8;s.nodeType='boss';g.spawnEnemy();
+g.pick('chef-warlock');g.newRun();g.modal='';s=g.state;s.stage=2;g.nextStage();assert(g.chooseTraining('furnace'));s.stage=8;s.nodeType='boss';g.spawnEnemy();
 assert.equal(s.bossPhase,1);
 const boss=s.enemies.find(e=>e.id==='boss');boss.hp=51;s.hand=['strike'];s.energy=3;s.targetIndex=0;
 g.playCard(0,0);assert.equal(s.bossPhase,2);assert(boss.hp>0&&boss.hp<=50);
