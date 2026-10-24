@@ -173,6 +173,7 @@ function validTrainingSave(x){
  if(!t||typeof t!=='object'||Array.isArray(t)||typeof t.used!=='boolean'||typeof t.fusionReady!=='boolean'||![null,'real','fantasy'].includes(t.lastFamily))return false;
  if(x.trainingId!==null&&!trainingFor(x))return false;
  if(x.phase==='training'&&(x.stage!==3||x.trainingId!==null))return false;
+ if(x.stage>=3&&x.trainingId===null&&x.phase!=='training')return false;
  return true;
 }
 function chooseTraining(id){
@@ -250,7 +251,7 @@ function renderTraining(){
  const selected=trainingChoice?.run===state&&trainingOptions().includes(trainingChoice.id)?trainingChoice.id:null;
  return `<main class="flow-screen training-flow">${flowHeader()}<section class="journey-panel"><div class="flow-kicker">3구역 완료 · 사내 전문교육</div><h1>이번 출근의 전문 분야는?</h1><p class="flow-lead">${pair().name}의 특성을 하나 고르세요. 무료이며 이번 도전이 끝날 때까지 자동으로 적용돼요.</p><div class="training-options">${trainingOptions().map(id=>{const t=TRAINING[id];return `<button type="button" class="training-option" data-act="selectTraining" data-id="${id}" aria-pressed="${selected===id}"><strong>${t.name}${selected===id?' ✓':''}</strong><span>${t.desc}</span><small>대표 카드 · ${t.cards.map(k=>cards[k].name).join(' · ')}</small></button>`}).join('')}</div><p class="flow-muted">확정 전에는 바꿀 수 있어요. 교육은 보상이나 상점·휴식 기회를 소비하지 않아요.</p></section><footer class="journey-dock training-dock"><div class="dock-copy"><b>${selected?TRAINING[selected].name:'전문화를 선택하세요'}</b><small>이번 도전 동안 유지</small></div><button class="btn primary" data-act="confirmTraining" ${selected?'':'disabled'}>교육 확정 →</button></footer></main>`;
 }
-function trainingInfoMarkup(){const t=trainingFor(state);return t?`<h2>🎓 ${t.name}</h2><p>${t.desc}</p><p>대표 카드 · ${t.cards.map(id=>cards[id].name).join(' · ')}</p><p>이번 도전 동안 유지돼요. 턴당 제한은 같은 이름의 모든 카드가 공유해요.</p>`:''}
+function trainingInfoMarkup(){const t=trainingFor(state),limit=['posthumous','investment'].includes(state?.trainingId)?'턴을 끝낼 때 조건을 보고 한 번 발동해요.':'어떤 카드로 발동했든 전문화는 한 턴에 한 번 발동해요.';return t?`<h2>🎓 ${t.name}</h2><p>${t.desc}</p><p>대표 카드 · ${t.cards.map(id=>cards[id].name).join(' · ')}</p><p>이번 도전 동안 유지돼요. ${limit}</p>`:''}
 function trainingStatus(){const t=state.trainingTurn;if(state.trainingId==='course'&&t.fusionReady)return '융합 +4 준비';return t.used?'이번 턴 사용함':'조건 충족 시 발동'}
 function battleLocationMarkup(){const location=esc(rooms[state.stage].label)+' · '+state.turn+'턴',t=trainingFor(state);return t?`<button class="mb-location training-location" data-act="trainingInfo" aria-label="${t.name}. ${trainingStatus()}. 전문화 설명 보기"><span>${location}</span><small>${t.name} · ${trainingStatus()}</small></button>`:`<span class="mb-location"><span>${location}</span></span>`}
 

@@ -97,7 +97,7 @@ check('old revision remains legacy on resume, backup, stage transition and shop'
 check('welfare: exact 10G discount, job fit, persistent quote, confirmation debit, no duplicate purchase',()=>{
  const expected={'accountant-warlock':['overtimeClock','manaAmp'],'accountant-alchemist':['overtimeClock','lunchVoucher'],'chef-warlock':['protectiveApron','manaAmp'],'chef-alchemist':['overtimeClock','protectiveApron']};
  for(const pair of Object.keys(expected)){
-  const s=start(pair);s.stage=3;g.chooseNode(1);const offer=clone(s.shop.welfare);assert(expected[pair].includes(offer.id));assert(offer.price>=35&&offer.price<=41);assert.equal(s.shop.relics.length,2);assert.equal(new Set(s.shop.relics).size,2);
+  const s=start(pair);s.stage=2;g.nextStage();assert(g.chooseTraining(g.trainingOptions()[0]));g.chooseNode(1);const offer=clone(s.shop.welfare);assert(expected[pair].includes(offer.id));assert(offer.price>=35&&offer.price<=41);assert.equal(s.shop.relics.length,2);assert.equal(new Set(s.shop.relics).size,2);
   s.gold=42;w.__djFast=false;g.save();g.render();const r=boot(w.localStorage.getItem(g.saveSlot));r.window.document.querySelector('[data-act=resume]').click();assert.deepEqual(clone(r.window.__dj.state.shop.welfare),offer);r.window.close();
   d.querySelector('[data-act=previewShopRelic][data-index="0"]').click();assert.equal(s.gold,42);assert(d.body.textContent.includes('−'+offer.price+'G'));d.querySelector('[data-act=confirmPending]').click();assert.equal(s.gold,42-offer.price);assert(s.relics.includes(offer.id));const gold=s.gold;g.buyItem('relic',0);assert.equal(s.gold,gold);assert.equal(g.parseBackup(g.backupText()).run.shop.welfare.price,offer.price);
  }
@@ -109,6 +109,6 @@ check('welfare: insufficient money, all preferred owned, all commons owned, no d
  for(const stage of [0,1,5,7]){s=start();s.stage=stage;if(stage===5)g.takeFloorDecision(5,0);g.chooseNode(g.mapRows[stage].indexOf('shop'));assert.equal(s.shop.welfare,undefined);}
 });
 check('welfare: malformed discount rejected rather than silently granting a cheaper price',()=>{
- const s=start();s.stage=3;g.chooseNode(1);const q=JSON.parse(g.backupText());q.run.shop.welfare.price=0;assert.throws(()=>g.parseBackup(JSON.stringify(q)));assert(g.shopRelicPrice(0)>0);
+ const s=start();s.stage=2;g.nextStage();assert(g.chooseTraining(g.trainingOptions()[0]));g.chooseNode(1);const q=JSON.parse(g.backupText());q.run.shop.welfare.price=0;assert.throws(()=>g.parseBackup(JSON.stringify(q)));assert(g.shopRelicPrice(0)>0);
 });
 assert.deepEqual(errors,[]);w.close();console.log(`ALL ${checks} training groups PASS (JSDOM; device/touch and balance are separate checks).`);

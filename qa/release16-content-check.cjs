@@ -17,7 +17,7 @@ for(let stage=0;stage<9;stage++)for(const type of g.mapRows[stage]){
  if(!['battle','elite','boss'].includes(type))continue;
  const pool=Array.from(g.encounterPool(stage,type));
  for(const random of [0,0.999]){
-  g.newRun();g.modal='';g.state.stage=stage;g.state.nodeType=type;
+  g.newRun();g.modal='';if(stage>=3){g.state.stage=2;g.nextStage();assert(g.chooseTraining('furnace'));}g.state.stage=stage;g.state.nodeType=type;
   const original=w.Math.random;w.Math.random=()=>random;g.spawnEnemy();w.Math.random=original;
   const ids=g.state.enemies.map(e=>e.id).join(',');const id=pool.find(k=>g.ENCOUNTERS[k].ids.join(',')===ids);assert(id);reached.add(id);
   assert(g.state.enemies.length>=2&&g.state.enemies.length<=3);assert.equal(new Set(g.state.enemies.map(e=>e.id)).size,g.state.enemies.length);
@@ -30,7 +30,7 @@ for(let stage=0;stage<9;stage++)for(const type of g.mapRows[stage]){
  }
 }
 assert.equal(reached.size,9);console.log('PASS all nine encounter compositions reachable; '+combinations+' stage/branch rolls, four-turn forecast/execution and backup round trips');
-g.newRun();g.modal='';g.state.stage=6;g.state.nodeType='battle';g.spawnEnemy();g.save();
+g.newRun();g.modal='';g.state.stage=2;g.nextStage();assert(g.chooseTraining('furnace'));g.state.stage=6;g.state.nodeType='battle';g.spawnEnemy();g.save();
 const packet=w.localStorage.getItem('dualJobSave_v1'),expected=JSON.stringify(g.state.enemies);const resumed=boot(packet);
 resumed.window.document.querySelector('[data-act=resume]').click();assert.equal(JSON.stringify(resumed.window.__dj.state.enemies),expected);resumed.window.close();
 console.log('PASS reload resumes the same enemies and intents without rerolling');
