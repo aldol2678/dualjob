@@ -1201,3 +1201,51 @@ body.mobile-stage .mobile-battle.c2-battle{grid-template-rows:44px clamp(174px,2
 .c2-battle .battle-top .training-location small{font-size:12px;color:#a6e5d4}
 
 .c2-battle .battle-top:has(.training-location){height:auto;min-height:54px;flex-basis:auto}
+
+/* Patch A: reuse the compact combat controls on wide/landscape viewports. */
+.mobile-stage .mobile-battle.c2-battle .hand{gap:6px}
+.mobile-stage .mobile-battle.c2-battle .hand .hand-slot,.mobile-stage .mobile-battle.c2-battle .hand .hand-slot.picked{margin-left:0!important;flex:0 0 var(--card-w);width:var(--card-w)}
+.mobile-stage .mobile-battle.c2-battle .hand .hand-slot .card{transform:none}
+.mobile-stage .mobile-battle.c2-battle .compact-hand .hand-slot .card .face-stats{flex-wrap:nowrap}
+@media(max-width:700px){
+ body.mobile-stage .mobile-battle.c2-battle:has(.boss-phase){grid-template-rows:44px minmax(174px,1fr) auto 44px 64px 62px minmax(218px,1fr)}
+ .mobile-stage .mobile-battle.c2-battle .boss-phase{margin:0;padding:6px 10px}
+}
+@media(min-width:701px){
+ body.mobile-stage #app{max-width:1280px;padding:8px}
+ body.mobile-stage .mobile-battle.c2-battle{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:44px 48px 84px 62px minmax(160px,1fr);gap:8px}
+ .mobile-stage .mobile-battle .mb-header{grid-column:1/-1;grid-row:1}
+ .mobile-stage .mobile-battle.c2-battle .mb-arena{grid-column:1;grid-row:2/6;grid-template-rows:minmax(0,1fr) 82px;padding:8px;border-radius:16px}
+ .mobile-stage .mobile-battle .mb-resources{grid-column:2;grid-row:2}
+ .mobile-stage .mobile-battle.c2-battle .mb-selection{grid-column:2;grid-row:3;height:84px;min-height:0;max-height:none;grid-template-rows:44px minmax(0,1fr)}
+ .mobile-stage .mobile-battle .mb-toolbar{grid-column:2;grid-row:4}
+ .mobile-stage .mobile-battle.c2-battle .mb-hand{grid-column:2;grid-row:5}
+ .mobile-stage .mobile-battle.c2-battle .mb-arena .player-lane,.mobile-stage .mobile-battle.c2-battle .mb-arena .hero-unit,.mobile-stage .mobile-battle.c2-battle .mb-arena .battle-sidebar,.mobile-stage .mobile-battle.c2-battle .mb-arena .forecast{height:82px;max-height:none}
+ .mobile-stage .mobile-battle.c2-battle .enemy-unit .enemy-avatar{max-height:220px;flex:1 1 40px}
+ .mobile-stage .mobile-battle.c2-battle .enemy-avatar svg{max-height:220px}
+ .mobile-stage .mobile-battle.c2-battle .enemy-unit>b,.mobile-stage .mobile-battle.c2-battle .enemy-intent{font-size:13px}
+ .mobile-stage .mobile-battle.c2-battle .mb-selection button{min-height:44px;min-width:44px}
+ .mobile-stage .mobile-battle.c2-battle .hand{--card-w:clamp(118px,14vw,164px);--step:56px}
+ .mobile-stage .mobile-battle.c2-battle .hand:is([data-hand-count="1"],[data-hand-count="2"],[data-hand-count="3"]){--card-w:clamp(118px,14vw,164px)}
+ .mobile-stage .mobile-battle.c2-battle .hand-slot{height:min(100%,300px)}
+ .mobile-stage .mobile-battle.c2-battle:has(.boss-phase){grid-template-rows:44px 48px 84px 62px minmax(160px,1fr)}
+ .mobile-stage .mobile-battle.c2-battle .boss-phase{grid-column:1;grid-row:2;margin:0;align-self:stretch;overflow:auto}
+ .mobile-stage .mobile-battle.c2-battle:has(.boss-phase) .mb-arena{grid-row:3/6}
+}
+@media(min-width:701px) and (max-height:540px){
+ body.mobile-stage #app{padding:6px max(6px,env(safe-area-inset-right)) 6px max(6px,env(safe-area-inset-left))}
+ body.mobile-stage .mobile-battle.c2-battle,body.mobile-stage .mobile-battle.c2-battle:has(.boss-phase){grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);grid-template-rows:44px 44px 78px 52px minmax(126px,1fr);gap:4px}
+ .mobile-stage .mobile-battle.c2-battle .mb-selection{height:78px;grid-template-rows:44px minmax(0,1fr)}
+ .mobile-stage .mobile-battle.c2-battle .mb-selection button{min-height:44px;min-width:44px}
+ .mobile-stage .mobile-battle.c2-battle .mb-toolbar,.mobile-stage .mobile-battle.c2-battle .energy-meter.energy-orb{height:52px;min-height:52px}
+ .mobile-stage .mobile-battle.c2-battle .mb-arena{grid-template-rows:minmax(0,1fr) 64px;padding:4px}
+ .mobile-stage .mobile-battle.c2-battle .mb-arena .player-lane,.mobile-stage .mobile-battle.c2-battle .mb-arena .hero-unit,.mobile-stage .mobile-battle.c2-battle .mb-arena .battle-sidebar,.mobile-stage .mobile-battle.c2-battle .mb-arena .forecast{height:64px}
+ .mobile-stage .mobile-battle.c2-battle .compact-hand .hand-slot .card,.mobile-stage .mobile-battle.c2-battle .compact-hand .hand-slot.picked .card{grid-template-rows:22px auto minmax(0,1fr);gap:2px;padding:4px}
+ .mobile-stage .mobile-battle.c2-battle .compact-hand .hand-slot .card .art-stage,.mobile-stage .mobile-battle.c2-battle .compact-hand .hand-slot .card .card-footer{display:none}
+ .mobile-stage .mobile-battle.c2-battle .hand{padding-top:4px;--card-w:118px;--step:48px}
+ .mobile-stage .mobile-battle.c2-battle .mb-hand-bottom{min-height:24px;height:24px;flex-basis:24px}
+}
+.end-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(min-width:1000px) and (min-height:541px){
+ .mobile-stage .mobile-battle.c2-battle .hand-nav:not([hidden]){display:grid}
+}
