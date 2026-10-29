@@ -2,9 +2,9 @@
 
 현실 직업과 판타지 직업을 조합하는 카드 로그라이트입니다. 네 가지 융합 직업으로 아홉 구역을 돌파하고 인사부장 마왕에게 퇴사를 통보하세요.
 
-**[게임 플레이](https://dualjob.aldol.app/)** · 운영 기준선 v0.6.22 · 이 브랜치: v0.6.23 B 패치 후보
+**[게임 플레이](https://dualjob.aldol.app/)** · 운영 기준선 v0.6.23 · 이 브랜치: v0.6.24 C 패치 후보
 
-A 패치는 운영에 반영했습니다. 다음 B 패치의 변경·검증 범위는 [docs/PATCH-B-v0623.md](docs/PATCH-B-v0623.md)에 정리했습니다.
+A·B 패치는 운영에 반영했습니다. C 패치의 연출 속도·행동별 기록·빌드 회고·재도전 개선은 [docs/PATCH-C-v0624.md](docs/PATCH-C-v0624.md)에 정리했습니다. 이 브랜치의 구현은 운영 배포 완료를 뜻하지 않습니다.
 
 ## 실행
 
@@ -53,6 +53,7 @@ node qa/release21-training-check.cjs
 node qa/release21-boundary-check.cjs
 node qa/release22-clarity-check.cjs
 node qa/release23-balance-check.cjs
+node qa/release24-replay-check.cjs
 ```
 
 자동 검사는 JSDOM을 사용하므로 실제 모바일 터치·전체화면·브라우저별 렌더링 검증을 대체하지 않습니다. 자동 실행 GitHub Actions는 설정하지 않았습니다.
