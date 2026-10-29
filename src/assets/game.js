@@ -357,6 +357,8 @@ function sanitizeRun(raw){
   x.deferredBonus=x.deferredBonus===28?28:0;x.floorCopy=cards[x.floorCopy]?x.floorCopy:null;
  x.ingredient=Math.max(0,num(x.ingredient,0));x.reagent=Math.max(0,num(x.reagent,0));
  x.synergies=num(x.synergies,0);x.defeated=num(x.defeated,0);x.overtimes=num(x.overtimes,0);
+ // Older saves counted victories only; do not invent missing enemy totals.
+ x.enemiesDefeated=Number.isSafeInteger(x.enemiesDefeated)&&x.enemiesDefeated>=0?x.enemiesDefeated:null;
  // C1 '전술 선택' 상태 → C2 자동 규칙으로 변환
  const used=x.turnBonusUsed;
  x.dualTurnUsed=typeof x.dualTurnUsed==='boolean'?x.dualTurnUsed:(used==='dual'||used==='overtime'||!!x.synergy);
@@ -401,17 +403,18 @@ const getCost=id=>{const base=costBase(id);if(base===99)return 99;let v=base-(up
 let activeCard=null, activeBonus=0, fxRec=null;
 const rec=o=>{if(fxRec)fxRec.push(o)};
 const preventLethal=()=>{if(state.hp>0)return false;if(hasRelic('severancePackage')&&!state.relicUsed.severancePackage){state.relicUsed.severancePackage=true;state.hp=Math.min(state.maxHp,20);state.block+=12;log('👑 최후의 퇴직금 발동! HP 20 · 방어 12');return true}return false};
+function countDefeat(beforeHp,e){if(beforeHp>0&&e.hp<=0&&Number.isSafeInteger(state.enemiesDefeated))state.enemiesDefeated++;}
 function enterBossPhase(e){
  if(state.nodeType!=='boss'||e.id!=='boss'||e.hp<=0||e.hp>e.maxHp/2||state.bossPhase===2)return;
  state.bossPhase=2;log('🚨 인사부장 2페이즈 · 겸직 적발 심사 개시! 현실·판타지 카드로 소명하자.');
 }
-const damage=x=>{if(!state.enemy)return;const e=state.enemy;const old=e.block||0;const amount=Math.max(0,Math.round(x+activeBonus+trainingDamageBonus(e)+(activeCard&&upgraded(activeCard)?3:0)));const wasCursed=(e.curse||0)>0;const blocked=Math.min(amount,old);e.block=old-blocked;e.hp=Math.max(0,e.hp-(amount-blocked));state.lastHitIndex=state.targetIndex;state.lastHitDamage=amount-blocked;rec({k:'dmg',i:state.targetIndex,raw:amount,dealt:amount-blocked,blocked,kill:e.hp<=0});if(e.hp<=0&&wasCursed&&hasRelic('ravenFeather')&&!state.relicUsed.ravenFeather){state.relicUsed.ravenFeather=true;heal(4)}log('⚔️ '+e.name+'에게 '+(amount-blocked)+' 피해'+(blocked?' (방어 '+blocked+' 흡수)':''));enterBossPhase(e);};
+const damage=x=>{if(!state.enemy)return;const e=state.enemy;const beforeHp=e.hp;const old=e.block||0;const amount=Math.max(0,Math.round(x+activeBonus+trainingDamageBonus(e)+(activeCard&&upgraded(activeCard)?3:0)));const wasCursed=(e.curse||0)>0;const blocked=Math.min(amount,old);e.block=old-blocked;e.hp=Math.max(0,e.hp-(amount-blocked));countDefeat(beforeHp,e);state.lastHitIndex=state.targetIndex;state.lastHitDamage=amount-blocked;rec({k:'dmg',i:state.targetIndex,raw:amount,dealt:amount-blocked,blocked,kill:e.hp<=0});if(e.hp<=0&&wasCursed&&hasRelic('ravenFeather')&&!state.relicUsed.ravenFeather){state.relicUsed.ravenFeather=true;heal(4)}log('⚔️ '+e.name+'에게 '+(amount-blocked)+' 피해'+(blocked?' (방어 '+blocked+' 흡수)':''));enterBossPhase(e);};
 const gainBlock=n=>{const v=n+(activeCard&&upgraded(activeCard)?3:0);state.block+=v;rec({k:'block',n:v});log('🛡️ 방어 '+v+' 획득');};
 const heal=(n,cardEffect=false)=>{if(activeCard&&upgraded(activeCard))n+=2;if(cardEffect&&trainingCard?.furnace)n=Math.max(0,n-2);const gained=Math.max(0,Math.min(n,state.maxHp-state.hp));state.hp+=gained;rec({k:'heal',n,gained});log('💚 체력 '+gained+' 회복');};
-const ingredient=n=>{state.ingredient=Math.min(12,state.ingredient+n);rec({k:'ingredient',n});log('🥕 재료 +'+n);};
-const reagent=n=>{state.reagent=Math.min(12,state.reagent+n);rec({k:'reagent',n});log('🧪 시약 +'+n);};
-const debt=n=>{state.enemy.debt=Math.min(40,(state.enemy.debt||0)+n);rec({k:'debt',i:state.targetIndex,n});log('📋 적 미수금 +'+n);};
-const curse=n=>{state.enemy.curse=Math.min(30,(state.enemy.curse||0)+n);rec({k:'curse',i:state.targetIndex,n});log('🕯️ 적 저주 +'+n);};
+const ingredient=n=>{const before=state.ingredient;state.ingredient=Math.min(12,before+n);n=state.ingredient-before;rec({k:'ingredient',n});log('🥕 재료 +'+n);};
+const reagent=n=>{const before=state.reagent;state.reagent=Math.min(12,before+n);n=state.reagent-before;rec({k:'reagent',n});log('🧪 시약 +'+n);};
+const debt=n=>{const before=state.enemy.debt||0;state.enemy.debt=Math.min(40,before+n);n=state.enemy.debt-before;rec({k:'debt',i:state.targetIndex,n});log('📋 적 미수금 +'+n);};
+const curse=n=>{const before=state.enemy.curse||0;state.enemy.curse=Math.min(30,before+n);n=state.enemy.curse-before;rec({k:'curse',i:state.targetIndex,n});log('🕯️ 적 저주 +'+n);};
 function draw(n){let got=0;for(let i=0;i<n;i++){if(state.hand.length>=10){log('손패는 최대 10장입니다.');break}if(!state.drawPile.length){if(!state.discard.length)break;state.drawPile=shuffle(state.discard);state.discard=[];}state.hand.push(state.drawPile.pop());got++}if(got)rec({k:'draw',n:got})}
 function addTempFatigue(n){for(let i=0;i<n;i++)state.discard.push('fatigue');log('🥱 버린 더미에 임시 피로 카드 +'+n+' (이번 전투만)')}
 function addFatigue(n){for(let i=0;i<n;i++){state.deck.push('fatigue');state.discard.push('fatigue')}log('🥱 덱에 피로 카드 '+n+'장 추가');}
@@ -637,7 +640,7 @@ function endTurn(){
  captureCombatBeat('start',null,'적의 턴');
  for(const e of livingEnemies()){
   const ei=state.enemies.indexOf(e);
-  if(e.curse>0){const d=e.curse*2;e.hp=Math.max(0,e.hp-d);e.curse--;ticks+=d;rec({k:'tick',i:ei,n:d,kill:e.hp<=0});log('🕯️ '+e.name+' 저주 피해 '+d);captureCombatBeat('tick',ei,e.name+' · 저주 피해 '+d)}
+  if(e.curse>0){const d=e.curse*2,beforeHp=e.hp;e.hp=Math.max(0,e.hp-d);countDefeat(beforeHp,e);e.curse--;ticks+=d;rec({k:'tick',i:ei,n:d,kill:e.hp<=0});log('🕯️ '+e.name+' 저주 피해 '+d);captureCombatBeat('tick',ei,e.name+' · 저주 피해 '+d)}
   enterBossPhase(e);if(e.hp<=0)continue;
   const a=enemyAction(e);
   if(e.id==='boss'&&e.intent?.pattern==='hr-verdict'&&state.usedReal&&state.usedFantasy)hrReward=true;
@@ -679,7 +682,7 @@ function newRun(){
  trainingChoice=null;
  state={version:4,contentRevision:21,trainingId:null,trainingTurn:freshTrainingTurn(),workFatigue:0,dualTurnUsed:false,lastDual:null,overtimes:0,tutorial:meta.tutorialDone?null:{step:0},phase:'map',stage:0,real:pickReal,fantasy:pickFantasy,maxHp:72,hp:72,block:0,energy:3,gold:30,
  ingredient:0,reagent:0,deck:[...initialDeck[pickReal],...initialDeck[pickFantasy],pairs[key].sig],drawPile:[],discard:[],hand:[],enemy:null,
- turn:1,usedReal:false,usedFantasy:false,synergy:false,synergies:0,overtimeUsed:false,sigUpgrade:false,defeated:0,logs:[],message:'',rewardOptions:[],rewardFor:0,
+ turn:1,usedReal:false,usedFantasy:false,synergy:false,synergies:0,overtimeUsed:false,sigUpgrade:false,defeated:0,enemiesDefeated:0,logs:[],message:'',rewardOptions:[],rewardFor:0,
  relics:[],upgrades:{},path:[],nodeType:null,relicTurn:{},relicUsed:{},shop:null,eventId:null,eventHistory:[],floorDecisions:{},deferredBonus:0,floorCopy:null,bossPhase:0};
  savedRun=null;save();render();
 }
@@ -744,7 +747,8 @@ function previewCard(id,{target,base=false,forceUp=null}={}){
  }
  c.hp=Math.max(1,Math.min(c.hp,c.maxHp-30));c.energy=99;c.logs=[];
  if(forceUp!==null){c.upgrades={...(c.upgrades||{}),[id]:!!forceUp}}
- c.hand=[id,...c.hand.slice(0,8)];
+ // Replace one hand slot instead of shrinking a full hand during preview.
+ c.hand=[id,...c.hand.slice(0,Math.max(0,c.hand.length-1))];
  const hp0=c.hp;let out=null;
  state=c;fxRec=[];
  try{
@@ -830,7 +834,11 @@ function safeInsets(){
  const probe=document.createElement('div');probe.style.cssText='position:fixed;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
  document.body.appendChild(probe);const css=getComputedStyle(probe),n=(parseFloat(css.paddingTop)||0)+(parseFloat(css.paddingBottom)||0);probe.remove();return n;
 }
-function mobileBattleFits(){return window.innerWidth>=320&&window.innerWidth<=700&&!readableBattle&&(window.visualViewport?.scale||1)<=1.25&&(window.visualViewport?.height||window.innerHeight)-safeInsets()>=640}
+function mobileBattleFits(){
+ const w=window.innerWidth,h=(window.visualViewport?.height||window.innerHeight)-safeInsets();
+ const portraitMin=state?.nodeType==='boss'?810:740;
+ return !readableBattle&&(window.visualViewport?.scale||1)<=1.25&&((w>=320&&w<=700&&h>=portraitMin)||(w>=701&&h>=390));
+}
 function syncBattleViewport(){
  const height=window.visualViewport?.height||window.innerHeight;
  document.documentElement.style.setProperty('--game-height',height+'px');
@@ -933,11 +941,11 @@ function mobileSelectionOutcome(){
 function mobileSelectionMarkup(){
  if(!selectedCard){
   const available=battleAvailability();
-  const heading=available.endReady?'사용할 카드가 없어요':available.canOvertime?'에너지 부족 · 초과근무 가능':'카드 선택 → 대상 탭';
+  const heading=available.endReady?'사용할 카드가 없어요':available.canOvertime?'에너지 부족 · 초과근무 가능':'① 카드 선택 → ② 대상 탭';
   const message=available.endReady?'턴 종료를 누르면 새 손패와 에너지를 받아요.':available.canOvertime?'초과근무: 에너지 +1 · 피로도 +2':/^🚪 \d+명의 적 등장!/.test(state.message||'')||/체력 0 회복/.test(state.message||'')?'적의 행동을 확인하고 카드를 골라 주세요.':state.message||'적의 행동을 확인하고 카드를 골라 주세요.';
   return `<section class="quick-preview mb-selection idle"><div class="mb-selection-heading"><b>${heading}</b>${state.tutorial?'<button data-act="mobileTutorial">도움말</button>':''}</div><p class="mb-outcome" role="status">${esc(message)}</p></section>`;
  }
- const c=cards[selectedCard.id],reason=selectionReason(),p=selectionProjection,self=targetMode(selectedCard.id)==='self',hint=reason?'사용 불가':self?'나에게':'적에게';
+ const c=cards[selectedCard.id],reason=selectionReason(),p=selectionProjection,self=targetMode(selectedCard.id)==='self',hint=reason?'사용 불가':self?'② 내 캐릭터 또는 사용':'② 사용할 적을 탭';
  return `<section class="quick-preview mb-selection ${reason?'unavailable':''}" aria-label="선택한 카드와 실제 예상 결과"><div class="mb-selection-heading"><span class="mb-selection-title"><b>${esc(c.name)}</b><small>${hint}${p?.dual&&!reason?' · ✦ 겸직 포함':''}</small></span><button data-act="selectedDetails">상세</button>${self&&!reason?'<button class="primary" data-act="useSelected">사용</button>':''}<button data-act="cancelSelection" aria-label="선택 취소">✕</button></div><p class="mb-outcome" role="status" tabindex="0" aria-label="예상 결과">${esc(mobileSelectionOutcome())}</p></section>`;
 }
 
@@ -952,7 +960,7 @@ function renderMobileBattle(){
  </main>`;
 }
 
-function header(){return `<header class="mast"><div><div class="mini">THE SECOND SHIFT · ROGUELITE</div><div class="brand">겸직<b>금지!</b> <span class="ver-tag">v0.6.21</span></div></div><div class="mast-buttons"><button class="btn small" data-act="battleMenu" aria-label="화면 설정 및 게임 메뉴">☰</button><button class="btn small" data-act="guide" aria-label="규칙 안내">❔ 규칙</button>${state?`<button class="btn small" data-act="deck" aria-label="내 덱 보기">🗂️ 덱 ${state.deck.length}</button><button class="btn small danger" data-act="restartPrompt" aria-label="도전 재시작">↻</button>`:''}</div></header>`}
+function header(){return `<header class="mast"><div><div class="mini">THE SECOND SHIFT · ROGUELITE</div><div class="brand">겸직<b>금지!</b> <span class="ver-tag">v0.6.22</span></div></div><div class="mast-buttons"><button class="btn small" data-act="battleMenu" aria-label="화면 설정 및 게임 메뉴">☰</button><button class="btn small" data-act="guide" aria-label="규칙 안내">❔ 규칙</button>${state?`<button class="btn small" data-act="deck" aria-label="내 덱 보기">🗂️ 덱 ${state.deck.length}</button><button class="btn small danger" data-act="restartPrompt" aria-label="도전 재시작">↻</button>`:''}</div></header>`}
 // v0.6.15: selection belongs to the current screen, never to the saved run.
 let journeyReward=null,journeyRoute=null;
 let journeyDockObserver=null;
@@ -978,7 +986,7 @@ function validJourneyReward(){return journeyReward&&state?.phase==='reward'&&jou
 function renderReward(){
  if(!validJourneyReward())journeyReward=null;
  const id=journeyReward?.id,c=cards[id];
- const detail=c?`<div class="reward-copy" aria-live="polite"><h2>${esc(c.name)}</h2><p>${esc(c.desc)}</p><small>내 덱에 ${state.deck.filter(x=>x===id).length}장 보유 · 획득 후 ${state.deck.length+1}장</small><button class="reward-more" data-act="inspectReward" data-index="${journeyReward.index}">카드 상세 보기 ›</button></div>`:'<div class="reward-copy reward-empty"><p>카드를 선택하면 효과와 획득 버튼이 표시됩니다.</p></div>';
+ const detail=c?`<div class="reward-copy" aria-live="polite"><h2>${esc(c.name)}</h2><p>${esc(cardRules(id))}</p><small>내 덱에 ${state.deck.filter(x=>x===id).length}장 보유 · 획득 후 ${state.deck.length+1}장</small><button class="reward-more" data-act="inspectReward" data-index="${journeyReward.index}">카드 상세 보기 ›</button></div>`:'<div class="reward-copy reward-empty"><p>카드를 선택하면 효과와 획득 버튼이 표시됩니다.</p></div>';
  return `<main class="flow-screen reward-flow">${flowHeader()}<section class="journey-panel"><div class="flow-kicker">${rooms[state.stage].label} 완료 · 다음: ${rooms[state.stage+1]?.label||'퇴근'}</div><h1>업무 해결!</h1><p class="flow-lead">카드 1장 또는 급여 8G를 선택하세요.</p>${pstats()}<div class="reward-grid journey-rewards">${state.rewardOptions.map((card,i)=>renderCard(card,{reward:true,index:i}).replace('data-act="inspectReward"','data-act="selectJourneyReward" aria-pressed="'+(journeyReward?.index===i)+'"').replace('class="card ','class="card '+(journeyReward?.index===i?'reward-picked ':'')).replace('⊕ 상세',journeyReward?.index===i?'✓ 선택됨':'선택')).join('')}</div>${detail}</section><footer class="journey-dock reward-dock"><button class="btn calm" data-act="reward" data-index="-1">건너뛰고 +8G</button><button class="btn primary" data-act="takeJourneyReward" ${c?'':'disabled'}>${c?esc(c.name)+' 획득':'카드를 선택하세요'}</button></footer></main>`;
 }
 function validJourneyRoute(){return journeyRoute&&state?.phase==='map'&&journeyRoute.run===state&&journeyRoute.stage===state.stage&&mapRows[state.stage]?.[journeyRoute.index]===journeyRoute.type}
@@ -1145,7 +1153,7 @@ function paintCombatFrame(){
  root.classList.add('combat-playing');root.dataset.combatKind=beat.kind;root.setAttribute('aria-busy','true');
  root.querySelectorAll('button').forEach(b=>b.disabled=true);
  const strip=root.querySelector('.quick-preview');
- if(strip){strip.classList.add('combat-status');strip.innerHTML=`<div class="combat-status-copy" role="status"><b>${esc(beat.label)}</b><small>${beat.kind==='dual'?esc(beat.state.lastDual?.text||''):session.kind==='turn'?'적 행동을 순서대로 확인하고 있어요.':(beat.state.usedReal?'✓':'○')+' 현실 · '+(beat.state.usedFantasy?'✓':'○')+' 판타지'}</small></div><button type="button" data-act="skipCombat" aria-label="전투 연출 건너뛰기">건너뛰기</button>`}
+ if(strip){strip.classList.add('combat-status');strip.innerHTML=`<div class="combat-status-copy" role="status"><b>${esc(beat.label)} · 연출 중</b><small>${beat.kind==='dual'?esc(beat.state.lastDual?.text||''):session.kind==='turn'?'적 행동을 순서대로 확인하고 있어요.':(beat.state.usedReal?'✓':'○')+' 현실 · '+(beat.state.usedFantasy?'✓':'○')+' 판타지'}</small></div><button type="button" data-act="skipCombat" aria-label="전투 연출 건너뛰기">건너뛰기</button>`}
  if(session.kind==='turn'&&beat.kind!=='turnStart'){
   const forecast=root.querySelector('.forecast');
   if(forecast){const remaining=session.beats.flatMap(b=>b.records||[]).filter(r=>r.k==='hit').reduce((sum,r)=>sum+r.dealt,0);forecast.innerHTML='<small>남은 적 행동 피해</small><b>'+ (remaining?'−'+remaining+' HP':'피해 없음')+'</b>';forecast.setAttribute('aria-label','남은 적 행동 피해 '+remaining)}
@@ -1221,7 +1229,7 @@ function cardDetailMarkup(){if(!inspected||!state)return '<p>카드 정보가 �
  const tags=termsFor(id),up=upgraded(id),udiff=id==='fatigue'?[]:upgradeDiff(id);
  const outcome=dynamicOutcome(id);
  return `<div class="inspect-shell"><div>${renderCard(id,{preview:true})}</div><div class="inspect-right"><div class="inspect-role">${toneName[c.family]} · ${targetMode(id)==='self'?'🛡 나에게 사용':'⚔ 적에게 사용'} · ⚡ ${cost===99?'—':cost}</div><h2>${esc(c.name)}${up?' <span class="up-mark">✦ 강화됨</span>':''}</h2>
- <div class="inspect-effect"><b>📜 기본 효과</b><div>${esc(c.desc)}</div></div>
+ <div class="inspect-effect"><b>📜 카드 규칙 · 강화 반영</b><div>${esc(cardRules(id))}</div></div>
  ${id==='fatigue'?'':`<div class="inspect-upgrade ${up?'on':''}"><b>✦ 강화 효과 ${up?'· 적용 중 (강화 전 → 현재)':udiff.length?'· 휴식/이벤트에서 강화하면':'· 강화 불가'}</b><ul>${upgradeDiffMarkup(id)}</ul></div>`}
  ${outcome?`<div class="inspect-outcome">📈 ${outcome}</div>`:''}
  ${tags.length?`<div class="term-list"><b class="term-head">📖 용어</b>${tags.map(k=>`<div class="keyword-term"><strong>${statIcon(k,TERMS[k].icon)} ${TERMS[k].name}</strong><span>${esc(TERMS[k].desc)}</span></div>`).join('')}</div>`:''}
@@ -1424,20 +1432,40 @@ function cardNumbers(id,{forceUp=null,live=true}={}){
  if(!inBattle)return {...b,live:false};
  const l=previewCard(id,{forceUp});if(!l)return {...b,live:false};
  const t=state.targetIndex;
- return {...l,draw:b.draw,live:true,target:t};
+ return {...l,live:true,target:t};
 }
 function faceValue(kind,n){
  switch(kind){case 'attack':return n.attack;case 'block':return n.block;case 'heal':return n.heal;case 'draw':return '+'+n.draw;case 'energy':return '+'+n.energy;
   case 'hpLoss':return '−'+n.hpLoss;case 'debt':return '+'+n.debt;case 'curse':return '+'+n.curse;case 'ingredient':return '+'+n.ingredient;case 'reagent':return '+'+n.reagent;default:return null}
 }
 function faceStatsMarkup(id,opt={}){
- const rows=FACE_STATS[id]||[];const n=id==='fatigue'?null:cardNumbers(id,opt);
- return `<div class="face-stats" aria-label="기본 효과 미리보기">${rows.map(([kind,v])=>{
+ const rows=FACE_STATS[id]||[];const n=id==='fatigue'?null:opt.numbers||cardNumbers(id,opt);
+ return `<div class="face-stats" aria-label="${n?.live?'현재 대상 기준 효과 · 공격은 방어 적용 전':'카드 자체 효과 · 강화 반영'}">${rows.filter(([kind])=>!n?.live||!kind.startsWith('scale')).map(([kind,v])=>{
   const [icon,label,cls]=FACE_TOKENS[kind];let amount=v;
   if(n){const x=faceValue(kind,n);if(x!==null&&x!==undefined)amount=x;}
   const liveMark=n&&n.live&&kind==='attack'?' live':'';
   return `<span class="face-chip ${cls}${liveMark}" title="${label}: ${esc(amount)}" aria-label="${label} ${esc(amount)}">${statIcon(kind,icon)} <span class="face-label">${label}</span> <span class="face-amount">${esc(amount)}</span></span>`;
  }).join('')}</div>`;
+}
+// The formula is explicitly separate from live totals. Upgrade each effect,
+// including both defense grants on riskHedge; never replace resource multipliers.
+function cardRules(id,{forceUp=null}={}){
+ const c=cards[id];if(!c)return '';
+ const up=forceUp===null?upgraded(id):forceUp,sig=id===pair().sig&&state?.sigUpgrade;
+ let text=c.desc;
+ if(up||sig)text=text.replace(/피해 (\d+)/g,(_,n)=>'피해 '+(+n+(up?3:0)+(sig?4:0)));
+ if(up){
+  text=text.replace(/방어 (\+?)(\d+)/g,(_,sign,n)=>'방어 '+sign+(+n+3));
+  text=text.replace(/체력 (\d+)([^.]*회복)/g,(_,n,tail)=>'체력 '+(+n+2)+tail);
+  if(utilityDrawCards.has(id))text+=' 강화: 카드 1장 추가 뽑기.';
+ }
+ return text;
+}
+function cardEffectText(id,n=cardNumbers(id)){
+ if(!n)return cardRules(id);
+ const rows=(FACE_STATS[id]||[]).filter(([kind])=>faceValue(kind,n)!==null);
+ const values=rows.map(([kind])=>FACE_TOKENS[kind][1]+' '+faceValue(kind,n)+(kind==='heal'?' (최대 체력까지)':'')).join(' · ');
+ return (n.live?'현재 대상 기준 · 공격은 방어 적용 전: ':'강화 반영 · 자원 없는 상태: ')+values;
 }
 // 강화 전후 비교(카드 자체 수치 기준). 변화가 없으면 빈 배열 → 강화 대상에서 제외.
 function upgradeDiff(id){
@@ -1475,11 +1503,12 @@ function resourceTextMarkup(text){
 function renderCard(id,opt={}){const c=cards[id]||cards.fatigue;const inHand=Number.isInteger(opt.index)&&!opt.reward&&!opt.preview;const inBattle=state&&state.phase==='battle';const cost=getCost(id);const canUse=inBattle&&id!=='fatigue'&&state.energy>=cost;const locked=inHand&&!canUse;const family={real:'현실',fantasy:'판타지',fusion:'융합',neutral:'공용'}[c.family];
  const dualHint=inHand&&canUse&&!state.dualTurnUsed&&((c.family==='real'&&state.usedFantasy&&!state.usedReal)||(c.family==='fantasy'&&state.usedReal&&!state.usedFantasy));
  const act=opt.preview?'':inHand?`data-act="selectCard" data-index="${opt.index}" data-id="${id}"`:opt.reward?`data-act="inspectReward" data-index="${opt.index}" data-id="${id}"`:'';
+ const numbers=id==='fatigue'?null:cardNumbers(id);
  const lockText=id==='fatigue'?'사용 불가':'⚡ '+(cost-state.energy)+' 부족';
- return `<button type="button" class="card ${c.family} ${inHand&&selectedCard?.index===opt.index?'selected-card':''} ${locked?'locked':inHand?'playable':''} ${dualHint?'dual-hint':''} ${opt.preview?'preview':''} ${inHand&&opt.index>=dealFrom?'deal':''}" ${act} style="--slot:${inHand?Math.max(0,opt.index-dealFrom):0}" ${opt.preview?'tabindex="-1" aria-hidden="true"':inHand?'aria-pressed="'+(selectedCard?.index===opt.index)+'"':''} aria-label="${esc(c.name)}, 비용 ${cost===99?'없음':cost}, ${family}. ${esc(c.desc)}${locked?'. '+lockText:''}${dualHint?'. 사용하면 겸직 발동':''}. ${inHand?'탭해서 선택, 대상 탭으로 사용':'상세 보기'}"><div class="top"><span class="cost ${inHand&&locked&&id!=='fatigue'?'short':''}">${cost===99?'×':cost}</span><span class="family">${family}</span></div>${dualHint?'<span class="dual-tag">✦ 겸직</span>':''}${locked?`<span class="lock-ribbon">${lockText}</span>`:''}${cardArtMarkup(id)}<div class="card-name"><span class="inline-card-icon" aria-hidden="true">${c.icon} </span>${esc(c.name)}${upgraded(id)||(id===pair().sig&&state.sigUpgrade)?' ✦':''}</div>${faceStatsMarkup(id)}<div class="card-desc">${esc(c.desc)}</div><div class="card-footer"><span>${id==='fatigue'?'—':targetMode(id)==='self'?statIcon('block')+' 나에게':statIcon('attack')+' 적에게'}</span><span class="view-indicator">${opt.preview?'':inHand?(selectedCard?.index===opt.index?'✓ 선택됨':locked?'효과 확인':'사용 가능'):'⊕ 상세'}</span></div></button>`}
+ return `<button type="button" class="card ${c.family} ${inHand&&selectedCard?.index===opt.index?'selected-card':''} ${locked?'locked':inHand?'playable':''} ${dualHint?'dual-hint':''} ${opt.preview?'preview':''} ${inHand&&opt.index>=dealFrom?'deal':''}" ${act} style="--slot:${inHand?Math.max(0,opt.index-dealFrom):0}" ${opt.preview?'tabindex="-1" aria-hidden="true"':inHand?'aria-pressed="'+(selectedCard?.index===opt.index)+'"':''} aria-label="${esc(c.name)}, 비용 ${cost===99?'없음':cost}, ${family}. ${esc(cardEffectText(id,numbers))}. 카드 규칙: ${esc(cardRules(id))}${locked?'. '+lockText:''}${dualHint?'. 사용하면 겸직 발동':''}. ${inHand?'탭해서 선택, 대상 탭으로 사용':'상세 보기'}"><div class="top"><span class="cost ${inHand&&locked&&id!=='fatigue'?'short':''}">${cost===99?'×':cost}</span><span class="family">${family}</span></div>${dualHint?'<span class="dual-tag">✦ 겸직</span>':''}${locked?`<span class="lock-ribbon">${lockText}</span>`:''}${cardArtMarkup(id)}<div class="card-name"><span class="inline-card-icon" aria-hidden="true">${c.icon} </span>${esc(c.name)}${upgraded(id)||(id===pair().sig&&state.sigUpgrade)?' ✦':''}</div>${faceStatsMarkup(id,{numbers})}<div class="card-desc">${esc(cardRules(id))}</div><div class="card-footer"><span>${id==='fatigue'?'—':targetMode(id)==='self'?statIcon('block')+' 나에게':statIcon('attack')+' 적에게'}</span><span class="view-indicator">${opt.preview?'':inHand?(selectedCard?.index===opt.index?'✓ 선택됨':locked?'효과 확인':'사용 가능'):'⊕ 상세'}</span></div></button>`}
 function relicTile(id,buttonAttrs='',priceLabel=''){const r=relics[id];return `<button class="relic-tile rarity-${r.rarity}" ${buttonAttrs}><span class="relic-symbol">${relicArtMarkup(id)}</span><span class="relic-title">${r.name}</span><span class="relic-rarity">${r.rarity}</span><span class="relic-description">${esc(r.desc)}</span>${priceLabel?`<span class="relic-cost">${esc(priceLabel)}</span>`:''}</button>`}
 function renderRelicReward(){return `${header()}${stageStrip()}<section class="panel big-event"><div class="eyebrow">ELITE CLEAR · 유물 선택</div><h1>💎 정예 전리품</h1><p class="description">세 가지 유물을 눌러 효과를 확인한 뒤 확정해. 유물은 도전 종료까지 지속돼.</p>${pstats()}<div class="relic-grid">${state.rewardOptions.map((id,i)=>relicTile(id,`data-act="previewRewardRelic" data-index="${i}"`)).join('')||'<p>모든 유물을 모았어!</p>'}</div><div class="action-foot"><button class="btn calm" data-act="pickRelic" data-index="-1">유물 대신 15G</button></div></section>`}
-function renderShop(){const x=state.shop||{cards:[],relics:[],cardBought:{},relicBought:{},removed:0};return `${header()}${stageStrip()}<section class="panel big-event"><div class="eyebrow">MARKET · 사내 복지몰</div><h1>🛒 이세계 야시장</h1><p class="description">상품이나 카드를 누르면 상세 정보를 먼저 확인해. <b>팝업에서 구매·삭제를 확정하기 전까지는 아무것도 바뀌지 않아.</b></p>${pstats()}<h2 class="sub-title">🎴 카드 판매</h2><div class="shop-grid">${x.cards.map((id,i)=>`<button class="shop-item" data-act="previewShopCard" data-index="${i}" ${x.cardBought[i]?'disabled':''}><span class="shop-icon">${cardThumbMarkup(id)}</span><strong>${cards[id].name}</strong><small>${cards[id].desc}</small><b>${x.cardBought[i]?'구매 완료':cardPrice(id)+'G · 상세 보기'}</b></button>`).join('')}</div><h2 class="sub-title">💎 유물 판매</h2><div class="relic-grid">${x.relics.map((id,i)=>relicTile(id,`data-act="previewShopRelic" data-index="${i}" ${x.relicBought[i]?'disabled':''}`,x.relicBought[i]?'구매 완료':(validWelfare(state)&&i===0?'복지 추천 · ':'')+shopRelicPrice(i)+'G · 상세 보기')).join('')||'<p>남은 유물이 없어.</p>'}</div><h2 class="sub-title">🧹 덱 정리 <span class="sub-note">${30+x.removed*15}G · 카드 한 장만 제거</span></h2><p class="safe-removal-hint">⚠️ 카드 선택 → 상세 확인 → 삭제 확정의 2단계로 진행돼. 상점을 나가기 전에는 방금 삭제한 카드를 복원할 수 있어.</p>${x.lastRemoval?`<div class="undo-line"><span>🧹 방금 제거: <b>${cards[x.lastRemoval.id]?.name||"카드"}</b> · ${x.lastRemoval.price}G</span><button class="btn small calm" data-act="undoRemove">↩ 삭제 취소 · 골드 환불</button></div>`:""}<div class="removal-list">${state.deck.map((id,i)=>`<button data-act="previewRemove" data-index="${i}" ${state.deck.length<=5?'disabled':''}>${cards[id].icon} ${cards[id].name} <b>상세·제거</b></button>`).join('')}</div><div class="action-foot"><button class="btn primary" data-act="leaveNode">↪ 상점 나가기</button></div></section>`}
+function renderShop(){const x=state.shop||{cards:[],relics:[],cardBought:{},relicBought:{},removed:0};return `${header()}${stageStrip()}<section class="panel big-event"><div class="eyebrow">MARKET · 사내 복지몰</div><h1>🛒 이세계 야시장</h1><p class="description">상품이나 카드를 누르면 상세 정보를 먼저 확인해. <b>팝업에서 구매·삭제를 확정하기 전까지는 아무것도 바뀌지 않아.</b></p>${pstats()}<h2 class="sub-title">🎴 카드 판매</h2><div class="shop-grid">${x.cards.map((id,i)=>`<button class="shop-item" data-act="previewShopCard" data-index="${i}" ${x.cardBought[i]?'disabled':''}><span class="shop-icon">${cardThumbMarkup(id)}</span><strong>${cards[id].name}</strong><small>${esc(cardRules(id))}</small><b>${x.cardBought[i]?'구매 완료':cardPrice(id)+'G · 상세 보기'}</b></button>`).join('')}</div><h2 class="sub-title">💎 유물 판매</h2><div class="relic-grid">${x.relics.map((id,i)=>relicTile(id,`data-act="previewShopRelic" data-index="${i}" ${x.relicBought[i]?'disabled':''}`,x.relicBought[i]?'구매 완료':(validWelfare(state)&&i===0?'복지 추천 · ':'')+shopRelicPrice(i)+'G · 상세 보기')).join('')||'<p>남은 유물이 없어.</p>'}</div><h2 class="sub-title">🧹 덱 정리 <span class="sub-note">${30+x.removed*15}G · 카드 한 장만 제거</span></h2><p class="safe-removal-hint">⚠️ 카드 선택 → 상세 확인 → 삭제 확정의 2단계로 진행돼. 상점을 나가기 전에는 방금 삭제한 카드를 복원할 수 있어.</p>${x.lastRemoval?`<div class="undo-line"><span>🧹 방금 제거: <b>${cards[x.lastRemoval.id]?.name||"카드"}</b> · ${x.lastRemoval.price}G</span><button class="btn small calm" data-act="undoRemove">↩ 삭제 취소 · 골드 환불</button></div>`:""}<div class="removal-list">${state.deck.map((id,i)=>`<button data-act="previewRemove" data-index="${i}" ${state.deck.length<=5?'disabled':''}>${cards[id].icon} ${cards[id].name} <b>상세·제거</b></button>`).join('')}</div><div class="action-foot"><button class="btn primary" data-act="leaveNode">↪ 상점 나가기</button></div></section>`}
 function renderRest(){return `${header()}${stageStrip()}<section class="panel big-event"><div class="eyebrow">REST SITE · 전투 준비</div><h1>🏕️ 작은 휴게실</h1><p class="description">회복·피로 관리·카드 강화 중 한 가지만 선택할 수 있어. <b>카드 강화는 이름이 같은 모든 사본에 적용</b>돼.</p>${pstats()}<div class="rest-choice"><button class="choice rest-heal" data-act="previewHeal"><span class="symbol">💚</span><strong>따뜻한 휴식</strong><span>체력 24 회복 (최대 체력까지)</span></button><button class="choice rest-heal" data-act="previewRecover" ${state.workFatigue<=0?'disabled':''}><span class="symbol">🌿</span><strong>피로 회복</strong><span>지속 피로 -3 · 현재 ${state.workFatigue}/6</span></button></div><h2 class="sub-title">✨ 카드 강화 (1종 선택)</h2><p class="footnote">강화할 카드를 누르면 강화 전과 강화 후를 비교할 수 있어.</p><div class="removal-list">${availableUpgrades().map(id=>`<button data-act="previewUpgrade" data-id="${id}">${cards[id].icon} ${cards[id].name} <b>비교 보기 ✦</b></button>`).join('')||'<div class="footnote">강화 가능한 카드가 없어. 체력을 회복하자.</div>'}</div></section>`}
 const eventCatalog=[
  {icon:'📋',title:'마왕성 긴급 채용',desc:'작은 글씨로 「퇴근 불가」가 적힌 계약서.',options:[['정규직 지원','최대 체력 +10 · 피로 카드 2장'],['계약직 지원','급여 +80G · HP -6 (최소 1)'],['면접 거절','아무 변화 없음']]},
@@ -1514,7 +1543,7 @@ function eventAllowed(id,i){
  return true;
 }
 function renderEvent(){const event=eventCatalog[state.eventId??0]||eventCatalog[0];return `${header()}${stageStrip()}<section class="panel big-event"><div class="eyebrow">EVENT · RANDOM ENCOUNTER · ${eventCatalog.length}종</div><div class="event-icon">${event.icon}</div><h1>${event.title}</h1><p class="description">${event.desc}</p>${pstats()}<div class="choice-grid">${event.options.map(([title,desc],i)=>`<button class="choice" data-act="previewEvent" data-index="${i}" ${!eventAllowed(state.eventId??0,i)?'disabled':''}><span class="symbol">${['✨','🎲','↪'][i]}</span><strong>${title}</strong><span>${desc}</span></button>`).join('')}</div><p class="footnote">🎭 선택지를 누르면 결과와 비용을 확인한 뒤 확정할 수 있어. 방문한 이벤트는 가능한 한 반복되지 않아.</p></section>`}
-function renderEnd(){const won=state.phase==='victory';return `${header()}<section class="panel end-screen"><div class="eyebrow">${won?'RUN COMPLETE':'GAME OVER'} · ${won?'SUCCESSFUL RESIGNATION':'OVERTIME NEVER ENDS'}</div><div class="end-icon">${won?'🎓':'🥀'}</div><h1>${won?'마왕에게 사표를 던졌다!':'다음 출근을 준비하자'}</h1><p class="description" style="color:#cfc3dc;line-height:1.8">${won?'인사부장이 무너지고 이세계 최초의 정시 퇴근이 실현됐다. 하지만 채용 공고는 다시 올라온다.':'이번 계약은 여기까지야. 직업 조합은 도감에 기록됐으니, 다음에는 더 강력한 콤보로 도전하자.'}</p><div class="pill gold" style="font-size:16px;padding:9px 16px">${pair().icon} ${pair().name}</div><div class="end-stats"><div><strong>${state.defeated||0}</strong><small>처치한 적</small></div><div><strong>${state.synergies||0}</strong><small>겸직 발동</small></div><div><strong>${state.gold}G</strong><small>획득한 골드 보유량</small></div></div><button class="btn primary wide" data-act="restart">🔁 새로운 직업으로 재도전</button><p class="small-print">🎴 발견 조합 ${meta.combos.length}/4 · 누적 승리 ${meta.wins||0}회 · 이 게임은 로컬 프로토타입으로 네트워크/결제 기능이 없어.</p></section>`}
+function renderEnd(){const won=state.phase==='victory';return `${header()}<section class="panel end-screen"><div class="eyebrow">${won?'RUN COMPLETE':'GAME OVER'} · ${won?'SUCCESSFUL RESIGNATION':'OVERTIME NEVER ENDS'}</div><div class="end-icon">${won?'🎓':'🥀'}</div><h1>${won?'마왕에게 사표를 던졌다!':'다음 출근을 준비하자'}</h1><p class="description" style="color:#cfc3dc;line-height:1.8">${won?'인사부장이 무너지고 이세계 최초의 정시 퇴근이 실현됐다. 하지만 채용 공고는 다시 올라온다.':'이번 계약은 여기까지야. 직업 조합은 도감에 기록됐으니, 다음에는 더 강력한 콤보로 도전하자.'}</p><div class="pill gold" style="font-size:16px;padding:9px 16px">${pair().icon} ${pair().name}</div><div class="end-stats"><div><strong>${state.defeated||0}</strong><small>승리한 전투</small></div><div><strong>${state.enemiesDefeated??'—'}</strong><small>처치한 적${state.enemiesDefeated==null?' · 이전 저장 미집계':''}</small></div><div><strong>${state.synergies||0}</strong><small>겸직 발동</small></div><div><strong>${state.gold}G</strong><small>최종 보유 골드</small></div></div><button class="btn primary wide" data-act="restart">🔁 새로운 직업으로 재도전</button><p class="small-print">🎴 발견 조합 ${meta.combos.length}/4 · 누적 승리 ${meta.wins||0}회 · 이 게임은 로컬 프로토타입으로 네트워크/결제 기능이 없어.</p></section>`}
 const utilityDrawCards=new Set(['receipt','taste','extract','catalyst','pantry','closeBooks','darkBargain','hustle','soul']);
 const upgradedDamageCards=new Set(['audit','collect','chop','flambe','curse','drain','night','blast','hellTax','goldAudit','infernalMenu','grandFeast','strike','surpriseAudit','spiceStorm','eclipse','flashFlask','chainReaction']);
 const upgradedBlockCards=new Set(['ledger','balance','broth','lunch','veil','transmute','goldAudit','guard','riskHedge','distill']);
@@ -1553,13 +1582,13 @@ function executeTransaction(){if(modal!=='transaction'||!pendingAction||!state)r
 function detailsForTransaction(){const a=pendingAction;if(!a)return '<p>선택 정보가 없어.</p>';const c=cards[a.id],r=relics[a.id];
  if(a.kind==='shopCard'||a.kind==='remove'){
  const buying=a.kind==='shopCard',copies=state.deck.filter(id=>id===a.id).length;const pay=state.gold>=a.price;
- return `<div class="transaction-head"><span class="txn-icon">${cardThumbMarkup(a.id)}</span><div><div class="eyebrow">${buying?'카드 구매 미리보기':'카드 제거 미리보기'}</div><h2>${esc(c.name)}</h2><p>${toneName[c.family]} · 비용 ${c.cost}⚡</p></div></div><div class="txn-description"><strong>📜 카드 효과</strong><p>${esc(c.desc)}${upgraded(a.id)?' · 현재 강화 적용':''}</p></div>${!buying?`<div class="warning-note">⚠️ <b>이 카드 사본 1장만 덱에서 영구 제거</b>해. 같은 이름 ${copies}장 보유 중이며 제거 후 ${copies-1}장이 남아. 상점에서 나가기 전에는 삭제 취소가 가능해.</div>`:`<div class="info-note">구매하면 <b>${esc(c.name)} 1장</b>이 덱에 추가돼. 현재 덱 ${state.deck.length} → ${state.deck.length+1}장</div>`}<div class="transaction-balance"><span>현재 잔액 <b>${state.gold}G</b></span><span>비용 <b>−${a.price}G</b></span><span>남는 잔액 <b>${pay?state.gold-a.price+'G':'잔액 부족'}</b></span></div><div class="txn-actions"><button class="btn calm" data-act="closeModal">취소</button><button class="btn ${buying?'primary':'danger'}" data-act="confirmPending" ${!pay?'disabled':''}>${buying?'🎴 구매 확정':'🗑️ 삭제 확정'} · ${a.price}G</button></div>`;
+ return `<div class="transaction-head"><span class="txn-icon">${cardThumbMarkup(a.id)}</span><div><div class="eyebrow">${buying?'카드 구매 미리보기':'카드 제거 미리보기'}</div><h2>${esc(c.name)}</h2><p>${toneName[c.family]} · 비용 ${getCost(a.id)}⚡</p></div></div><div class="txn-description"><strong>📜 카드 효과</strong><p>${esc(cardRules(a.id))}${upgraded(a.id)?' · 현재 강화 적용':''}</p></div>${!buying?`<div class="warning-note">⚠️ <b>이 카드 사본 1장만 덱에서 영구 제거</b>해. 같은 이름 ${copies}장 보유 중이며 제거 후 ${copies-1}장이 남아. 상점에서 나가기 전에는 삭제 취소가 가능해.</div>`:`<div class="info-note">구매하면 <b>${esc(c.name)} 1장</b>이 덱에 추가돼. 현재 덱 ${state.deck.length} → ${state.deck.length+1}장</div>`}<div class="transaction-balance"><span>현재 잔액 <b>${state.gold}G</b></span><span>비용 <b>−${a.price}G</b></span><span>남는 잔액 <b>${pay?state.gold-a.price+'G':'잔액 부족'}</b></span></div><div class="txn-actions"><button class="btn calm" data-act="closeModal">취소</button><button class="btn ${buying?'primary':'danger'}" data-act="confirmPending" ${!pay?'disabled':''}>${buying?'🎴 구매 확정':'🗑️ 삭제 확정'} · ${a.price}G</button></div>`;
  }
  if(a.kind==='rewardRelic'){return `<div class="transaction-head"><span class="txn-icon">${relicArtMarkup(a.id)}</span><div><div class="eyebrow">정예 전투 보상 · ${r.rarity}</div><h2>${esc(r.name)}</h2></div></div><div class="txn-description"><strong>💎 지속 효과</strong><p>${esc(r.desc)}</p></div><div class="info-note">한 가지 유물만 고를 수 있어. 확정하면 이번 도전에 적용되고 다음 갈림길로 이동해.</div><div class="txn-actions"><button class="btn calm" data-act="closeModal">다른 유물 보기</button><button class="btn primary" data-act="confirmPending">💎 유물 선택 확정</button></div>`}
  if(a.kind==='shopRelic'){const pay=state.gold>=a.price;return `<div class="transaction-head"><span class="txn-icon">${relicArtMarkup(a.id)}</span><div><div class="eyebrow">유물 구매 미리보기 · ${r.rarity}</div><h2>${esc(r.name)}</h2></div></div><div class="txn-description"><strong>💎 지속 효과</strong><p>${esc(r.desc)}</p></div><div class="info-note">유물은 덱에 들어가지 않고 이번 도전 동안 적용돼. 현재 보유 ${state.relics.length}/12종.</div><div class="transaction-balance"><span>현재 잔액 <b>${state.gold}G</b></span><span>비용 <b>−${a.price}G</b></span><span>남는 잔액 <b>${pay?state.gold-a.price+'G':'잔액 부족'}</b></span></div><div class="txn-actions"><button class="btn calm" data-act="closeModal">취소</button><button class="btn primary" data-act="confirmPending" ${!pay?'disabled':''}>💎 유물 구매 확정 · ${a.price}G</button></div>`}
  if(a.kind==='upgrade'){
  const copies=state.deck.filter(id=>id===a.id).length,nb=cardNumbers(a.id,{forceUp:false,live:false}),na=cardNumbers(a.id,{forceUp:true,live:false});
- return `<h2>✨ 카드 강화 비교</h2><p class="txn-intro">강화 전후 수치를 확인한 뒤 확정해. <b>같은 이름 카드 ${copies}장 전체 적용</b>.</p><div class="upgrade-comparison"><div class="compare-card before"><span class="compare-label">강화 전</span><div class="compare-icon">${cardThumbMarkup(a.id)}</div><strong>${esc(c.name)}</strong><span class="energy-cost">⚡ ${nb?nb.cost:c.cost}</span>${faceStatsMarkup(a.id,{forceUp:false,live:false})}<small>${esc(c.desc)}</small></div><div class="compare-arrow">➜</div><div class="compare-card after"><span class="compare-label">강화 후 ✦</span><div class="compare-icon">${cardThumbMarkup(a.id)}</div><strong>${esc(c.name)}+</strong><span class="energy-cost">⚡ ${na?na.cost:c.cost}</span>${faceStatsMarkup(a.id,{forceUp:true,live:false})}<ul class="up-diff">${upgradeDiffMarkup(a.id)}</ul></div></div><div class="info-note">수치는 자원·유물이 없는 기본 상태 기준이야. 공격은 강화된 카드가 피해를 줄 때마다 +3씩 더해져. 이 휴식 지점은 강화를 확정하면 종료돼.</div><div class="txn-actions"><button class="btn calm" data-act="closeModal">취소</button><button class="btn primary" data-act="confirmPending">✨ 강화 확정</button></div>`;
+ return `<h2>✨ 카드 강화 비교</h2><p class="txn-intro">강화 전후 수치를 확인한 뒤 확정해. <b>같은 이름 카드 ${copies}장 전체 적용</b>.</p><div class="upgrade-comparison"><div class="compare-card before"><span class="compare-label">강화 전</span><div class="compare-icon">${cardThumbMarkup(a.id)}</div><strong>${esc(c.name)}</strong><span class="energy-cost">⚡ ${nb?nb.cost:c.cost}</span>${faceStatsMarkup(a.id,{forceUp:false,live:false})}<small>${esc(cardRules(a.id,{forceUp:false}))}</small></div><div class="compare-arrow">➜</div><div class="compare-card after"><span class="compare-label">강화 후 ✦</span><div class="compare-icon">${cardThumbMarkup(a.id)}</div><strong>${esc(c.name)}+</strong><span class="energy-cost">⚡ ${na?na.cost:c.cost}</span>${faceStatsMarkup(a.id,{forceUp:true,live:false})}<ul class="up-diff">${upgradeDiffMarkup(a.id)}</ul></div></div><div class="info-note">수치는 자원·유물이 없는 기본 상태 기준이야. 공격은 강화된 카드가 피해를 줄 때마다 +3씩 더해져. 이 휴식 지점은 강화를 확정하면 종료돼.</div><div class="txn-actions"><button class="btn calm" data-act="closeModal">취소</button><button class="btn primary" data-act="confirmPending">✨ 강화 확정</button></div>`;
  }
  if(a.kind==='recover'){return `<h2>🌿 피로 회복</h2><div class="txn-description">피로도 ${state.workFatigue}/6 → <b>${Math.max(0,state.workFatigue-3)}/6</b></div><p>회복·강화·피로 관리 중 하나만 선택할 수 있어.</p><div class="txn-actions"><button class="btn calm" data-act="closeModal">취소</button><button class="btn primary" data-act="confirmPending">피로 회복 확정</button></div>`}
  if(a.kind==='heal'){const n=Math.min(24,state.maxHp-state.hp);return `<h2>💚 휴식으로 회복</h2><div class="txn-description">체력 ${state.hp}/${state.maxHp} → <b>${state.hp+n}/${state.maxHp}</b> · 실제 회복량 ${n}</div><p>이 지점에서는 회복과 강화 중 하나만 선택할 수 있어.</p><div class="txn-actions"><button class="btn calm" data-act="closeModal">취소</button><button class="btn primary" data-act="confirmPending">회복 확정</button></div>`}
@@ -1567,7 +1596,7 @@ function detailsForTransaction(){const a=pendingAction;if(!a)return '<p>선택 �
  return '<p>선택 정보가 없어.</p>';
 }
 function jobBriefMarkup(k){const p=pairs[k],g=JOB_GUIDE[k];return `<div class="transaction-head"><span class="txn-icon">${p.icon}</span><div><div class="eyebrow">처음 출근하는 직업 · ${stars(g.level)} ${g.label}</div><h2>${p.name}</h2><p>${g.core}</p></div></div><div class="txn-description"><strong>핵심 자원</strong><p>${g.resourceBrief}</p></div><div class="pd-box" style="margin-top:10px"><b class="h">기본 전략</b><ol>${g.strategy.map(x=>`<li>${x}</li>`).join('')}</ol><b class="h" style="margin-top:8px">대표 조합</b>${comboMarkup(k)}<div class="pd-note">${g.comboNote}</div></div><div class="info-note">✨ 겸직 자동 효과: <b>${dualSummary(k)}</b> (현실+판타지 카드를 같은 턴에, 턴당 1회)</div><div class="txn-actions"><button class="btn primary" data-act="closeModal">확인, 전투 시작</button></div>`}
-const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.6.21</h2>
+const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.6.22</h2>
 <div class="guide-actions"><button class="btn primary small" data-act="tutReplay">🎓 튜토리얼 다시 보기</button></div>
 <div class="guide-sec"><b>⚔ 기본 전투</b><p>카드를 탭하면 전장을 보면서 효과를 확인할 수 있어. 적 또는 내 캐릭터를 탭하면 사용해. 「상세」에서 전체 설명을 볼 수 있어. 손패를 좌우로 넘겨 탐색하고, 위로 끌어 대상에 놓으면 바로 사용해. 에너지는 매 턴 ⚡3, 손패는 5장. 「턴 종료」를 누르면 적이 예고한 행동을 해. 오른쪽 <b>예상 피해</b>를 보고 방어를 챙기자.</p></div>
 <div class="guide-sec"><b>✨ 겸직 (자동)</b><p>같은 턴에 청록 「현실」 카드와 보라 「판타지」 카드를 쓰면 직업 고유 효과가 자동 발동해. 턴당 1번. 공용·융합 카드는 조건에 포함되지 않아. 한쪽만 썼으면 나머지 계열 카드에 <b>✦겸직</b> 표시가 떠.</p></div>
@@ -1576,7 +1605,7 @@ const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.6.21</h2>
 <div class="guide-sec"><b>🧬 직업별 핵심 자원</b>${JOB_ORDER.map(k=>`<div class="guide-job"><span>${pairs[k].icon} <b>${pairs[k].name}</b> ${stars(JOB_GUIDE[k].level)}</span><span>${JOB_GUIDE[k].resources.map(resChip).join('')}</span><small>${JOB_GUIDE[k].core} · 겸직: ${dualSummary(k)}</small></div>`).join('')}<p class="footnote">★은 규칙 복잡도야. 별이 많다고 더 강하지 않아.</p></div>
 <div class="guide-sec"><b>🗺 갈림길·보상</b><p>9개 지점마다 길을 골라. 일반 전투는 카드, 정예는 유물(12종), 상점은 구매·제거, 휴식은 회복·피로 회복·강화 중 하나. 구매·제거·강화·이벤트 선택은 모두 <b>미리보기 → 확정</b> 2단계야.</p></div>
 <div class="guide-sec"><b>🎓 사내 전문교육</b><p>새 도전은 3구역을 마친 뒤 전문화 하나를 무료로 선택해. 이번 도전 동안 자동 적용되며 기존 겸직 규칙은 유지돼. 4구역 상점은 미보유 일반 유물 한 칸을 10G 할인해. 기존 진행 중인 도전은 이전 규칙으로 끝까지 이어가.</p></div>
-<div class="guide-sec"><b>💾 저장</b><p>v0.6.21은 v0.6 계열과 같은 저장 키에 자동 저장돼. 이전 C2.2·C2.1·C2·C1·v0.4.1 진행은 원본을 건드리지 않고 복사본으로만 가져와. 브라우저 데이터를 지우면 기록도 지워져.</p></div>`;
+<div class="guide-sec"><b>💾 저장</b><p>v0.6.22는 v0.6 계열과 같은 저장 키에 자동 저장돼. 이전 C2.2·C2.1·C2·C1·v0.4.1 진행은 원본을 건드리지 않고 복사본으로만 가져와. 브라우저 데이터를 지우면 기록도 지워져.</p></div>`;
 const backupOwn=(o,k)=>!!o&&Object.hasOwn(o,k);
 const backupPlain=o=>!!o&&typeof o==='object'&&!Array.isArray(o);
 function checkedBackupTree(value,depth=0,budget={n:0}){
@@ -1598,6 +1627,7 @@ function validateBackupRun(raw){
  for(const k of ['hp','maxHp','gold','stage','turn','energy','block','ingredient','reagent','workFatigue','synergies','defeated','overtimes']){
   const v=raw[k];if(typeof v!=='number'||!Number.isFinite(v)||v<0||v>1000000)throw Error('진행 수치가 올바르지 않아요.');
  }
+ if(raw.enemiesDefeated!=null&&(!Number.isSafeInteger(raw.enemiesDefeated)||raw.enemiesDefeated<0||raw.enemiesDefeated>1000000))throw Error('처치 기록이 올바르지 않아요.');
  if(!Number.isInteger(raw.stage)||raw.stage>8||raw.hp<1||raw.hp>raw.maxHp||raw.workFatigue>6)throw Error('구역·체력·피로도 범위를 확인해 주세요.');
  if(!array(raw.path,x=>x===null||(backupPlain(x)&&backupOwn(nodeInfo,x.type)&&Number.isInteger(x.choice)&&x.choice>=0&&x.choice<3),9))throw Error('이동 기록이 올바르지 않아요.');
  if(!array(raw.logs,x=>typeof x==='string'&&x.length<2000,20)||typeof raw.message!=='string')throw Error('전투 기록이 올바르지 않아요.');
@@ -1628,7 +1658,7 @@ function parseBackup(text){
  return {schema:1,run:validateBackupRun(x.run),meta:cleanMeta(x.meta),settings:{readableBattle:x.settings.readableBattle}};
 }
 function currentSavePacket(){return {schema:1,run:state?(RUN_PHASES.includes(state.phase)?JSON.parse(JSON.stringify(state)):null):(savedRun?JSON.parse(JSON.stringify(savedRun)):null),meta:JSON.parse(JSON.stringify(meta)),settings:{readableBattle}}}
-function backupText(){const x=currentSavePacket();return JSON.stringify({game:'aldol-dualjob',backupVersion:1,gameVersion:'0.6.21',createdAt:new Date().toISOString(),run:x.run,meta:x.meta,settings:x.settings},null,2)}
+function backupText(){const x=currentSavePacket();return JSON.stringify({game:'aldol-dualjob',backupVersion:1,gameVersion:'0.6.22',createdAt:new Date().toISOString(),run:x.run,meta:x.meta,settings:x.settings},null,2)}
 function downloadBackup(){
  try{const blob=new Blob([backupText()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='dualjob-save-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);saveMessage='백업 파일 다운로드를 요청했어요. 저장이 안 되면 아래 백업 텍스트를 복사해 주세요.'}
  catch{saveMessage='다운로드를 시작하지 못했어요. 아래 백업 텍스트를 복사해 주세요.'}
@@ -1655,7 +1685,7 @@ function saveManagerMarkup(){
  return `<h2>저장 및 백업</h2><p>진행과 누적 기록은 이 브라우저에 저장됩니다. 다른 주소·기기에서는 백업 파일을 가져와 주세요.</p><div class="save-summary">${run?esc(pairs[run.real+'-'+run.fantasy].name)+' · 구역 '+(run.stage+1)+'/9':'진행 중인 도전 없음'}<br/>누적 승리 ${meta.wins} · 도전 ${meta.attempts}</div>${saveIssue?`<p class="save-error" role="alert">${esc(saveIssue)}</p>`:'<p class="save-ok">자동 저장 사용 중 · 브라우저 데이터 삭제 시 기록도 사라집니다.</p>'}${saveMessage?`<p role="status">${esc(saveMessage)}</p>`:''}<div class="save-actions"><button class="btn primary" data-act="exportSave">백업 파일 내보내기</button><button class="btn calm" data-act="retrySave">현재 기록 저장 재시도</button></div><label class="save-file">백업 파일 가져오기<input id="backup-file" type="file" accept=".json,application/json"/></label><details class="save-text"><summary>파일 저장이 안 되나요? 백업 텍스트 보기</summary><textarea id="backup-output" readonly aria-label="현재 기록 백업 텍스트">${esc(backupText())}</textarea><button class="btn small" data-act="selectBackupText">텍스트 전체 선택</button></details><details class="save-text"><summary>백업 텍스트 붙여넣기</summary><textarea id="backup-input" maxlength="524288" spellcheck="false" aria-label="복원할 백업 텍스트"></textarea><button class="btn calm" data-act="previewBackupText">내용 확인</button></details>`;
 }
 function restoreSaveMarkup(){const x=restoreCandidate,r=x?.run;if(!x)return '';return `<h2>이 기록으로 복원할까요?</h2><div class="save-summary">${r?esc(pairs[r.real+'-'+r.fantasy].name)+' · 구역 '+(r.stage+1)+'/9 · 체력 '+r.hp+'/'+r.maxHp:'진행 중인 도전 없음'}<br/>누적 승리 ${x.meta.wins} · 도전 ${x.meta.attempts}</div><p>현재 진행과 누적 기록, 화면 설정을 위 내용으로 교체합니다. 지금 기록이 필요하면 먼저 백업해 주세요.</p><div class="save-actions"><button class="btn calm" data-act="cancelRestore">취소</button><button class="btn primary" data-act="commitRestore">이 기록으로 복원</button></div>`}
-function releaseAboutMarkup(){return `<h2>겸직금지!</h2><p class="release-tag">공개 테스트 · v0.6.21</p><p>낮에는 직장인, 밤에는 던전 출근. 현실과 판타지 직업을 조합하고 카드를 모아 인사부장 마왕에게 퇴사를 통보하세요.</p><p>직업 4종 · 갈림길 9개 구역 · 싱글플레이 카드 로그라이트</p><h3>기록과 개인정보</h3><p>게임에는 계정·클라우드 저장·게임 분석 전송 기능이 없습니다. 기록은 이 브라우저에 저장됩니다. 배포 후 호스팅 서비스의 접속 로그는 게임 저장과 별도로 처리될 수 있습니다.</p><h3>제작</h3><p>ALDOL · AI 도구를 활용해 제작한 일러스트를 포함합니다. 글꼴 출처와 라이선스는 규칙 안내에서 확인할 수 있어요.</p><h3>버그 제보</h3><p>버전, 기기·브라우저, 문제가 생긴 행동과 스크린샷을 함께 알려 주세요. 백업 파일에는 플레이 기록이 포함되므로 필요할 때만 첨부해 주세요.</p>`}
+function releaseAboutMarkup(){return `<h2>겸직금지!</h2><p class="release-tag">공개 테스트 · v0.6.22</p><p>낮에는 직장인, 밤에는 던전 출근. 현실과 판타지 직업을 조합하고 카드를 모아 인사부장 마왕에게 퇴사를 통보하세요.</p><p>직업 4종 · 갈림길 9개 구역 · 싱글플레이 카드 로그라이트</p><h3>기록과 개인정보</h3><p>게임에는 계정·클라우드 저장·게임 분석 전송 기능이 없습니다. 기록은 이 브라우저에 저장됩니다. 배포 후 호스팅 서비스의 접속 로그는 게임 저장과 별도로 처리될 수 있습니다.</p><h3>제작</h3><p>ALDOL · AI 도구를 활용해 제작한 일러스트를 포함합니다. 글꼴 출처와 라이선스는 규칙 안내에서 확인할 수 있어요.</p><h3>버그 제보</h3><p>버전, 기기·브라우저, 문제가 생긴 행동과 스크린샷을 함께 알려 주세요. 백업 파일에는 플레이 기록이 포함되므로 필요할 때만 첨부해 주세요.</p>`}
 function handleReleaseAction(act){
  if(act==='saveManager'){restoreSerial++;restoreCandidate=null;saveMessage='';modal='saveManager';render();return true}
  if(act==='releaseAbout'){modal='releaseAbout';render();return true}
@@ -1943,7 +1973,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 </pre></details>`}
  else if(modal==='jobBrief'&&state){content=jobBriefMarkup(keyPair());eyebrow='JOB BRIEFING'}
  else if(modal==='log'&&state){content=`<h2>📜 전투 기록</h2><div class="log-list">${(state.logs||[]).map(l=>`<p>${esc(l)}</p>`).join('')||'<p>기록이 없어.</p>'}</div>`;eyebrow='BATTLE LOG · 최근 20개'}
- else if(modal==='deck'&&state){const tally={};for(const id of state.deck)tally[id]=(tally[id]||0)+1;content=`<h2>🗂️ 내 덱 (${state.deck.length}장)</h2><p>${jobs[state.real].name} + ${jobs[state.fantasy].name} = ${pair().name}. 융합 카드 강화 ${state.sigUpgrade?'완료 ✦':'미적용'}.</p><div class="deck-list">${Object.entries(tally).map(([id,n])=>`<div class="deck-row"><span>${cards[id].icon} <b>${cards[id].name}</b>${upgraded(id)?' ✦':''} <small class="fam-${cards[id].family}">${toneName[cards[id].family]}</small></span><span class="pill">×${n}</span></div>`).join('')}</div>`}
+ else if(modal==='deck'&&state){const tally={};for(const id of state.deck)tally[id]=(tally[id]||0)+1;content=`<h2>🗂️ 내 덱 (${state.deck.length}장)</h2><p>${jobs[state.real].name} + ${jobs[state.fantasy].name} = ${pair().name}. 융합 카드 일반 강화: ${upgraded(pair().sig)?'적용 ✦':'미적용'}.${state.sigUpgrade?' 이전 기록의 융합 특전: 비용 1 · 공격 +4 적용.':''}</p><div class="deck-list">${Object.entries(tally).map(([id,n])=>`<div class="deck-row"><span>${cards[id].icon} <b>${cards[id].name}</b>${upgraded(id)?' ✦':''} <small class="fam-${cards[id].family}">${toneName[cards[id].family]}</small></span><span class="pill">×${n}</span></div>`).join('')}</div>`}
  else if(modal==='relics'&&state){content=`<h2>💎 보유 유물 (${state.relics.length}/12)</h2><p>유물은 덱에 들어가지 않으며 이번 도전에만 적용돼.</p><div class="relic-grid">${state.relics.map(k=>relicTile(k,'disabled')).join('')||'<p>아직 유물이 없어. 정예 전투나 상점을 방문해봐.</p>'}</div>`}
  else if(modal==='card'){content=cardDetailMarkup();eyebrow='CARD DETAILS'}
  else if(modal==='status'){const t=TERMS[statusKey];eyebrow='EFFECT CODEX';content=t?`<h2>${t.icon} ${t.name}</h2><p class="rule-sentence">${t.desc}</p>${statusKey==='synergy'&&state?`<div class="inspect-outcome">${pair().name} 겸직: <b>${dualSummary()}</b><br/>이번 턴: 현실 ${state.usedReal?'✓':'○'} · 판타지 ${state.usedFantasy?'✓':'○'} · ${state.dualTurnUsed?'발동 완료':'대기'}</div>`:''}${statusKey==='fatigueGauge'&&state?`<div class="inspect-outcome">현재 피로도 <b>${state.workFatigue}/6</b> · ${fatigueNote(state.workFatigue)}</div>`:''}${statusKey==='intent'&&state?.phase==='battle'?intentDetailsMarkup():''}<p class="inspect-hint">아이콘을 누르면 언제든 설명을 다시 볼 수 있어.</p>`:''}
@@ -1969,7 +1999,7 @@ document.querySelector('#app').addEventListener('click',ev=>{
  const el=ev.target.closest('[data-act]');if(!el)return;
  const act=el.dataset.act;
  if(act==='skipCombat'){finishCombatPlayback();return}
- if(turnVisualBusy()){ev.preventDefault();return}
+ if(turnVisualBusy()){ev.preventDefault();screenNotice('전투 연출 중이에요. 건너뛰기 또는 Esc로 바로 계속할 수 있어요.');return}
  if(!modal&&act==='handPage'){pageHand(Number(el.dataset.dir));return}
  if(ev.detail!==0&&performance.now()<suppressClickUntil){ev.preventDefault();return}
  if(handleReleaseAction(act))return;
@@ -1996,7 +2026,7 @@ document.querySelector('#app').addEventListener('click',ev=>{
  if(modal)return;
  if(act==='selectTraining'&&state?.phase==='training'&&trainingOptions().includes(el.dataset.id)){trainingChoice={run:state,id:el.dataset.id};render();return}
  if(act==='confirmTraining'&&trainingChoice?.run===state){chooseTraining(trainingChoice.id);return}
- if(act==='tutNext'){if(state?.tutorial){tutorialEvent('next');save();render()}return}
+ if(act==='tutNext'){if(state?.tutorial){tutorialEvent('next');save();render();maybeJobBrief()}return}
  if(act==='tutSkip'){if(state?.tutorial){finishTutorial(true);save();render();maybeJobBrief()}return}
  if(act==='overtime'){overtimeFx();return}
  if(act==='previewShopCard'){beginTransaction('shopCard',el.dataset.index);return}
