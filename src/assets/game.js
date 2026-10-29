@@ -333,11 +333,20 @@ let selectedCard=null, selectionProjection=null, suppressClickUntil=0;
 let state=null,modal='',pendingAction=null,pickReal='chef',pickFantasy='warlock';
 const CARD_OK=id=>typeof id==='string'&&!!cards[id];
 const RUN_PHASES=['map','shop','rest','relicReward','battle','event','reward','training'];
+// Used copies remain in discard for save/rollback compatibility, but cannot
+// recycle during the same player turn. Duplicate copies are counted separately.
+function validTurnDiscard(s){
+ if(s.turnDiscard===undefined)return true;
+ if(!s.turnDiscard||typeof s.turnDiscard!=='object'||Array.isArray(s.turnDiscard)||!Array.isArray(s.discard))return false;
+ const counts={};for(const id of s.discard)counts[id]=(counts[id]||0)+1;
+ return Object.entries(s.turnDiscard).every(([id,n])=>Object.hasOwn(cards,id)&&Number.isSafeInteger(n)&&n>=0&&n<=(counts[id]||0));
+}
 // 저장 데이터를 검증하고 '깊은 복사본'을 C2 형식(version 4)으로 정리한다. 실패하면 null.
 function sanitizeRun(raw){
  let x;try{x=JSON.parse(JSON.stringify(raw))}catch{return null}
  if(!x||typeof x!=='object'||![1,2,3,4].includes(x.version)||!RUN_PHASES.includes(x.phase)||!pairs[x.real+'-'+x.fantasy])return null;
- if(!validTrainingSave(x))return null;
+ if(!validTrainingSave(x)||!validTurnDiscard(x))return null;
+ x.turnDiscard=x.turnDiscard||{};
  x.contentRevision=x.contentRevision??20;
  if(x.contentRevision===20){x.trainingId=null;x.trainingTurn=freshTrainingTurn();if(x.shop)delete x.shop.welfare}
  else if(x.shop?.welfare&&!validWelfare(x))return null;
@@ -415,7 +424,20 @@ const ingredient=n=>{const before=state.ingredient;state.ingredient=Math.min(12,
 const reagent=n=>{const before=state.reagent;state.reagent=Math.min(12,before+n);n=state.reagent-before;rec({k:'reagent',n});log('🧪 시약 +'+n);};
 const debt=n=>{const before=state.enemy.debt||0;state.enemy.debt=Math.min(40,before+n);n=state.enemy.debt-before;rec({k:'debt',i:state.targetIndex,n});log('📋 적 미수금 +'+n);};
 const curse=n=>{const before=state.enemy.curse||0;state.enemy.curse=Math.min(30,before+n);n=state.enemy.curse-before;rec({k:'curse',i:state.targetIndex,n});log('🕯️ 적 저주 +'+n);};
-function draw(n){let got=0;for(let i=0;i<n;i++){if(state.hand.length>=10){log('손패는 최대 10장입니다.');break}if(!state.drawPile.length){if(!state.discard.length)break;state.drawPile=shuffle(state.discard);state.discard=[];}state.hand.push(state.drawPile.pop());got++}if(got)rec({k:'draw',n:got})}
+function draw(n){
+ let got=0;
+ for(let i=0;i<n;i++){
+  if(state.hand.length>=10){log('손패는 최대 10장입니다.');break}
+  if(!state.drawPile.length){
+   const held={...(state.turnDiscard||{})},ready=[],waiting=[];
+   for(const id of state.discard){if(held[id]>0){waiting.push(id);held[id]--}else ready.push(id)}
+   if(!ready.length){if(waiting.length)log('이번 턴에 사용한 카드는 다음 턴부터 다시 뽑을 수 있어.');break}
+   state.drawPile=shuffle(ready);state.discard=waiting;
+  }
+  state.hand.push(state.drawPile.pop());got++;
+ }
+ if(got)rec({k:'draw',n:got});
+}
 function addTempFatigue(n){for(let i=0;i<n;i++)state.discard.push('fatigue');log('🥱 버린 더미에 임시 피로 카드 +'+n+' (이번 전투만)')}
 function addFatigue(n){for(let i=0;i<n;i++){state.deck.push('fatigue');state.discard.push('fatigue')}log('🥱 덱에 피로 카드 '+n+'장 추가');}
 function forEachEnemy(fn){const old=state.targetIndex;for(let i=0;i<state.enemies.length;i++){if(state.enemies[i].hp>0){state.targetIndex=i;ensureTarget();fn(state.enemy,i)}}state.targetIndex=old;ensureTarget()}
@@ -571,6 +593,9 @@ function chooseIntent(){
   const old=e.intent,amount=attackAt(e,t);
   if(e.id==='boss'&&state.bossPhase===2){
     if(old?.pattern==='hr-review')e.intent={type:'attack',amount:old.nextAmount,pattern:'hr-verdict'};
+    // First verdict gets a full player turn of warning; preserve the intent
+    // already on screen when the HP threshold is crossed (including curse ticks).
+    else if(old?.pattern!=='hr-verdict')e.intent={type:'attack',amount:Math.max(16,amount+5),pattern:'hr-verdict'};
     else e.intent={type:'prepare',amount:0,nextAmount:Math.max(16,amount+5),pattern:'hr-review'};
    }else if(e.id==='golem'){
    if(old?.type==='charge'&&old.pattern==='copier')e.intent={type:'slam',amount:old.nextAmount,pattern:'copier'};
@@ -610,7 +635,7 @@ function intentDetailsMarkup(){
   golem:'충전 → 예고한 강타 → 약한 재정비 공격을 반복해. 충전 중에는 공격하지 않아.',
   ghost:'야근 예고 → 피로 공격 → 일반 공격을 반복해. 예고 중에는 공격하거나 피로 카드를 넣지 않아.',
   healer:'홀수 턴에는 자신과 예고한 아군을 보호하고, 짝수 턴에는 공격해. 보호 대상이 처치되면 다른 적을 대신 보호하지 않아.',
-   boss:'체력이 절반 이하가 되면 인사 감사 예고 → 겸직 적발이 반복돼. 현실·판타지 카드를 모두 쓰면 미사용 때보다 피해를 12 줄이고 다음 턴 에너지 +1.'
+   boss:'체력이 절반 이하가 되면 현재 예고는 유지하고 다음 턴에 첫 겸직 적발을 예고해. 이후 인사 감사 예고 → 겸직 적발을 반복해. 현실·판타지 카드를 모두 쓰면 미사용 때보다 피해를 12 줄이고 다음 턴 에너지 +1.'
  };
  return '<div class="intent-details">'+livingEnemies().map(e=>{
   const a=enemyAction(e),doomed=e.hp<=(e.curse||0)*2;let now='';
@@ -633,7 +658,7 @@ function turnForecast(s){
 }
 function endTurn(){
  if(state.phase!=='battle')return;
- state.discard.push(...state.hand);state.hand=[];fxRec=[];
+ state.discard.push(...state.hand);state.hand=[];state.turnDiscard={};fxRec=[];
  const training=applyTrainingEnd(state);if(training){rec({k:'block',n:training.block});log('🎓 '+trainingFor(state).name+' · 턴 종료 효과');captureCombatBeat('training',training.i,'🎓 '+trainingFor(state).name)}
  let taken=0,absorbedAll=0,ticks=0,fatigueAdded=0,hrReward=false;
  for(const e of livingEnemies())e.block=0;
@@ -670,7 +695,7 @@ function spawnEnemy(){
  const nt=state.nodeType,encounter=ENCOUNTERS[shuffle(encounterPool(state.stage,nt))[0]],ids=encounter.ids;
  state.enemies=ids.map(id=>{const e=enemies[id],scale=nt==='boss'?0:Math.floor(state.stage/2)*3;return {id,name:e.name,icon:e.icon,hp:e.maxHp+scale,maxHp:e.maxHp+scale,baseAttack:e.attack+Math.floor(state.stage/3),block:0,debt:0,curse:0}});
  state.targetIndex=0;ensureTarget();state.block=hasRelic('lunchVoucher')?6:0;state.energy=3;
- state.drawPile=shuffle([...state.deck]);state.discard=[];state.hand=[];state.turn=1;state.usedReal=false;state.usedFantasy=false;state.synergy=false;state.dualTurnUsed=false;state.lastDual=null;
+ state.drawPile=shuffle([...state.deck]);state.discard=[];state.turnDiscard={};state.hand=[];state.turn=1;state.usedReal=false;state.usedFantasy=false;state.synergy=false;state.dualTurnUsed=false;state.lastDual=null;
  state.lastHitIndex=null;state.lastHitDamage=0;state.overtimeUsed=false;state.ingredient=0;state.reagent=0;state.logs=[];
  state.trainingTurn=freshTrainingTurn();state.relicTurn={};state.relicUsed={severancePackage:!!state.relicUsed?.severancePackage};state.bossPhase=nt==='boss'?1:0;state.floorCopy=null;state.phase='battle';
  dealFrom=0;if(state.workFatigue>=3){draw(4);state.hand.push('fatigue');log('💤 피로도 '+state.workFatigue+': 시작 손패 1장이 임시 피로 카드')}else draw(5);
@@ -681,7 +706,7 @@ function newRun(){
  meta.attempts=(meta.attempts||0)+1;const key=pickReal+'-'+pickFantasy;if(!meta.combos.includes(key))meta.combos.push(key);saveMeta();
  trainingChoice=null;
  state={version:4,contentRevision:21,trainingId:null,trainingTurn:freshTrainingTurn(),workFatigue:0,dualTurnUsed:false,lastDual:null,overtimes:0,tutorial:meta.tutorialDone?null:{step:0},phase:'map',stage:0,real:pickReal,fantasy:pickFantasy,maxHp:72,hp:72,block:0,energy:3,gold:30,
- ingredient:0,reagent:0,deck:[...initialDeck[pickReal],...initialDeck[pickFantasy],pairs[key].sig],drawPile:[],discard:[],hand:[],enemy:null,
+ ingredient:0,reagent:0,deck:[...initialDeck[pickReal],...initialDeck[pickFantasy],pairs[key].sig],drawPile:[],discard:[],turnDiscard:{},hand:[],enemy:null,
  turn:1,usedReal:false,usedFantasy:false,synergy:false,synergies:0,overtimeUsed:false,sigUpgrade:false,defeated:0,enemiesDefeated:0,logs:[],message:'',rewardOptions:[],rewardFor:0,
  relics:[],upgrades:{},path:[],nodeType:null,relicTurn:{},relicUsed:{},shop:null,eventId:null,eventHistory:[],floorDecisions:{},deferredBonus:0,floorCopy:null,bossPhase:0};
  savedRun=null;save();render();
@@ -709,7 +734,7 @@ function resolveCard(index,target){
  activeCard=id;activeBonus=(boostMana?3:0)+(boostGlass?4:0);
  state.energy-=getCost(id);if(hasRelic('overtimeClock')&&c.family==='real'&&!state.relicTurn.overtimeClock)state.relicTurn.overtimeClock=true;
  if(boostMana)state.relicTurn.manaAmp=true;if(boostGlass)state.relicTurn.glassRetort=true;
- state.hand.splice(index,1);state.discard.push(id);
+ state.hand.splice(index,1);state.discard.push(id);state.turnDiscard=state.turnDiscard||{};state.turnDiscard[id]=(state.turnDiscard[id]||0)+1;
  if(c.family==='real')state.usedReal=true;if(c.family==='fantasy')state.usedFantasy=true;
  state.cardsPlayed=(state.cardsPlayed||0)+1;log('🃏 '+c.name+' 사용');
  const trainingContext={id,target:targetMode(id)==='enemy'?state.targetIndex:-1,spent:{debt:0,ingredient:0,reagent:0},bonusApplied:false};
@@ -743,7 +768,7 @@ function previewCard(id,{target,base=false,forceUp=null}={}){
  try{c=JSON.parse(JSON.stringify(real))}catch{return null}
  if(base||c.phase!=='battle'||!Array.isArray(c.enemies)||!c.enemies.some(e=>e.hp>0)){
   c.phase='battle';c.enemies=[{id:'dummy',name:'',icon:'',hp:999,maxHp:999,block:0,debt:0,curse:0,baseAttack:0}];c.targetIndex=0;
-  c.trainingId=null;c.trainingTurn=freshTrainingTurn();c.ingredient=0;c.reagent=0;c.relics=[];c.relicTurn={};c.relicUsed={};c.drawPile=Array(20).fill('strike');c.discard=[];c.hand=[];target=0;
+  c.trainingId=null;c.trainingTurn=freshTrainingTurn();c.ingredient=0;c.reagent=0;c.relics=[];c.relicTurn={};c.relicUsed={};c.drawPile=Array(20).fill('strike');c.discard=[];c.turnDiscard={};c.hand=[];target=0;
  }
  c.hp=Math.max(1,Math.min(c.hp,c.maxHp-30));c.energy=99;c.logs=[];
  if(forceUp!==null){c.upgrades={...(c.upgrades||{}),[id]:!!forceUp}}
@@ -960,7 +985,7 @@ function renderMobileBattle(){
  </main>`;
 }
 
-function header(){return `<header class="mast"><div><div class="mini">THE SECOND SHIFT · ROGUELITE</div><div class="brand">겸직<b>금지!</b> <span class="ver-tag">v0.6.22</span></div></div><div class="mast-buttons"><button class="btn small" data-act="battleMenu" aria-label="화면 설정 및 게임 메뉴">☰</button><button class="btn small" data-act="guide" aria-label="규칙 안내">❔ 규칙</button>${state?`<button class="btn small" data-act="deck" aria-label="내 덱 보기">🗂️ 덱 ${state.deck.length}</button><button class="btn small danger" data-act="restartPrompt" aria-label="도전 재시작">↻</button>`:''}</div></header>`}
+function header(){return `<header class="mast"><div><div class="mini">THE SECOND SHIFT · ROGUELITE</div><div class="brand">겸직<b>금지!</b> <span class="ver-tag">v0.6.23</span></div></div><div class="mast-buttons"><button class="btn small" data-act="battleMenu" aria-label="화면 설정 및 게임 메뉴">☰</button><button class="btn small" data-act="guide" aria-label="규칙 안내">❔ 규칙</button>${state?`<button class="btn small" data-act="deck" aria-label="내 덱 보기">🗂️ 덱 ${state.deck.length}</button><button class="btn small danger" data-act="restartPrompt" aria-label="도전 재시작">↻</button>`:''}</div></header>`}
 // v0.6.15: selection belongs to the current screen, never to the saved run.
 let journeyReward=null,journeyRoute=null;
 let journeyDockObserver=null;
@@ -995,7 +1020,12 @@ function floorSpecialMarkup(level){
  const picked=state.floorDecisions?.[level];const pending=floorDecisionPending(level);
  return '<section class="floor-special" aria-label="구역 특수 선택"><h2>'+info.title+'</h2><p>'+info.desc+'</p><div class="floor-special-options">'+info.options.map((entry,i)=>'<button type="button" class="floor-special-choice" data-act="floorDecision" data-choice="'+i+'" '+(pending?'':'disabled')+' aria-pressed="'+(picked===i)+'"><b>'+entry[0]+'</b><small>'+entry[1]+'</small></button>').join('')+'</div><p class="floor-special-feedback" role="status">'+(pending?'선택 후 경로를 이동할 수 있어. 선택은 되돌릴 수 없어.':'✓ 결재 완료 · 다음 구역까지 효과 유지')+'</p></section>';
 }
-function bossPhaseMarkup(){return state.nodeType==='boss'&&state.bossPhase===2?'<div class="boss-phase" role="status">🚨 인사부장 2페이즈 · 겸직 적발 중! 현실·판타지 카드를 둘 다 사용해 피해를 줄이자.</div>':''}
+function bossPhaseMarkup(){
+ if(state.nodeType!=='boss'||state.bossPhase!==2)return '';
+ const pattern=state.enemies.find(e=>e.id==='boss'&&e.hp>0)?.intent?.pattern;
+ const note=pattern==='hr-verdict'?'이번 턴 겸직 적발 · 현실·판타지 카드를 둘 다 사용해 피해를 줄이자.':pattern==='hr-review'?'인사 감사 준비 · 다음 턴 겸직 적발.':'현재 예고는 유지 · 다음 턴 첫 겸직 적발.';
+ return '<div class="boss-phase" role="status">🚨 인사부장 2페이즈 · '+note+'</div>';
+}
 function renderMap(){
  if(!validJourneyRoute())journeyRoute=null;
  const level=state.stage,room=rooms[level],selected=journeyRoute?nodeInfo[journeyRoute.type]:null;
@@ -1039,7 +1069,7 @@ const TERMS={
  curse:{name:'저주',icon:'🕯️',desc:'적에게 쌓는 표식. 내가 턴을 끝내면 적이 행동하기 전에 중첩×2 피해를 주고 1 줄어. 밤의 파동·검은 일식은 저주에 비례해 강해져.'},
  ingredient:{name:'재료',icon:'🥕',desc:'요리사 카드가 모으는 내 자원. 화염 불쇼·도시락 등이 소모해 피해나 회복을 키워. 전투가 끝나면 0. 최대 12.'},
  reagent:{name:'시약',icon:'🧪',desc:'연금술사 카드가 모으는 내 자원. 연금 폭발 등이 최대 2개씩 소모해 피해·회복을 키워. 전투가 끝나면 0. 최대 12.'},
- draw:{name:'카드 뽑기',icon:'🎴',desc:'뽑을 덱에서 카드를 가져와. 덱이 비면 버린 카드를 섞어 새 덱을 만들어. 손패는 최대 10장.'},
+ draw:{name:'카드 뽑기',icon:'🎴',desc:'덱이 비면 버린 카드 중 이번 턴에 쓰지 않은 카드를 섞어 뽑아. 이번 턴에 사용한 카드는 다음 턴부터 다시 뽑을 수 있어. 같은 이름의 다른 사본은 사용할 수 있고, 손패는 최대 10장.'},
  health:{name:'체력',icon:'❤️',desc:'전투가 끝나도 유지돼. 0이 되면 이번 도전은 끝나. 최대 체력 이상은 회복되지 않아.'},
  energy:{name:'에너지',icon:'⚡',desc:'카드 왼쪽 위 숫자만큼 소모해. 매 턴 3으로 돌아와. 모자라면 카드가 잠겨. 초과근무로 전투당 1번 +1.'},
  fatigue:{name:'피로 카드',icon:'🥱',desc:'사용할 수 없는 방해 카드. 손패 한 칸을 차지해. 적의 📜 특수 공격은 이번 전투 동안만 임시로 넣고, 일부 이벤트 선택지는 덱에 영구히 넣어. 영구 피로 카드는 상점 덱 정리나 일부 이벤트로 없앨 수 있어.'},
@@ -1596,16 +1626,17 @@ function detailsForTransaction(){const a=pendingAction;if(!a)return '<p>선택 �
  return '<p>선택 정보가 없어.</p>';
 }
 function jobBriefMarkup(k){const p=pairs[k],g=JOB_GUIDE[k];return `<div class="transaction-head"><span class="txn-icon">${p.icon}</span><div><div class="eyebrow">처음 출근하는 직업 · ${stars(g.level)} ${g.label}</div><h2>${p.name}</h2><p>${g.core}</p></div></div><div class="txn-description"><strong>핵심 자원</strong><p>${g.resourceBrief}</p></div><div class="pd-box" style="margin-top:10px"><b class="h">기본 전략</b><ol>${g.strategy.map(x=>`<li>${x}</li>`).join('')}</ol><b class="h" style="margin-top:8px">대표 조합</b>${comboMarkup(k)}<div class="pd-note">${g.comboNote}</div></div><div class="info-note">✨ 겸직 자동 효과: <b>${dualSummary(k)}</b> (현실+판타지 카드를 같은 턴에, 턴당 1회)</div><div class="txn-actions"><button class="btn primary" data-act="closeModal">확인, 전투 시작</button></div>`}
-const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.6.22</h2>
+const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.6.23</h2>
 <div class="guide-actions"><button class="btn primary small" data-act="tutReplay">🎓 튜토리얼 다시 보기</button></div>
 <div class="guide-sec"><b>⚔ 기본 전투</b><p>카드를 탭하면 전장을 보면서 효과를 확인할 수 있어. 적 또는 내 캐릭터를 탭하면 사용해. 「상세」에서 전체 설명을 볼 수 있어. 손패를 좌우로 넘겨 탐색하고, 위로 끌어 대상에 놓으면 바로 사용해. 에너지는 매 턴 ⚡3, 손패는 5장. 「턴 종료」를 누르면 적이 예고한 행동을 해. 오른쪽 <b>예상 피해</b>를 보고 방어를 챙기자.</p></div>
+<div class="guide-sec"><b>🎴 카드 순환</b><p>이번 턴에 사용한 카드는 버림 더미에 보관하고 다음 턴부터 다시 뽑아. 같은 이름의 다른 사본은 계속 사용할 수 있어. 손패는 최대 10장.</p></div>
 <div class="guide-sec"><b>✨ 겸직 (자동)</b><p>같은 턴에 청록 「현실」 카드와 보라 「판타지」 카드를 쓰면 직업 고유 효과가 자동 발동해. 턴당 1번. 공용·융합 카드는 조건에 포함되지 않아. 한쪽만 썼으면 나머지 계열 카드에 <b>✦겸직</b> 표시가 떠.</p></div>
 <div class="guide-sec"><b>${statIcon('overtime')} 초과근무</b><p>전투당 1번 쓰는 특수 행동. 즉시 ⚡+1, 대신 💤 피로도 +2. 피로도 5 이상이면 쓸 수 없어. 겸직 효과와 따로 계산돼.</p></div>
 <div class="guide-sec"><b>💤 피로도 vs 🥱 피로 카드</b><p><b>피로도</b>(0~6)는 다음 전투까지 이어지는 게이지야. 3↑이면 전투 시작 손패 1장이 임시 피로 카드, 5↑이면 초과근무 불가. 승리 −1, 휴식 「피로 회복」 −3. <b>피로 카드</b>는 사용 불가 카드야. 적의 📜 특수 공격은 이번 전투에만 임시로, 일부 이벤트는 덱에 영구로 넣어. 영구 피로 카드는 상점 덱 정리로 지울 수 있어.</p></div>
 <div class="guide-sec"><b>🧬 직업별 핵심 자원</b>${JOB_ORDER.map(k=>`<div class="guide-job"><span>${pairs[k].icon} <b>${pairs[k].name}</b> ${stars(JOB_GUIDE[k].level)}</span><span>${JOB_GUIDE[k].resources.map(resChip).join('')}</span><small>${JOB_GUIDE[k].core} · 겸직: ${dualSummary(k)}</small></div>`).join('')}<p class="footnote">★은 규칙 복잡도야. 별이 많다고 더 강하지 않아.</p></div>
 <div class="guide-sec"><b>🗺 갈림길·보상</b><p>9개 지점마다 길을 골라. 일반 전투는 카드, 정예는 유물(12종), 상점은 구매·제거, 휴식은 회복·피로 회복·강화 중 하나. 구매·제거·강화·이벤트 선택은 모두 <b>미리보기 → 확정</b> 2단계야.</p></div>
 <div class="guide-sec"><b>🎓 사내 전문교육</b><p>새 도전은 3구역을 마친 뒤 전문화 하나를 무료로 선택해. 이번 도전 동안 자동 적용되며 기존 겸직 규칙은 유지돼. 4구역 상점은 미보유 일반 유물 한 칸을 10G 할인해. 기존 진행 중인 도전은 이전 규칙으로 끝까지 이어가.</p></div>
-<div class="guide-sec"><b>💾 저장</b><p>v0.6.22는 v0.6 계열과 같은 저장 키에 자동 저장돼. 이전 C2.2·C2.1·C2·C1·v0.4.1 진행은 원본을 건드리지 않고 복사본으로만 가져와. 브라우저 데이터를 지우면 기록도 지워져.</p></div>`;
+<div class="guide-sec"><b>💾 저장</b><p>v0.6.23는 v0.6 계열과 같은 저장 키에 자동 저장돼. 이전 C2.2·C2.1·C2·C1·v0.4.1 진행은 원본을 건드리지 않고 복사본으로만 가져와. 브라우저 데이터를 지우면 기록도 지워져.</p></div>`;
 const backupOwn=(o,k)=>!!o&&Object.hasOwn(o,k);
 const backupPlain=o=>!!o&&typeof o==='object'&&!Array.isArray(o);
 function checkedBackupTree(value,depth=0,budget={n:0}){
@@ -1620,6 +1651,7 @@ function validateBackupRun(raw){
  if(raw===null)return null;
  if(!backupPlain(raw)||raw.version!==4||!RUN_PHASES.includes(raw.phase)||!backupOwn(pairs,raw.real+'-'+raw.fantasy))throw Error('지원하지 않는 진행 기록이에요.');
  if(!validTrainingSave(raw)||raw.shop?.welfare&&!validWelfare(raw))throw Error('전문교육·복지 상품 기록이 올바르지 않아요.');
+ if(!validTurnDiscard(raw))throw Error('이번 턴에 사용한 카드 기록이 올바르지 않아요.');
  const array=(v,valid,max=300)=>Array.isArray(v)&&v.length<=max&&v.every(valid);
  const card=id=>typeof id==='string'&&backupOwn(cards,id),relic=id=>typeof id==='string'&&backupOwn(relics,id);
  if(!array(raw.deck,card)||!raw.deck.length||!['hand','drawPile','discard'].every(k=>array(raw[k],card)))throw Error('카드 목록이 올바르지 않아요.');
@@ -1658,7 +1690,7 @@ function parseBackup(text){
  return {schema:1,run:validateBackupRun(x.run),meta:cleanMeta(x.meta),settings:{readableBattle:x.settings.readableBattle}};
 }
 function currentSavePacket(){return {schema:1,run:state?(RUN_PHASES.includes(state.phase)?JSON.parse(JSON.stringify(state)):null):(savedRun?JSON.parse(JSON.stringify(savedRun)):null),meta:JSON.parse(JSON.stringify(meta)),settings:{readableBattle}}}
-function backupText(){const x=currentSavePacket();return JSON.stringify({game:'aldol-dualjob',backupVersion:1,gameVersion:'0.6.22',createdAt:new Date().toISOString(),run:x.run,meta:x.meta,settings:x.settings},null,2)}
+function backupText(){const x=currentSavePacket();return JSON.stringify({game:'aldol-dualjob',backupVersion:1,gameVersion:'0.6.23',createdAt:new Date().toISOString(),run:x.run,meta:x.meta,settings:x.settings},null,2)}
 function downloadBackup(){
  try{const blob=new Blob([backupText()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='dualjob-save-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);saveMessage='백업 파일 다운로드를 요청했어요. 저장이 안 되면 아래 백업 텍스트를 복사해 주세요.'}
  catch{saveMessage='다운로드를 시작하지 못했어요. 아래 백업 텍스트를 복사해 주세요.'}
@@ -1685,7 +1717,7 @@ function saveManagerMarkup(){
  return `<h2>저장 및 백업</h2><p>진행과 누적 기록은 이 브라우저에 저장됩니다. 다른 주소·기기에서는 백업 파일을 가져와 주세요.</p><div class="save-summary">${run?esc(pairs[run.real+'-'+run.fantasy].name)+' · 구역 '+(run.stage+1)+'/9':'진행 중인 도전 없음'}<br/>누적 승리 ${meta.wins} · 도전 ${meta.attempts}</div>${saveIssue?`<p class="save-error" role="alert">${esc(saveIssue)}</p>`:'<p class="save-ok">자동 저장 사용 중 · 브라우저 데이터 삭제 시 기록도 사라집니다.</p>'}${saveMessage?`<p role="status">${esc(saveMessage)}</p>`:''}<div class="save-actions"><button class="btn primary" data-act="exportSave">백업 파일 내보내기</button><button class="btn calm" data-act="retrySave">현재 기록 저장 재시도</button></div><label class="save-file">백업 파일 가져오기<input id="backup-file" type="file" accept=".json,application/json"/></label><details class="save-text"><summary>파일 저장이 안 되나요? 백업 텍스트 보기</summary><textarea id="backup-output" readonly aria-label="현재 기록 백업 텍스트">${esc(backupText())}</textarea><button class="btn small" data-act="selectBackupText">텍스트 전체 선택</button></details><details class="save-text"><summary>백업 텍스트 붙여넣기</summary><textarea id="backup-input" maxlength="524288" spellcheck="false" aria-label="복원할 백업 텍스트"></textarea><button class="btn calm" data-act="previewBackupText">내용 확인</button></details>`;
 }
 function restoreSaveMarkup(){const x=restoreCandidate,r=x?.run;if(!x)return '';return `<h2>이 기록으로 복원할까요?</h2><div class="save-summary">${r?esc(pairs[r.real+'-'+r.fantasy].name)+' · 구역 '+(r.stage+1)+'/9 · 체력 '+r.hp+'/'+r.maxHp:'진행 중인 도전 없음'}<br/>누적 승리 ${x.meta.wins} · 도전 ${x.meta.attempts}</div><p>현재 진행과 누적 기록, 화면 설정을 위 내용으로 교체합니다. 지금 기록이 필요하면 먼저 백업해 주세요.</p><div class="save-actions"><button class="btn calm" data-act="cancelRestore">취소</button><button class="btn primary" data-act="commitRestore">이 기록으로 복원</button></div>`}
-function releaseAboutMarkup(){return `<h2>겸직금지!</h2><p class="release-tag">공개 테스트 · v0.6.22</p><p>낮에는 직장인, 밤에는 던전 출근. 현실과 판타지 직업을 조합하고 카드를 모아 인사부장 마왕에게 퇴사를 통보하세요.</p><p>직업 4종 · 갈림길 9개 구역 · 싱글플레이 카드 로그라이트</p><h3>기록과 개인정보</h3><p>게임에는 계정·클라우드 저장·게임 분석 전송 기능이 없습니다. 기록은 이 브라우저에 저장됩니다. 배포 후 호스팅 서비스의 접속 로그는 게임 저장과 별도로 처리될 수 있습니다.</p><h3>제작</h3><p>ALDOL · AI 도구를 활용해 제작한 일러스트를 포함합니다. 글꼴 출처와 라이선스는 규칙 안내에서 확인할 수 있어요.</p><h3>버그 제보</h3><p>버전, 기기·브라우저, 문제가 생긴 행동과 스크린샷을 함께 알려 주세요. 백업 파일에는 플레이 기록이 포함되므로 필요할 때만 첨부해 주세요.</p>`}
+function releaseAboutMarkup(){return `<h2>겸직금지!</h2><p class="release-tag">공개 테스트 · v0.6.23</p><p>낮에는 직장인, 밤에는 던전 출근. 현실과 판타지 직업을 조합하고 카드를 모아 인사부장 마왕에게 퇴사를 통보하세요.</p><p>직업 4종 · 갈림길 9개 구역 · 싱글플레이 카드 로그라이트</p><h3>기록과 개인정보</h3><p>게임에는 계정·클라우드 저장·게임 분석 전송 기능이 없습니다. 기록은 이 브라우저에 저장됩니다. 배포 후 호스팅 서비스의 접속 로그는 게임 저장과 별도로 처리될 수 있습니다.</p><h3>제작</h3><p>ALDOL · AI 도구를 활용해 제작한 일러스트를 포함합니다. 글꼴 출처와 라이선스는 규칙 안내에서 확인할 수 있어요.</p><h3>버그 제보</h3><p>버전, 기기·브라우저, 문제가 생긴 행동과 스크린샷을 함께 알려 주세요. 백업 파일에는 플레이 기록이 포함되므로 필요할 때만 첨부해 주세요.</p>`}
 function handleReleaseAction(act){
  if(act==='saveManager'){restoreSerial++;restoreCandidate=null;saveMessage='';modal='saveManager';render();return true}
  if(act==='releaseAbout'){modal='releaseAbout';render();return true}
@@ -1973,7 +2005,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 </pre></details>`}
  else if(modal==='jobBrief'&&state){content=jobBriefMarkup(keyPair());eyebrow='JOB BRIEFING'}
  else if(modal==='log'&&state){content=`<h2>📜 전투 기록</h2><div class="log-list">${(state.logs||[]).map(l=>`<p>${esc(l)}</p>`).join('')||'<p>기록이 없어.</p>'}</div>`;eyebrow='BATTLE LOG · 최근 20개'}
- else if(modal==='deck'&&state){const tally={};for(const id of state.deck)tally[id]=(tally[id]||0)+1;content=`<h2>🗂️ 내 덱 (${state.deck.length}장)</h2><p>${jobs[state.real].name} + ${jobs[state.fantasy].name} = ${pair().name}. 융합 카드 일반 강화: ${upgraded(pair().sig)?'적용 ✦':'미적용'}.${state.sigUpgrade?' 이전 기록의 융합 특전: 비용 1 · 공격 +4 적용.':''}</p><div class="deck-list">${Object.entries(tally).map(([id,n])=>`<div class="deck-row"><span>${cards[id].icon} <b>${cards[id].name}</b>${upgraded(id)?' ✦':''} <small class="fam-${cards[id].family}">${toneName[cards[id].family]}</small></span><span class="pill">×${n}</span></div>`).join('')}</div>`}
+ else if(modal==='deck'&&state){const tally={};for(const id of state.deck)tally[id]=(tally[id]||0)+1;content=`<h2>🗂️ 내 덱 (${state.deck.length}장)</h2><p>${jobs[state.real].name} + ${jobs[state.fantasy].name} = ${pair().name}. 융합 카드 일반 강화: ${upgraded(pair().sig)?'적용 ✦':'미적용'}.${state.sigUpgrade?' 이전 기록의 융합 특전: 비용 1 · 공격 +4 적용.':''}</p><p>이번 턴에 사용한 카드는 다음 턴부터 다시 뽑을 수 있어. 같은 이름의 다른 사본은 사용할 수 있어.</p><div class="deck-list">${Object.entries(tally).map(([id,n])=>`<div class="deck-row"><span>${cards[id].icon} <b>${cards[id].name}</b>${upgraded(id)?' ✦':''} <small class="fam-${cards[id].family}">${toneName[cards[id].family]}</small></span><span class="pill">×${n}</span></div>`).join('')}</div>`}
  else if(modal==='relics'&&state){content=`<h2>💎 보유 유물 (${state.relics.length}/12)</h2><p>유물은 덱에 들어가지 않으며 이번 도전에만 적용돼.</p><div class="relic-grid">${state.relics.map(k=>relicTile(k,'disabled')).join('')||'<p>아직 유물이 없어. 정예 전투나 상점을 방문해봐.</p>'}</div>`}
  else if(modal==='card'){content=cardDetailMarkup();eyebrow='CARD DETAILS'}
  else if(modal==='status'){const t=TERMS[statusKey];eyebrow='EFFECT CODEX';content=t?`<h2>${t.icon} ${t.name}</h2><p class="rule-sentence">${t.desc}</p>${statusKey==='synergy'&&state?`<div class="inspect-outcome">${pair().name} 겸직: <b>${dualSummary()}</b><br/>이번 턴: 현실 ${state.usedReal?'✓':'○'} · 판타지 ${state.usedFantasy?'✓':'○'} · ${state.dualTurnUsed?'발동 완료':'대기'}</div>`:''}${statusKey==='fatigueGauge'&&state?`<div class="inspect-outcome">현재 피로도 <b>${state.workFatigue}/6</b> · ${fatigueNote(state.workFatigue)}</div>`:''}${statusKey==='intent'&&state?.phase==='battle'?intentDetailsMarkup():''}<p class="inspect-hint">아이콘을 누르면 언제든 설명을 다시 볼 수 있어.</p>`:''}

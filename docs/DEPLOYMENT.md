@@ -2,8 +2,8 @@
 
 - 운영 주소: https://dualjob.aldol.app/
 - 호스팅: Vercel 정적 사이트
-- 운영 기준선: v0.6.21 (`a2095868a947ab0023ad53699862874871129e66`, 2026-10-29 확인)
-- 다음 패치 후보: v0.6.22. 구현·로컬 검증 범위는 [PATCH-A-v0622.md](PATCH-A-v0622.md) 참조. 운영 배포 완료를 뜻하지 않습니다.
+- 운영 기준선: v0.6.22 (`b234529d32750ffac7cd9fd1d3a50f477d35a7fb`, 2026-10-29 확인)
+- 다음 패치 후보: v0.6.23. 구현·로컬 검증 범위는 [PATCH-B-v0623.md](PATCH-B-v0623.md) 참조. 운영 배포 완료를 뜻하지 않습니다.
 - 저장소: https://github.com/aldol2678/dualjob
 - 자동 배포: `main` → Vercel Production → https://dualjob.aldol.app/
 - 빌드 명령: `python3 scripts/build.py`
