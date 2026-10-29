@@ -1,0 +1,194 @@
+/* ALDOL Game UI Kit: DualJob pilot.
+   Additive visual layer only; do not modify combat geometry or save behavior.
+   Remove this stylesheet link to revert the pilot. */
+:root {
+  --kit-ink: #121525;
+  --kit-panel: #252239;
+  --kit-panel-raised: #342b48;
+  --kit-edge: #827297;
+  --kit-edge-strong: #b8a6d0;
+  --kit-text: #fff8ef;
+  --kit-subtext: #e2d9eb;
+  --kit-gold: #ffcb76;
+  --kit-cyan: #81d9ed;
+  --kit-mint: #8ae7cc;
+  --kit-focus: #a7edff;
+  --kit-r-sm: 11px;
+  --kit-r-md: 15px;
+  --kit-r-lg: 21px;
+  --kit-elevation: 0 5px 0 #100e20, 0 14px 26px #06081658;
+}
+body {
+  color: var(--kit-text);
+  font-family: "DJ Pretendard", system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+button, [role="button"] { touch-action: manipulation; }
+button:focus-visible, [role="button"]:focus-visible,
+[tabindex="0"]:focus-visible, .card:focus-visible,
+a:focus-visible, summary:focus-visible {
+  outline: 3px solid var(--kit-focus);
+  outline-offset: 3px;
+}
+.btn {
+  min-height: 44px;
+  border: 2px solid #80718e;
+  border-radius: var(--kit-r-md);
+  background: linear-gradient(180deg, #473953, #30283f);
+  box-shadow: inset 0 2px 0 #ffffff2d, 0 3px 0 #151220, 0 7px 15px #0004;
+  color: var(--kit-text);
+  font-family: "DJ Pretendard", system-ui, sans-serif;
+  font-weight: 700;
+  line-height: 1.3;
+  text-wrap: pretty;
+  transition: filter .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.btn.primary {
+  color: #302218;
+  background: linear-gradient(180deg, #ffe5a4, #ffc56f 70%, #ed9d52);
+  border-color: #ffe0a2;
+  box-shadow: inset 0 2px 0 #fff9d594, 0 3px 0 #8a542c, 0 9px 18px #0004;
+}
+.btn.calm {
+  color: #d9fbff;
+  background: linear-gradient(180deg, #285364, #173645);
+  border-color: #79cbd5;
+}
+.btn.danger {
+  color: #ffe4e6;
+  background: linear-gradient(180deg, #653748, #442433);
+  border-color: #d08495;
+}
+.btn:active:not(:disabled) {
+  filter: brightness(.97);
+  box-shadow: inset 0 2px 6px #05050b5c, 0 1px 0 #14111d;
+}
+.btn:disabled {
+  opacity: .53;
+  filter: saturate(.65);
+  box-shadow: none;
+}
+.panel, .journey-panel {
+  border: 2px solid #756584;
+  border-radius: var(--kit-r-lg);
+  box-shadow: inset 0 1px 0 #ffffff16, 0 14px 30px #0708125c;
+}
+.panel .section-title, .journey-panel h2,
+.hand-heading h3, .modal h2 {
+  color: var(--kit-text);
+  letter-spacing: -.025em;
+  text-wrap: balance;
+}
+.section-title::after {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 3px;
+  border-radius: 99px;
+  margin-top: 6px;
+  background: linear-gradient(90deg, var(--kit-gold), #ffcb7600);
+}
+.pill, .stat-token, .build-chips li {
+  border-width: 1.5px;
+  box-shadow: inset 0 1px 0 #ffffff12;
+  font-variant-numeric: tabular-nums;
+}
+.pill { color: var(--kit-subtext); }
+.pill.gold { color: #ffe2a5; }
+.pill.mint { color: #b1f5e4; }
+.pill.red { color: #ffbec9; }
+.stage-node {
+  border: 2px solid #665b77;
+  border-radius: var(--kit-r-sm);
+  background: linear-gradient(180deg, #302a43, #211e35);
+  box-shadow: inset 0 1px 0 #ffffff14;
+  font-variant-numeric: tabular-nums;
+}
+.stage-node.now {
+  border-color: #ffe4a4;
+  color: #382719;
+  background: linear-gradient(180deg, #ffe9ac, #f6bd69);
+  box-shadow: 0 0 0 2px #f4bd6530, 0 3px 0 #9f6d3e;
+}
+.stage-node.done {
+  border-color: #6bb6a7;
+  background: linear-gradient(180deg, #27534e, #1c393c);
+  color: #c6ffeb;
+}
+.hand-wrap {
+  border-color: #93809e;
+  box-shadow: inset 0 1px 0 #ffffff1d, 0 11px 22px #0006;
+}
+.card {
+  box-shadow: 0 4px 0 #110f1a, 0 12px 20px #05081566,
+              inset 0 1px 0 #ffffff20;
+}
+.card .cost {
+  border: 2px solid #d6c6e0;
+  box-shadow: 0 2px 0 #100f20;
+  font-variant-numeric: tabular-nums;
+}
+.card .card-name {
+  color: #fffaf2;
+  font-family: "DJ Pretendard", system-ui, sans-serif;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.card .card-desc { color: #f1eaf5; }
+.card.selected-card, .hand-slot.picked .card,
+.card[aria-selected="true"] {
+  outline-color: var(--kit-gold);
+  border-color: var(--kit-gold) !important;
+}
+.reward-grid .card:focus-visible, .journey-rewards .card:focus-visible,
+.hand .card:focus-visible {
+  outline: 3px solid var(--kit-focus);
+  outline-offset: 2px;
+}
+.modal {
+  border: 2px solid #ad96c0;
+  border-radius: var(--kit-r-lg);
+  background: linear-gradient(150deg, #332c48, #1b1b2c);
+  box-shadow: 0 28px 82px #03040bb5, inset 0 2px 0 #ffffff1a;
+}
+.modal-screen { background: #070916d9; }
+.intent {
+  border: 2px solid #e19b9e;
+  color: #ffe3df;
+  background: #522b3b;
+  font-variant-numeric: tabular-nums;
+}
+.hp-rail {
+  border: 1px solid #a39bb5;
+  box-shadow: inset 0 1px 3px #0008;
+}
+.hp-text, .resource strong { font-variant-numeric: tabular-nums; }
+.battle-message {
+  border: 2px solid #80708c;
+  color: #ffebb9;
+  background: #1b1d34ed;
+  box-shadow: inset 0 1px 0 #ffffff12;
+}
+@media (hover:hover) and (pointer:fine) {
+  .btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    border-color: #c4b1d2;
+    filter: brightness(1.08);
+  }
+  .btn.primary:hover:not(:disabled) { border-color: #fff0c2; }
+}
+@media (max-width:530px) {
+  .mast-buttons .btn { min-height: 40px; }
+  .modal { border-radius: 17px; }
+  .stage-node { border-radius: 9px; }
+  .panel, .journey-panel { border-radius: 17px; }
+  .section-title::after { margin-top: 4px; }
+}
+@media (max-width:350px) {
+  .mast-buttons .btn { min-height: 38px; }
+  .pill { max-width: 100%; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .btn { transition: none; }
+  .btn:hover:not(:disabled) { transform: none; }
+}
