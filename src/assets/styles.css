@@ -864,7 +864,7 @@ body.mobile-stage .mobile-battle.c2-battle{--hand-height:clamp(176px,28dvh,236px
 .mobile-stage .modal .coach-actions button{min-height:44px}
 @media(prefers-reduced-motion:reduce){.mobile-stage .mobile-battle.c2-battle .compact-hand .hand-slot .card.selected-card{transform:none}}
 
-.mobile-stage .mobile-battle.c2-battle .hand[data-small-hand="true"]{justify-content:center}
+.mobile-stage .mobile-battle.c2-battle .hand[data-small-hand="true"]{justify-content:safe center}
 .mobile-stage .mobile-battle.c2-battle .hand-slot:focus-within{z-index:31}
 
 
@@ -1121,8 +1121,8 @@ body.mobile-stage .mobile-battle.c2-battle{grid-template-rows:44px clamp(174px,2
 .mobile-stage .mobile-battle.c2-battle .hand-zone{height:auto;flex:1;min-height:0;overflow:hidden}
 .mobile-stage .mobile-battle.c2-battle .hand{--card-w:clamp(118px,32vw,148px);--step:clamp(44px,calc((100vw - 36px - var(--card-w))/4),var(--card-w));align-items:flex-start;padding:10px 8px 4px;height:100%;gap:0;box-sizing:border-box}
 .mobile-stage .mobile-battle.c2-battle .hand-slot{height:min(100%,228px)}
-.mobile-stage .mobile-battle.c2-battle .hand[data-hand-count="1"],.mobile-stage .mobile-battle.c2-battle .hand[data-hand-count="2"]{--card-w:clamp(132px,43vw,154px);gap:8px;justify-content:center}
-.mobile-stage .mobile-battle.c2-battle .hand[data-hand-count="3"]{--card-w:calc((100vw - 40px)/3);gap:6px;justify-content:center}
+.mobile-stage .mobile-battle.c2-battle .hand[data-hand-count="1"],.mobile-stage .mobile-battle.c2-battle .hand[data-hand-count="2"]{--card-w:clamp(132px,43vw,154px);gap:8px;justify-content:safe center}
+.mobile-stage .mobile-battle.c2-battle .hand[data-hand-count="3"]{--card-w:calc((100vw - 40px)/3);gap:6px;justify-content:safe center}
 .mobile-stage .mobile-battle.c2-battle .hand:is([data-hand-count="1"],[data-hand-count="2"],[data-hand-count="3"]) .hand-slot{margin-left:0!important}
 .mobile-stage .mobile-battle.c2-battle .hand[data-hand-count="3"]:has(.picked){justify-content:flex-start}
 .mobile-stage .mobile-battle.c2-battle .hand[data-hand-count="1"] .hand-slot.picked,.mobile-stage .mobile-battle.c2-battle .hand[data-hand-count="2"] .hand-slot.picked{flex-basis:var(--card-w);width:var(--card-w)}
