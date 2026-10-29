@@ -1,0 +1,10 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"project_id\":\"dualjob-v070-art\",\"metadata_structure\":\"PASS\",\"asset_count\":14,\"total_declared_bytes\":327556,\"issues\":[{\"id\":\"card_soulLien\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"card_goldReserve\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"card_hellMarinade\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"card_courseExchange\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"relic_spectralSeal\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"relic_compoundAbacus\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"relic_emberLadle\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"relic_pairedCutlery\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"relic_crossBadge\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"relic_reservePocket\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"relic_lastStand\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"relic_sturdyFolder\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"enemy_stock-audit\",\"caller_status\":\"UNKNOWN\"},{\"id\":\"enemy_cross-exam\",\"caller_status\":\"UNKNOWN\"}],\"declared_status_only\":true,\"content_integrity\":\"UNKNOWN\",\"visual_qa\":\"UNKNOWN\",\"engine_import_qa\":\"UNKNOWN\",\"rights_qa\":\"UNKNOWN\",\"evidence\":{\"basis\":\"caller_supplied_metadata\",\"metadata_sha256\":\"1887bce10f6ed943abae91fc1bca6bf4c4d387f50d4b90daaedc7902f1300a6d\",\"files_read\":0,\"writes\":0,\"persisted\":false,\"hash_scope\":\"normalized request metadata, not asset bytes\"}}"
+    }
+  ],
+  "structuredContent": null,
+  "isError": false
+}

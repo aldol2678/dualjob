@@ -20,7 +20,7 @@ check('fatigue card is selectable but unplayable',()=>{fresh();hand(['fatigue'])
 check('turn end clears selected card',()=>{fresh();hand(['guard']);click('[data-act=selectCard]');click('[data-act=endTurn]');assert.equal(g.selectedCard,null);assert.equal(g.state.turn,2)});
 check('forecast removes enemies killed by curse before attacks',()=>{fresh();g.state.enemies[0].hp=2;g.state.enemies[0].curse=1;g.state.block=3;assert.equal(g.turnForecast(g.state).net,13);g.state.enemies[1].intent.type='guard';assert.equal(g.turnForecast(g.state).net,5)});
 const summarize=s=>JSON.stringify({hp:s.hp,block:s.block,energy:s.energy,ingredient:s.ingredient,reagent:s.reagent,synergies:s.synergies,relicUsed:s.relicUsed,relicTurn:s.relicTurn,enemies:s.enemies.map(e=>[e.hp,e.block,e.debt,e.curse])});
-check('projection matches actual card + synergy across all 4 jobs and all 39 playable cards',()=>{
+check('projection matches actual card + synergy across all 4 jobs and all playable cards',()=>{
  let combos=0;
  for(const pair of Object.keys(g.pairs))for(const id of Object.keys(g.cards).filter(k=>k!=='fatigue')){
   fresh(pair);hand([id]);const s=g.state;s.energy=10;s.ingredient=3;s.reagent=3;s.usedReal=g.cards[id].family==='fantasy';s.usedFantasy=g.cards[id].family==='real';s.upgrades={[id]:true};s.relics=['dualContract','protectiveApron'];s.relicTurn={};s.relicUsed={};

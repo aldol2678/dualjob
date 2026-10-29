@@ -91,7 +91,7 @@ check('pending training reload; malformed new fields reject backup without alter
  assert.equal(JSON.stringify(s),before);
 });
 check('old revision remains legacy on resume, backup, stage transition and shop',()=>{
- const s=start();delete s.contentRevision;delete s.trainingId;delete s.trainingTurn;s.stage=2;s.phase='rest';const packet=JSON.stringify({schema:1,run:s,meta:g.meta,settings:{readableBattle:false}}),r=boot(packet),a=r.window.__dj;
+ const s=start();delete s.campaignId;delete s.contentRevision;delete s.trainingId;delete s.trainingTurn;s.stage=2;s.phase='rest';const packet=JSON.stringify({schema:1,run:s,meta:g.meta,settings:{readableBattle:false}}),r=boot(packet),a=r.window.__dj;
  r.window.document.querySelector('[data-act=resume]').click();assert.equal(a.state.contentRevision,20);a.restAction('heal');assert.equal(a.state.phase,'map');a.chooseNode(1);assert.equal(a.state.phase,'shop');assert.equal(a.state.shop.welfare,undefined);assert.equal(a.parseBackup(a.backupText()).run.contentRevision,20);r.window.close();
 });
 check('welfare: exact 10G discount, job fit, persistent quote, confirmation debit, no duplicate purchase',()=>{
@@ -105,7 +105,7 @@ check('welfare: exact 10G discount, job fit, persistent quote, confirmation debi
 check('welfare: insufficient money, all preferred owned, all commons owned, no discount outside fourth floor',()=>{
  let s=start();s.stage=3;g.chooseNode(1);const before=JSON.stringify(s);g.buyItem('relic',0);assert.equal(JSON.stringify(s),before);
  s=start();s.relics=['protectiveApron','manaAmp'];s.stage=3;g.chooseNode(1);assert(s.shop.welfare);assert(!s.relics.includes(s.shop.welfare.id));
- s=start();s.relics=['overtimeClock','manaAmp','lunchVoucher','copperBuckle','paydayCoupon','protectiveApron'];s.stage=3;g.chooseNode(1);assert.equal(s.shop.welfare,undefined);
+ s=start();s.relics=g.eligibleRelics().filter(id=>g.relics[id].rarity==='일반');s.stage=3;g.chooseNode(1);assert.equal(s.shop.welfare,undefined);
  for(const stage of [0,1,5,7]){s=start();s.stage=stage;if(stage===5)g.takeFloorDecision(5,0);g.chooseNode(g.mapRows[stage].indexOf('shop'));assert.equal(s.shop.welfare,undefined);}
 });
 check('welfare: malformed discount rejected rather than silently granting a cheaper price',()=>{

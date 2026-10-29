@@ -1,0 +1,321 @@
+{
+  "project_id": "dualjob-v070-images",
+  "metadata_structure": "PASS",
+  "asset_count": 75,
+  "total_declared_bytes": 2174912,
+  "issues": [
+    {
+      "id": "asset-17f12608f034ae40",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-18f3191534509e32",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-25554b3891797a09",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-2724e38724810a26",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-2dd60e1ce96712ed",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-3e05e95693d3b460",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-44608f9b5557e8ac",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-4c415c538bda9da1",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-4e915676ddf4825f",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-580ff4dd7843f5ad",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-5bc6e1896de3002a",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-622d2ec463a27597",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-670b1035c7835a35",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-69d8f6064058e690",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-70682a3db947e514",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-7125ab5be2562ad9",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-76a9a79213815573",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-795057e3d6ce4acc",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-7b996364e449a385",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-7fd1c796f7e3937d",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-8bdc01be88cc7d49",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-8d27096eca4fdbb5",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-950bc127d00e4e6e",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-b39d938c5afe471b",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-b410910e08a0b50f",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-b7781b7874be7b43",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-b936a172ed0fee2f",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-bdfa70e8a4391a5f",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-eb2560a375e2f206",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "asset-f6d712a4cb232617",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-audit-2e50ba2041d27784",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-balance-d071a551f2410cee",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-catalyst-fcf2f957906cefc6",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-chainReaction-eb4614fe990fafc7",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-closeBooks-4b2db0044d7e74a1",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-contagion-aae928af2b7996f0",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-darkBargain-ebdb406e6786d941",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-distill-e85ddd5858f46cd6",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-eclipse-3e9abcf7c74c7139",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-elixir-928ab0fc818f6630",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-fatigue-c067afe037f1803d",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-flambe-e7cedf5e695fb608",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-flashFlask-1d5979543dbedaaf",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-goldAudit-0261728464902cd8",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-grandFeast-5535d182f4d389b7",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-guard-59e1984d7acf2cb3",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-hellTax-7ebf0b1d1cafb002",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-hotMeal-a7df99501bd88835",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-hustle-10e8e3a799202371",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-night-d29c7038d0f9d4e1",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-pantry-d58010130c9b4a12",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-receipt-c4dcffd8e1e9f711",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-riskHedge-afd83f27e0789a2f",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-spiceStorm-33c9519f29655dda",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-strike-d782333209f1d2cb",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-surpriseAudit-2f5776a6d7068d12",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "card-transmute-0b3aa78b1eb0b548",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "energy-battery-0-e0991b68df0d609b",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "energy-battery-1-111f3700e64420c3",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "energy-battery-2-625c5bb3a2854c89",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "energy-battery-3-346ce767847b9cda",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "energy-battery-4-cb24fc2c020e33ba",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "relic-copperBuckle-727ef6ed5514993a",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "relic-dualContract-9c42678fe47bcc30",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "relic-glassRetort-4d15ba2a547840c0",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "relic-infinitePot-23e7001196d56b80",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "relic-ledgerBeyond-d32f8f8f96b6b012",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "relic-lunchVoucher-e8b7ed334e14916a",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "relic-manaAmp-93c096efcb96a39c",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "relic-overtimeClock-9269fad8355b639a",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "relic-paydayCoupon-bfb4bcf8320623b7",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "relic-protectiveApron-67288d8941e7b48e",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "relic-ravenFeather-5aad590f235f330e",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "relic-severancePackage-4253f8a2203fa9a8",
+      "caller_status": "UNKNOWN"
+    },
+    {
+      "id": "share-73351019ce40f3ea",
+      "caller_status": "UNKNOWN"
+    }
+  ],
+  "declared_status_only": true,
+  "content_integrity": "UNKNOWN",
+  "visual_qa": "UNKNOWN",
+  "engine_import_qa": "UNKNOWN",
+  "rights_qa": "UNKNOWN",
+  "evidence": {
+    "basis": "caller_supplied_metadata",
+    "metadata_sha256": "723831c00402ae164567e68bb5800655cdb31197ae0a4c4d61e1233bb48aa39f",
+    "files_read": 0,
+    "writes": 0,
+    "persisted": false,
+    "hash_scope": "normalized request metadata, not asset bytes"
+  }
+}

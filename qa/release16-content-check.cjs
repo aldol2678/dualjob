@@ -2,7 +2,8 @@ const fs=require('fs'),assert=require('assert/strict'),{JSDOM,VirtualConsole}=re
 const html=fs.readFileSync('output/dualjob-debug.html','utf8').replace(/(data:[^;"'<>\s]+;base64,)[A-Za-z0-9+/=]+/g,'$1AA==');
 const errors=[],vc=new VirtualConsole();vc.on('jsdomError',e=>{if(e.type!=='css-parsing')errors.push(e.message)});
 function boot(packet){return new JSDOM(html,{url:'https://qa.test/?debug=1',runScripts:'dangerously',pretendToBeVisual:true,virtualConsole:vc,beforeParse(w){w.innerWidth=320;w.innerHeight=640;w.scrollTo=()=>{};w.matchMedia=()=>({matches:true});if(packet)w.localStorage.setItem('dualJobSave_v1',packet)}})}
-const dom=boot(),w=dom.window,g=w.__dj,d=w.document;g.meta.tutorialDone=true;g.pick('chef-warlock');g.newRun();g.modal='';
+const dom=boot(),w=dom.window,g=w.__dj,d=w.document;// This suite preserves the original nine-zone content contract.
+const newCampaign=g.newRun;g.newRun=()=>{newCampaign();delete g.state.campaignId};g.meta.tutorialDone=true;g.pick('chef-warlock');g.newRun();g.modal='';
 const names=['출입 심사대','서류 보관실','복사실','사내 복지층','계약 심사부','결산실','야근 전용층','인사 대기실','인사부장실'];
 for(let stage=0;stage<9;stage++){
  g.state.stage=stage;g.state.phase='map';g.render();assert.equal(d.querySelector('.map-flow h1').textContent,names[stage]);

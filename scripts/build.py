@@ -18,14 +18,14 @@ for source,prefix,ext in [(js,'game','js'),(css,'styles','css')]:
 (DIST/'index.html').write_text(page)
 for name in ['404.html','robots.txt']:shutil.copy2(SRC/name,DIST/name)
 shutil.copy2(ROOT/'vercel.json',DIST/'vercel.json')
-manifest={'version':'0.6.24','assets':{}}
+manifest={'version':'0.7.0','assets':{}}
 for p in sorted((DIST/'assets').iterdir()):
  b=p.read_bytes();manifest['assets'][p.name]={'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()}
 (OUT/'asset-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
 # Standalone files retain the same code and all runtime assets.
 standalone=(SRC/'index.html').read_text()
 inline_js=js;inline_css=css
-mime={'.webp':'image/webp','.svg':'image/svg+xml','.woff':'font/woff','.jpg':'image/jpeg'}
+mime={'.webp':'image/webp','.svg':'image/svg+xml','.woff':'font/woff','.woff2':'font/woff2','.jpg':'image/jpeg'}
 for p in (SRC/'assets').iterdir():
  if p.suffix not in mime:continue
  uri='data:'+mime[p.suffix]+';base64,'+base64.b64encode(p.read_bytes()).decode()

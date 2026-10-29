@@ -20,6 +20,6 @@ for(const id of Object.keys(g.relics)){
  g.state.shop.relics=[id];g.render();assert.equal(d.querySelector('.relic-art').dataset.asset,'relic_'+id);
  const before=JSON.stringify(g.state);d.querySelector('[data-act=previewShopRelic]').click();assert.equal(d.querySelector('.txn-icon .relic-art').dataset.asset,'relic_'+id);assert.equal(JSON.stringify(g.state),before);d.querySelector('[data-act=closeModal]').click();
 }
-g.state.relics=Object.keys(g.relics);g.modal='relics';g.render();assert.equal(d.querySelectorAll('#modal .relic-art').length||d.querySelectorAll('.modal .relic-art').length,12);
+g.state.relics=Object.keys(g.relics);g.modal='relics';g.render();assert.equal(d.querySelectorAll('#modal .relic-art').length||d.querySelectorAll('.modal .relic-art').length,20);
 assert.deepEqual(errors,[]);dom.window.close();
-console.log('PASS art: 40 illustrated cards, 12 illustrated relics, 39 byte hashes, standalone image embedding, shop previews retain state, owned relic gallery. Browser geometry is not measured by this test.');
+console.log('PASS art: 56 cards and 20 relics with mapped illustrations, 39 byte hashes, standalone image embedding, shop previews retain state, owned relic gallery. Browser geometry is not measured by this test.');

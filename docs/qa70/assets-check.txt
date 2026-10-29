@@ -1,0 +1,23 @@
+PASS 1180x752: distinct enemy portraits, card art, small-label font, relic preview purity, 15/12 counts, no overflow
+PASS 390x844: distinct enemy portraits, card art, small-label font, relic preview purity, 15/12 counts, no overflow
+PASS 320x568: distinct enemy portraits, card art, small-label font, relic preview purity, 15/12 counts, no overflow
+PASS 844x390: distinct enemy portraits, card art, small-label font, relic preview purity, 15/12 counts, no overflow
+PASS 14 unique byte hashes, dimensions/alpha, embedded runtime paths, hosted WOFF2 loading, review board. Browser emulation only.
+
+PASS 1180x752 accountant-warlock: supply compare/reload/take, late battle card, 12-zone boss, classic resume
+PASS 1180x752 accountant-alchemist: supply compare/reload/take, late battle card, 12-zone boss, classic resume
+PASS 1180x752 chef-warlock: supply compare/reload/take, late battle card, 12-zone boss, classic resume
+PASS 1180x752 chef-alchemist: supply compare/reload/take, late battle card, 12-zone boss, classic resume
+PASS 390x844 accountant-warlock: supply compare/reload/take, late battle card, 12-zone boss, classic resume
+PASS 390x844 accountant-alchemist: supply compare/reload/take, late battle card, 12-zone boss, classic resume
+PASS 390x844 chef-warlock: supply compare/reload/take, late battle card, 12-zone boss, classic resume
+PASS 390x844 chef-alchemist: supply compare/reload/take, late battle card, 12-zone boss, classic resume
+PASS 320x568 accountant-warlock: supply compare/reload/take, late battle card, 12-zone boss, classic resume
+PASS 320x568 accountant-alchemist: supply compare/reload/take, late battle card, 12-zone boss, classic resume
+PASS 320x568 chef-warlock: supply compare/reload/take, late battle card, 12-zone boss, classic resume
+PASS 320x568 chef-alchemist: supply compare/reload/take, late battle card, 12-zone boss, classic resume
+PASS 844x390 accountant-warlock: supply compare/reload/take, late battle card, 12-zone boss, classic resume
+PASS 844x390 accountant-alchemist: supply compare/reload/take, late battle card, 12-zone boss, classic resume
+PASS 844x390 chef-warlock: supply compare/reload/take, late battle card, 12-zone boss, classic resume
+PASS 844x390 chef-alchemist: supply compare/reload/take, late battle card, 12-zone boss, classic resume
+PASS all 16 browser journeys; no page errors. Touch emulation, not physical Android/iOS.

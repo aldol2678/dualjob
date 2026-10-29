@@ -1,0 +1,38 @@
+{
+  "method": "Full glyph WOFF to WOFF2; cmap preserved; no subset",
+  "fonts": [
+    {
+      "old": "asset-ba3dfe71f8a5e9c7.woff",
+      "new": "pretendard-regular.woff2",
+      "before": 1045232,
+      "after": 790700,
+      "glyphs": 14336,
+      "sha256": "ea40ba99c83fab21bd147b920833b76c12d38558a63826346846a3802e7f374c",
+      "hangul_syllables_checked": 555,
+      "missing_hangul": 0
+    },
+    {
+      "old": "asset-d04730e95a9e8005.woff",
+      "new": "pretendard-bold.woff2",
+      "before": 1067708,
+      "after": 819956,
+      "glyphs": 14336,
+      "sha256": "7d9eadda3e0a18b1b64fc98b54cfed548b069725d506eceab1b08874ab4a9878",
+      "hangul_syllables_checked": 555,
+      "missing_hangul": 0
+    },
+    {
+      "old": "asset-8d8325016935350c.woff",
+      "new": "gmarket-bold.woff2",
+      "before": 964760,
+      "after": 591084,
+      "glyphs": 12266,
+      "sha256": "6c7ee1fd2c96ef7e98a712012105b649a0d46f7fabadff9566c3911c82d49015",
+      "hangul_syllables_checked": 555,
+      "missing_hangul": 0
+    }
+  ],
+  "total_before": 3077700,
+  "total_after": 2201740,
+  "saved_percent": 28.46
+}

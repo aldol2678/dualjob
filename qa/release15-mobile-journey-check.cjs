@@ -11,11 +11,11 @@ let groups=0;function check(name,fn){fn();groups++;console.log('PASS',name)}
 check('four careers reuse portraits, stay in place, update dock/details, and start correct job',()=>{
  for(const key of ['chef-warlock','accountant-warlock','accountant-alchemist','chef-alchemist']){const t=boot();assert.equal(t.d.querySelectorAll('.career-tile').length,4);assert.equal(t.d.querySelectorAll('.career-portrait img,.career-portrait svg').length,4);assert(!t.d.querySelector('.career-details').open);const old=JSON.stringify(t.g.meta);t.click('[data-pair="'+key+'"]');assert.equal(t.g.state,null);assert.equal(JSON.stringify(t.g.meta),old);assert.equal(t.scrollCalls,0);assert.equal(t.d.querySelectorAll('.career-tile[aria-pressed=true]').length,1);assert(t.d.querySelector('.start-dock').textContent.includes(t.g.pairs[key].name));assert(t.d.querySelector('.career-details summary').textContent.includes(t.g.pairs[key].name));assert.equal(t.d.activeElement.dataset.pair,key);const ids=[...t.d.querySelectorAll('[id]')].map(n=>n.id);assert.equal(new Set(ids).size,ids.length);t.click('[data-act=start]');assert.equal(t.g.state.real+'-'+t.g.state.fantasy,key);assert.equal(t.g.state.phase,'map');t.close()}
 });
-check('map selection is non-mutating; all 25 destinations require explicit confirmation',()=>{
+check('map selection is non-mutating; all 34 destinations require explicit confirmation',()=>{
  let cases=0;const t=boot();
- for(let stage=0;stage<9;stage++)for(let index=0;index<t.g.mapRows[stage].length;index++){
-  const s=newRun(t);s.stage=stage;t.g.save();t.g.render();const before=JSON.stringify(s),saved=readRun(t.w);assert.equal(t.d.querySelectorAll('.current-routes button').length,t.g.mapRows[stage].length);assert.equal(t.d.querySelectorAll('.route-overview-row').length,9);assert(!t.d.querySelector('.route-overview').open);assert(t.d.querySelector('[data-act=goJourneyRoute]').disabled);
-  t.click('[data-act=selectJourneyRoute][data-index="'+index+'"]');assert.equal(JSON.stringify(s),before);assert.equal(readRun(t.w),saved);assert.equal(t.d.querySelectorAll('.route-choice.selected').length,1);const type=t.g.mapRows[stage][index];
+ for(let stage=0;stage<12;stage++)for(let index=0;index<t.g.routeRows()[stage].length;index++){
+  const s=newRun(t);s.stage=stage;t.g.save();t.g.render();const before=JSON.stringify(s),saved=readRun(t.w);assert.equal(t.d.querySelectorAll('.current-routes button').length,t.g.routeRows()[stage].length);assert.equal(t.d.querySelectorAll('.route-overview-row').length,12);assert(!t.d.querySelector('.route-overview').open);assert(t.d.querySelector('[data-act=goJourneyRoute]').disabled);
+  t.click('[data-act=selectJourneyRoute][data-index="'+index+'"]');assert.equal(JSON.stringify(s),before);assert.equal(readRun(t.w),saved);assert.equal(t.d.querySelectorAll('.route-choice.selected').length,1);const type=t.g.routeRows()[stage][index];
    if(stage===5||stage===6){
     // v0.6.19: settle floor-specific decision before route confirmation.
     assert(t.d.querySelector('[data-act=goJourneyRoute]').disabled);
@@ -23,9 +23,9 @@ check('map selection is non-mutating; all 25 destinations require explicit confi
     assert.equal(s.floorDecisions[stage],0);
     assert(!t.d.querySelector('[data-act=goJourneyRoute]').disabled);
    }
-   t.click('[data-act=goJourneyRoute]');assert.equal(s.nodeType,type);assert.equal(s.path[stage].choice,index);assert.equal(s.phase,['battle','elite','boss'].includes(type)?'battle':type);cases++;
+   t.click('[data-act=goJourneyRoute]');assert.equal(s.nodeType,type);assert.equal(s.path[stage].choice,index);assert.equal(s.phase,['battle','elite','boss'].includes(type)?'battle':type==='supply'?'reward':type);cases++;
  }
- assert.equal(cases,25);t.close();
+ assert.equal(cases,34);t.close();
 });
 check('reward select, switch, details, confirm and skip do not double-award',()=>{
  const t=boot(),ids=['chop','soul','guard'];let s=reward(t,ids),deck=s.deck.length,gold=s.gold;const before=JSON.stringify(s);assert(t.d.querySelector('[data-act=takeJourneyReward]').disabled);

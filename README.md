@@ -1,10 +1,10 @@
 # 겸직금지! · DualJob
 
-현실 직업과 판타지 직업을 조합하는 카드 로그라이트입니다. 네 가지 융합 직업으로 아홉 구역을 돌파하고 인사부장 마왕에게 퇴사를 통보하세요.
+현실 직업과 판타지 직업을 조합하는 카드 로그라이트입니다. 이 후보에서는 새 도전이 12구역이며 기존 9구역 저장은 그대로 이어집니다.
 
-**[게임 플레이](https://dualjob.aldol.app/)** · 운영 기준선 v0.6.23 · 이 브랜치: v0.6.24 C 패치 후보
+**[게임 플레이](https://dualjob.aldol.app/)** · 기준 main v0.6.24 · 이 브랜치: v0.7.0 확장 후보
 
-A·B 패치는 운영에 반영했습니다. C 패치의 연출 속도·행동별 기록·빌드 회고·재도전 개선은 [docs/PATCH-C-v0624.md](docs/PATCH-C-v0624.md)에 정리했습니다. 이 브랜치의 구현은 운영 배포 완료를 뜻하지 않습니다.
+12구역, 카드 16종·유물 8종 추가, 직업 보급과 후반 적 패턴을 구현했습니다. 범위·저장 호환·검증 및 남은 확인은 [docs/PATCH-v070.md](docs/PATCH-v070.md)에 정리했습니다. 후보 브랜치의 구현은 운영 배포 완료를 뜻하지 않습니다.
 
 ## 실행
 
@@ -54,6 +54,9 @@ node qa/release21-boundary-check.cjs
 node qa/release22-clarity-check.cjs
 node qa/release23-balance-check.cjs
 node qa/release24-replay-check.cjs
+node qa/release70-expansion-check.cjs
+# Chromium/Playwright 및 sharp가 있는 환경; CHROMIUM_PATH는 설치 경로로 지정
+CHROMIUM_PATH=/path/to/chromium node qa/release70-assets-check.cjs
 ```
 
 자동 검사는 JSDOM을 사용하므로 실제 모바일 터치·전체화면·브라우저별 렌더링 검증을 대체하지 않습니다. 자동 실행 GitHub Actions는 설정하지 않았습니다.
