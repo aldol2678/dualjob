@@ -1,0 +1,239 @@
+C patch v0.6.24 local verification · 2026-10-29
+Synthetic fixtures, not physical-device QA or human play evidence.
+
+c24-final-release15-card-regression.log
+PASS tap selects without modal or spending energy
+PASS target tap uses chosen card on specified enemy
+PASS self card applies via hero tap
+PASS wrong target does not spend self card
+PASS cancel and Escape leave battle unchanged
+PASS unaffordable card remains inspectable and cannot be cast
+PASS fatigue card is selectable but unplayable
+PASS turn end clears selected card
+PASS forecast removes enemies killed by curse before attacks
+  projection cases 156
+PASS projection matches actual card + synergy across all 4 jobs and all 39 playable cards
+PASS lethal self damage and revival projection match actual
+PASS horizontal gesture remains scroll even when moved over enemy
+PASS upward drag uses once and suppresses follow-up click
+PASS drop outside targets and pointer cancellation never spend card
+PASS card front has readable effect labels
+PASS v0.5-C2.2 save imports to new key without overwriting original
+ALL 16 checks PASS; script errors: 0
+
+c24-final-release15-check.log
+PASS release hides debug even with debug URL, shows save/about and retains licenses
+PASS backup preview is read-only, cancel is safe, commit is atomic and survives reload
+PASS failed restore keeps prior persisted and live state; storage retry and backup remain available
+PASS malformed, oversized, future, prototype, unknown card and invalid shop imports never write
+PASS all four jobs and all active phases round-trip, including settings and terminal meta-only backup
+PASS legacy save migrates without changing original; blocked/corrupt storage shows warning
+ALL 6 release groups PASS; actual file-picker/download/browser visuals unverified.
+
+c24-final-release15-combat-flow-check.log
+PASS enemy frames show acting unit and intermediate HP; final state saved immediately; input locked
+PASS skip, Escape, background and reduced-motion changes finish without repeating resolution
+PASS curse kill cancels enemy attack and final reward arrives once, including resize during playback
+PASS card kill, elite reward, boss victory and self-cost defeat commit once before presentation
+PASS revival is a separate frame and does not consume its relic twice
+PASS all four dual jobs show capped actual gains, condition completion and one activation
+PASS resume uses committed state even when original window closes mid-animation
+ALL 7 combat-flow groups PASS. Controlled timers and mock geometry; real rendering/touch unverified.
+
+c24-final-release15-mobile-journey-check.log
+PASS four careers reuse portraits, stay in place, update dock/details, and start correct job
+PASS map selection is non-mutating; all 25 destinations require explicit confirmation
+PASS reward select, switch, details, confirm and skip do not double-award
+PASS stale reward/route selections cannot apply to another run or changed options
+PASS all playable reward cards expose full details and preserve three-way comparison
+PASS saved-run resume precedes career picker; no transient choices saved
+PASS mobile, desktop and short-landscape CSS: dock, readable detail, three columns, footer and menu access
+ALL 7 journey groups PASS. DOM/CSS and interaction checks; actual rendered geometry/touch UNKNOWN.
+
+c24-final-release15-web-check.log
+PASS web build: 80 asset hashes; CSS/JS paths; external-resource DOM boot; save menu; game start; no public debug hook. HTTP headers/rendered device behavior unverified.
+
+c24-final-release16-content-check.log
+PASS nine named floors, mandatory director messages, non-mutating map previews at 320×640 DOM
+PASS all nine encounter compositions reachable; 22 stage/branch rolls, four-turn forecast/execution and backup round trips
+PASS reload resumes the same enemies and intents without rerolling
+
+c24-final-release17-art-check.log
+PASS art: 40 illustrated cards, 12 illustrated relics, 39 byte hashes, standalone image embedding, shop previews retain state, owned relic gallery. Browser geometry is not measured by this test.
+
+c24-final-release18-mobile-check.log
+PASS hand counts 1/2/3/5/8, energy controls precede hand
+PASS zero-cost cards, overtime availability and fatigue-only hands
+PASS preview is non-mutating, spending / energy gain / dual relic match actual resolution
+PASS charge / guard timing and damage forecast
+PASS five SVG states have exactly 0/1/2/3/3 lit cells, separate text, no scripts. DOM assertions only; rendered mobile geometry/touch not verified by this test.
+
+c24-final-release19-content-check.log
+PASS copier makes a combat-only copy, without changing permanent deck
+PASS floor commitments once-only, delayed payout on victory and night shift fatigue
+PASS four job-specific encounter pools and choice effects
+PASS boss phase trigger, damage forecast, energy reward, mobile warning and saved-run resume (JSDOM only)
+
+c24-final-release20-save-recovery-check.log
+PASS primary and recovery copies stored atomically at 2nd map
+PASS reload in same origin exposes resume CTA
+PASS missing primary restores secondary without losing progress
+PASS corrupt primary falls back to secondary with warning
+PASS valid packet with corrupt embedded run falls back without overwriting source first
+PASS intentional run:null never resurrects stale recovery
+PASS recovery-slot write failure leaves successful primary save intact
+PASS primary write failure is prominently diagnosed, not called saved
+PASS pagehide flush retains last unsaved run state
+PASS mid-battle turn 2 reload resumes identical cards, enemies, and HP without rerolling
+PASS separate browser context is UNKNOWN/no shared localStorage
+PASS v0.6.20 recovery/reload: 11 checks; JSDOM storage simulation only
+
+c24-final-release21-boundary-check.log
+PASS revision21 early stage 0 null training import preserved
+PASS revision21 early stage 1 null training import preserved
+PASS revision21 early stage 2 null training import preserved
+PASS legitimate stage3 training wait import preserves pending choice
+PASS revision21 stage3 missing training rejected by import and contract
+PASS revision21 stage4 missing training rejected by import and contract
+PASS revision21 stage5 missing training rejected by import and contract
+PASS revision21 stage6 missing training rejected by import and contract
+PASS revision21 stage7 missing training rejected by import and contract
+PASS revision21 stage8 missing training rejected by import and contract
+PASS legacy revision undefined late-stage null retained
+PASS legacy revision 20 late-stage null retained
+PASS invalid/future revision 19 rejected
+PASS invalid/future revision 22 rejected
+PASS invalid/future revision 21 rejected
+PASS invalid/future revision null rejected
+PASS training wait at invalid stage0 rejected
+PASS training wait at invalid stage2 rejected
+PASS training wait at invalid stage4 rejected
+PASS training wait at invalid stage8 rejected
+PASS enforcement: selected state import and rendered popup wording
+PASS posthumous: selected state import and rendered popup wording
+PASS cashflow: selected state import and rendered popup wording
+PASS investment: selected state import and rendered popup wording
+PASS fermentation: selected state import and rendered popup wording
+PASS furnace: selected state import and rendered popup wording
+PASS course: selected state import and rendered popup wording
+PASS molecular: selected state import and rendered popup wording
+PASS defeat stage0: ended run clears save and backup keeps metadata
+PASS defeat stage4: ended run clears save and backup keeps metadata
+PASS victory stage8: ended run clears save and backup keeps metadata
+PASS no unexpected JSDOM errors
+{"pass":32,"fail":0}
+
+c24-final-release21-training-check.log
+PASS all eight courses: stage-three rest/reward/elite completion gates once; choices are job-scoped
+PASS selection/switch/cancel is read-only; confirm applies once and stale selection cannot affect a new run
+PASS enforcement: +4 cap, kill transfer, survivor refund, no-spend does not use trigger
+PASS posthumous: highest-debt tie uses leftmost, consumes one, buffs before damage, forecast is pure
+PASS cashflow: refund once before/after kill; self-target follows highest HP; capped resources
+PASS investment: 3 reagent threshold; ends with 2, +5 defense, deterministic highest-HP debt
+PASS fermentation: every survivor, single survivor +2; infinitePot refund does not hide spending
+PASS furnace: 28/1 base signature; upgrades apply once; AoE primary only; healing cards do not consume trigger
+PASS furnace: ravenFeather relic heal is not penalized; last-enemy victory preserves correct heal
+PASS course: consecutive family order only, neutral breaks, one flat block, one fusion boost, expires
+PASS molecular: ingredient-only/reagent-only/both; actual spending wins over card label and refunds
+PASS normal auto dual and dualContract stack once with course; no additional energy/draw from training
+PASS all eight courses reload mid-battle without resetting used flag or fusion readiness
+PASS pending training reload; malformed new fields reject backup without altering live state
+
+c24-final-release22-clarity-check.log
+PASS four careers: upgraded card rules and accessible totals match effect recorder
+PASS live draw count honors hand cap while base comparison remains uncapped
+PASS resource limits report actual gain without changing caps
+PASS two victories with 2+3 enemies count five, including curse and AoE; previews never count
+PASS partial battle kills survive backup; legacy totals remain unknown; invalid totals rejected
+PASS first input instructions, invalid target, cancel and double click preserve one action
+ALL 6 Patch A groups PASS
+
+c24-final-release23-balance-check.log
+PASS four careers: a thin deck cannot repeatedly redraw its zero-cost card; next turn releases it
+PASS duplicate copies and previous-turn discards stay usable; current-turn copies stay held
+PASS draw/energy/discount combination terminates without losing any copies
+PASS mid-turn lock survives backup and reload; old saves without it load; invalid locks are rejected
+PASS boss threshold preserves current intent and forecast; first verdict has a full response turn
+PASS curse threshold cannot cause a surprise verdict; old telegraphed review values persist
+PASS a lethal burst still cancels the boss action; no forced phase or HP inflation
+ALL 7 Patch B groups PASS
+
+c24-final-release24-replay-check.log
+PASS three speeds commit identical enemy-turn results immediately; fast uses half the frame time
+PASS minimal blocks only accidental repeat: a card or new battle permits the next turn
+PASS all four careers: card and dual results identical across speeds; costs remain readable
+PASS OS reduced motion overrides normal and fast; minimal never adds moving overlays
+PASS grouped logs preserve cause/effect order, survive backup, and previews do not mutate them
+PASS log bounds, malformed backups, old saves and HTML escaping
+PASS speed settings round-trip and restore; invalid values rejected
+PASS eight specializations: result recap, alternative goals and same-job retry preserve meta, reset run
+ALL 8 Patch C groups PASS; mocked clocks/geometry, not human fun or physical-device QA.
+
+c24-release22-browser-check.log
+PASS Chromium 1180x752 chef-warlock: layout, target, self, cancel, single execution, turn, reload, boss/10 cards
+PASS Chromium 1180x752 accountant-warlock: layout, target, self, cancel, single execution, turn, reload, boss/10 cards
+PASS Chromium 1180x752 accountant-alchemist: layout, target, self, cancel, single execution, turn, reload, boss/10 cards
+PASS Chromium 1180x752 chef-alchemist: layout, target, self, cancel, single execution, turn, reload, boss/10 cards
+PASS Chromium 390x844 chef-warlock: layout, target, self, cancel, single execution, turn, reload, boss/10 cards
+PASS Chromium 390x844 accountant-warlock: layout, target, self, cancel, single execution, turn, reload, boss/10 cards
+PASS Chromium 390x844 accountant-alchemist: layout, target, self, cancel, single execution, turn, reload, boss/10 cards
+PASS Chromium 390x844 chef-alchemist: layout, target, self, cancel, single execution, turn, reload, boss/10 cards
+PASS Chromium 844x390 chef-warlock: layout, target, self, cancel, single execution, turn, reload, boss/10 cards
+PASS Chromium 844x390 accountant-warlock: layout, target, self, cancel, single execution, turn, reload, boss/10 cards
+PASS Chromium 844x390 accountant-alchemist: layout, target, self, cancel, single execution, turn, reload, boss/10 cards
+PASS Chromium 844x390 chef-alchemist: layout, target, self, cancel, single execution, turn, reload, boss/10 cards
+PASS production has no debug hook; no page errors
+
+c24-release23-browser-check.log
+PASS 1180x752 chef-warlock: cycle, saved lock, next-turn release, boss warning and layout
+PASS 1180x752 chef-alchemist: cycle, saved lock, next-turn release, boss warning and layout
+PASS 1180x752 accountant-warlock: cycle, saved lock, next-turn release, boss warning and layout
+PASS 1180x752 accountant-alchemist: cycle, saved lock, next-turn release, boss warning and layout
+PASS 390x844 chef-warlock: cycle, saved lock, next-turn release, boss warning and layout
+PASS 390x844 chef-alchemist: cycle, saved lock, next-turn release, boss warning and layout
+PASS 390x844 accountant-warlock: cycle, saved lock, next-turn release, boss warning and layout
+PASS 390x844 accountant-alchemist: cycle, saved lock, next-turn release, boss warning and layout
+PASS 844x390 chef-warlock: cycle, saved lock, next-turn release, boss warning and layout
+PASS 844x390 chef-alchemist: cycle, saved lock, next-turn release, boss warning and layout
+PASS 844x390 accountant-warlock: cycle, saved lock, next-turn release, boss warning and layout
+PASS 844x390 accountant-alchemist: cycle, saved lock, next-turn release, boss warning and layout
+PASS no browser page errors
+
+c24-browser-final.log
+PASS 1180x752 chef-warlock normal: feedback, reload, grouped log, result, retry
+PASS 1180x752 chef-warlock fast: feedback, reload, grouped log, result, retry
+PASS 1180x752 chef-warlock minimal: feedback, reload, grouped log, result, retry
+PASS 1180x752 chef-alchemist normal: feedback, reload, grouped log, result, retry
+PASS 1180x752 chef-alchemist fast: feedback, reload, grouped log, result, retry
+PASS 1180x752 chef-alchemist minimal: feedback, reload, grouped log, result, retry
+PASS 1180x752 accountant-warlock normal: feedback, reload, grouped log, result, retry
+PASS 1180x752 accountant-warlock fast: feedback, reload, grouped log, result, retry
+PASS 1180x752 accountant-warlock minimal: feedback, reload, grouped log, result, retry
+PASS 1180x752 accountant-alchemist normal: feedback, reload, grouped log, result, retry
+PASS 1180x752 accountant-alchemist fast: feedback, reload, grouped log, result, retry
+PASS 1180x752 accountant-alchemist minimal: feedback, reload, grouped log, result, retry
+PASS 390x844 chef-warlock normal: feedback, reload, grouped log, result, retry
+PASS 390x844 chef-warlock fast: feedback, reload, grouped log, result, retry
+PASS 390x844 chef-warlock minimal: feedback, reload, grouped log, result, retry
+PASS 390x844 chef-alchemist normal: feedback, reload, grouped log, result, retry
+PASS 390x844 chef-alchemist fast: feedback, reload, grouped log, result, retry
+PASS 390x844 chef-alchemist minimal: feedback, reload, grouped log, result, retry
+PASS 390x844 accountant-warlock normal: feedback, reload, grouped log, result, retry
+PASS 390x844 accountant-warlock fast: feedback, reload, grouped log, result, retry
+PASS 390x844 accountant-warlock minimal: feedback, reload, grouped log, result, retry
+PASS 390x844 accountant-alchemist normal: feedback, reload, grouped log, result, retry
+PASS 390x844 accountant-alchemist fast: feedback, reload, grouped log, result, retry
+PASS 390x844 accountant-alchemist minimal: feedback, reload, grouped log, result, retry
+PASS 844x390 chef-warlock normal: feedback, reload, grouped log, result, retry
+PASS 844x390 chef-warlock fast: feedback, reload, grouped log, result, retry
+PASS 844x390 chef-warlock minimal: feedback, reload, grouped log, result, retry
+PASS 844x390 chef-alchemist normal: feedback, reload, grouped log, result, retry
+PASS 844x390 chef-alchemist fast: feedback, reload, grouped log, result, retry
+PASS 844x390 chef-alchemist minimal: feedback, reload, grouped log, result, retry
+PASS 844x390 accountant-warlock normal: feedback, reload, grouped log, result, retry
+PASS 844x390 accountant-warlock fast: feedback, reload, grouped log, result, retry
+PASS 844x390 accountant-warlock minimal: feedback, reload, grouped log, result, retry
+PASS 844x390 accountant-alchemist normal: feedback, reload, grouped log, result, retry
+PASS 844x390 accountant-alchemist fast: feedback, reload, grouped log, result, retry
+PASS 844x390 accountant-alchemist minimal: feedback, reload, grouped log, result, retry
+PASS no browser page errors; emulated touch only

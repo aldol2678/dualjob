@@ -188,8 +188,8 @@ function trainingTarget(s,preferred=-1){
 }
 // Spending is captured BEFORE any relic refund; a course can never trigger itself.
 let trainingCard=null;
-function spendResource(key,n){const spent=Math.min(n,state[key]);state[key]-=spent;if(trainingCard)trainingCard.spent[key]+=spent;return spent}
-function spendDebt(e){const n=e.debt||0;e.debt=0;if(trainingCard)trainingCard.spent.debt+=n;return n}
+function spendResource(key,n){const spent=Math.min(n,state[key]);state[key]-=spent;if(spent){rec({k:'spend',resource:key,n:spent});log((key==='ingredient'?'🥕 재료':'🧪 시약')+' '+spent+' 소비')}if(trainingCard)trainingCard.spent[key]+=spent;return spent}
+function spendDebt(e){const n=e.debt||0;e.debt=0;if(n){rec({k:'spend',resource:'debt',n});log('📋 '+e.name+' 미수금 '+n+' 소비')}if(trainingCard)trainingCard.spent.debt+=n;return n}
 function trainingDamageBonus(e){
  const c=trainingCard,t=state.trainingTurn;if(!c||!trainingFor(state)||state.enemies[c.target]!==e||c.bonusApplied)return 0;
  let bonus=0;
@@ -345,7 +345,8 @@ function validTurnDiscard(s){
 function sanitizeRun(raw){
  let x;try{x=JSON.parse(JSON.stringify(raw))}catch{return null}
  if(!x||typeof x!=='object'||![1,2,3,4].includes(x.version)||!RUN_PHASES.includes(x.phase)||!pairs[x.real+'-'+x.fantasy])return null;
- if(!validTrainingSave(x)||!validTurnDiscard(x))return null;
+ if(!validTrainingSave(x)||!validTurnDiscard(x)||!validActionLog(x.actionLog))return null;
+ x.actionLog=x.actionLog||[];
  x.turnDiscard=x.turnDiscard||{};
  x.contentRevision=x.contentRevision??20;
  if(x.contentRevision===20){x.trainingId=null;x.trainingTurn=freshTrainingTurn();if(x.shop)delete x.shop.welfare}
@@ -406,7 +407,19 @@ const pair=()=>pairs[keyPair()];
 const save=()=>{if(state&&state.phase!=='victory'&&state.phase!=='defeat')safeSet(KEY,state);else safeRemove(KEY)};
 const rng=n=>Math.floor(Math.random()*n);
 const shuffle=xs=>{const a=[...xs];for(let i=a.length-1;i>0;i--){let j=rng(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
-const log=(t)=>{state.logs.unshift(t);state.logs=state.logs.slice(0,20);state.message=t};
+// Keep the legacy effect list; new actions also retain their causal order.
+let actionLogContext=null;
+function validActionLog(entries){
+ return entries===undefined||Array.isArray(entries)&&entries.length<=12&&entries.every(g=>g&&typeof g==='object'&&!Array.isArray(g)&&Number.isInteger(g.turn)&&g.turn>=1&&Number.isInteger(g.stage)&&g.stage>=0&&g.stage<=8&&typeof g.label==='string'&&g.label.length<=120&&Array.isArray(g.lines)&&g.lines.length<=40&&g.lines.every(s=>typeof s==='string'&&s.length<=500)&&(g.truncated===undefined||typeof g.truncated==='boolean'));
+}
+function withActionLog(label,resolve){
+ const previous=actionLogContext,group={stage:state.stage,turn:state.turn,label,lines:[]};
+ state.actionLog=[group,...(state.actionLog||[])].slice(0,12);actionLogContext={run:state,group};
+ try{return resolve()}finally{actionLogContext=previous}
+}
+const log=(t)=>{state.logs.unshift(t);state.logs=state.logs.slice(0,20);state.message=t;
+ if(actionLogContext?.run===state){const g=actionLogContext.group;if(g.lines.length<40)g.lines.push(String(t).slice(0,500));else g.truncated=true}
+};
 const getCost=id=>{const base=costBase(id);if(base===99)return 99;let v=base-(upgraded(id)&&base>=2?1:0);if(state?.phase==='battle'&&cards[id]?.family==='real'&&hasRelic('overtimeClock')&&!state.relicTurn?.overtimeClock)v--;return Math.max(0,v)};
 // ── v0.6.1: 효과 기록기. 실제 행동과 미리보기 모두 같은 기본 함수를 거치므로, 카드 앞면 수치와 전투 피드백이 실제 결과와 일치한다.
 let activeCard=null, activeBonus=0, fxRec=null;
@@ -436,7 +449,7 @@ function draw(n){
   }
   state.hand.push(state.drawPile.pop());got++;
  }
- if(got)rec({k:'draw',n:got});
+ if(got){rec({k:'draw',n:got});if(actionLogContext?.run===state)log('🎴 카드 '+got+'장 뽑기')}
 }
 function addTempFatigue(n){for(let i=0;i<n;i++)state.discard.push('fatigue');log('🥱 버린 더미에 임시 피로 카드 +'+n+' (이번 전투만)')}
 function addFatigue(n){for(let i=0;i<n;i++){state.deck.push('fatigue');state.discard.push('fatigue')}log('🥱 덱에 피로 카드 '+n+'장 추가');}
@@ -455,7 +468,7 @@ case 'lunch':num=spendResource('ingredient',2);gainBlock(4);heal(4+2*num,true);b
 case 'flambe':num=spendResource('ingredient',2);damage(12+3*num);break;
 case 'curse':damage(5);if(e.hp>0)curse(2);break;
 case 'drain':damage(7);heal(2,true);break;
-case 'soul':state.hp=Math.max(0,state.hp-3);state.energy++;draw(1);log('🩸 생명력 3을 바쳐 에너지 +1');break;
+case 'soul':state.hp=Math.max(0,state.hp-3);state.energy++;log('🩸 생명력 3을 바쳐 에너지 +1');draw(1);break;
 case 'veil':gainBlock(6);curse(1);break;
 case 'night':damage(10+3*(e.curse||0));break;
 case 'extract':reagent(1);draw(1);break;
@@ -473,7 +486,7 @@ case 'grandFeast':num=spendResource('ingredient',2)+spendResource('reagent',2);d
  case 'pantry':ingredient(2);draw(1);break;
  case 'hotMeal':num=spendResource('ingredient',2);heal(6+num*3,true);break;
  case 'spiceStorm':num=spendResource('ingredient',2);forEachEnemy(()=>damage(7+num*2));break;
- case 'darkBargain':state.hp=Math.max(0,state.hp-3);draw(2);log('🩸 체력 3 지불, 카드 2장');break;
+ case 'darkBargain':state.hp=Math.max(0,state.hp-3);log('🩸 체력 3 지불');draw(2);break;
  case 'contagion':curse(2);forEachEnemy((a)=>{if(a!==e)curse(1)});break;
  case 'eclipse':forEachEnemy(a=>damage(5+(a.curse||0)*2));break;
  case 'distill':reagent(2);gainBlock(4);break;
@@ -521,6 +534,9 @@ function overtimeStatus(){
 }
 function useOvertime(){
  if(!overtimeStatus().ok)return false;
+ return withActionLog('초과근무',resolveOvertime);
+}
+function resolveOvertime(){
  state.overtimeUsed=true;state.overtimes=(state.overtimes||0)+1;state.energy+=1;state.workFatigue=Math.min(6,state.workFatigue+2);
  log('☕ 초과근무 · ⚡ 에너지 +1 · 💤 피로도 +2 → '+state.workFatigue+'/6');
  tutorialEvent('overtime');save();render();return true;
@@ -657,7 +673,10 @@ function turnForecast(s){
  return {incoming,net:Math.max(0,incoming-(s.block||0)),fatigue,trainingBlock:training?.block||0};
 }
 function endTurn(){
- if(state.phase!=='battle')return;
+ if(state?.phase!=='battle')return;
+ return withActionLog('턴 종료 · 적 행동',resolveEndTurn);
+}
+function resolveEndTurn(){
  state.discard.push(...state.hand);state.hand=[];state.turnDiscard={};fxRec=[];
  const training=applyTrainingEnd(state);if(training){rec({k:'block',n:training.block});log('🎓 '+trainingFor(state).name+' · 턴 종료 효과');captureCombatBeat('training',training.i,'🎓 '+trainingFor(state).name)}
  let taken=0,absorbedAll=0,ticks=0,fatigueAdded=0,hrReward=false;
@@ -696,7 +715,7 @@ function spawnEnemy(){
  state.enemies=ids.map(id=>{const e=enemies[id],scale=nt==='boss'?0:Math.floor(state.stage/2)*3;return {id,name:e.name,icon:e.icon,hp:e.maxHp+scale,maxHp:e.maxHp+scale,baseAttack:e.attack+Math.floor(state.stage/3),block:0,debt:0,curse:0}});
  state.targetIndex=0;ensureTarget();state.block=hasRelic('lunchVoucher')?6:0;state.energy=3;
  state.drawPile=shuffle([...state.deck]);state.discard=[];state.turnDiscard={};state.hand=[];state.turn=1;state.usedReal=false;state.usedFantasy=false;state.synergy=false;state.dualTurnUsed=false;state.lastDual=null;
- state.lastHitIndex=null;state.lastHitDamage=0;state.overtimeUsed=false;state.ingredient=0;state.reagent=0;state.logs=[];
+ state.lastHitIndex=null;state.lastHitDamage=0;state.overtimeUsed=false;state.ingredient=0;state.reagent=0;state.logs=[];state.actionLog=[];
  state.trainingTurn=freshTrainingTurn();state.relicTurn={};state.relicUsed={severancePackage:!!state.relicUsed?.severancePackage};state.bossPhase=nt==='boss'?1:0;state.floorCopy=null;state.phase='battle';
  dealFrom=0;if(state.workFatigue>=3){draw(4);state.hand.push('fatigue');log('💤 피로도 '+state.workFatigue+': 시작 손패 1장이 임시 피로 카드')}else draw(5);
  if(state.stage===2){state.floorCopy=pair().sig;state.hand.push(pair().sig);log('🖨️ 복사실 특전 · '+cards[pair().sig].name+' 임시 사본 1장 (이번 전투 한정)')}
@@ -707,7 +726,7 @@ function newRun(){
  trainingChoice=null;
  state={version:4,contentRevision:21,trainingId:null,trainingTurn:freshTrainingTurn(),workFatigue:0,dualTurnUsed:false,lastDual:null,overtimes:0,tutorial:meta.tutorialDone?null:{step:0},phase:'map',stage:0,real:pickReal,fantasy:pickFantasy,maxHp:72,hp:72,block:0,energy:3,gold:30,
  ingredient:0,reagent:0,deck:[...initialDeck[pickReal],...initialDeck[pickFantasy],pairs[key].sig],drawPile:[],discard:[],turnDiscard:{},hand:[],enemy:null,
- turn:1,usedReal:false,usedFantasy:false,synergy:false,synergies:0,overtimeUsed:false,sigUpgrade:false,defeated:0,enemiesDefeated:0,logs:[],message:'',rewardOptions:[],rewardFor:0,
+ turn:1,usedReal:false,usedFantasy:false,synergy:false,synergies:0,overtimeUsed:false,sigUpgrade:false,defeated:0,enemiesDefeated:0,logs:[],actionLog:[],message:'',rewardOptions:[],rewardFor:0,
  relics:[],upgrades:{},path:[],nodeType:null,relicTurn:{},relicUsed:{},shop:null,eventId:null,eventHistory:[],floorDecisions:{},deferredBonus:0,floorCopy:null,bossPhase:0};
  savedRun=null;save();render();
 }
@@ -732,11 +751,11 @@ function resolveCard(index,target){
  const boostMana=hasRelic('manaAmp')&&c.family==='fantasy'&&!state.relicTurn.manaAmp&&['curse','drain','night','blast','flashFlask','chainReaction','eclipse'].includes(id);
  const boostGlass=hasRelic('glassRetort')&&!state.relicTurn.glassRetort&&state.reagent>0&&['blast','goldAudit','grandFeast','chainReaction'].includes(id);
  activeCard=id;activeBonus=(boostMana?3:0)+(boostGlass?4:0);
- state.energy-=getCost(id);if(hasRelic('overtimeClock')&&c.family==='real'&&!state.relicTurn.overtimeClock)state.relicTurn.overtimeClock=true;
+ const paid=getCost(id);state.energy-=paid;rec({k:'cost',n:paid});if(hasRelic('overtimeClock')&&c.family==='real'&&!state.relicTurn.overtimeClock)state.relicTurn.overtimeClock=true;
  if(boostMana)state.relicTurn.manaAmp=true;if(boostGlass)state.relicTurn.glassRetort=true;
  state.hand.splice(index,1);state.discard.push(id);state.turnDiscard=state.turnDiscard||{};state.turnDiscard[id]=(state.turnDiscard[id]||0)+1;
  if(c.family==='real')state.usedReal=true;if(c.family==='fantasy')state.usedFantasy=true;
- state.cardsPlayed=(state.cardsPlayed||0)+1;log('🃏 '+c.name+' 사용');
+ state.cardsPlayed=(state.cardsPlayed||0)+1;log('🃏 '+c.name+' 사용 · 에너지 '+paid+' 소비');
  const trainingContext={id,target:targetMode(id)==='enemy'?state.targetIndex:-1,spent:{debt:0,ingredient:0,reagent:0},bonusApplied:false};
  trainingCard=trainingContext;
  try{applyCard(id)}finally{activeCard=null;activeBonus=0;trainingCard=null}
@@ -747,6 +766,11 @@ function resolveCard(index,target){
  afterTrainingCard(trainingContext);
 }
 function playCard(index,target){
+ if(state?.phase!=='battle'||!Number.isInteger(index)||index<0||index>=state.hand.length)return;
+ const id=state.hand[index];if(!cards[id]||id==='fatigue'||state.energy<getCost(id))return;
+ return withActionLog(cards[id].name+' 사용',()=>resolvePlayerCard(index,target));
+}
+function resolvePlayerCard(index,target){
  if(state.phase!=='battle'||!Number.isInteger(index)||index<0||index>=state.hand.length)return;
  const id=state.hand[index],c=cards[id];if(!c||id==='fatigue'||state.energy<getCost(id))return;
  const handBefore=state.hand.length;fxRec=[];
@@ -853,6 +877,10 @@ function restart(){state=null;savedRun=null;safeRemove(KEY);modal='';pendingActi
 // v0.6.15: presentation preferences are separate from the saved run.
 let readableBattle=false, fullscreenPending=false, fullscreenNotice='', viewportFrame=0;
 readableBattle=!!saveCache?.settings?.readableBattle;
+const COMBAT_SPEEDS={normal:'보통',fast:'빠름',minimal:'최소'};
+let combatSpeed=Object.hasOwn(COMBAT_SPEEDS,saveCache?.settings?.combatSpeed)?saveCache.settings.combatSpeed:'normal';
+const motionDuration=ms=>Math.round(ms*(combatSpeed==='fast'?0.5:1));
+function combatSpeedMarkup(){return `<fieldset class="combat-speed"><legend>전투 연출</legend><div>${Object.entries(COMBAT_SPEEDS).map(([id,label])=>`<button class="btn" data-act="combatSpeed" data-speed="${id}" aria-pressed="${combatSpeed===id}">${label}</button>`).join('')}</div><p>빠름은 연출 시간을 절반으로 줄여요. 최소는 즉시 결과를 보여줘요. 전투 규칙은 같아요.${window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?' 기기의 동작 줄이기가 우선 적용 중이에요.':''}</p></fieldset>`}
 const fullscreenActive=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
 const mobileDevice=()=>window.innerWidth<=700||(navigator.maxTouchPoints>0&&Math.min(screen.width,screen.height)<=700);
 function safeInsets(){
@@ -904,7 +932,7 @@ for(const name of ['fullscreenchange','webkitfullscreenchange'])document.addEven
  fullscreenPending=false;fullscreenNotice='';document.querySelector('.screen-notice')?.remove();scheduleBattleViewport();
  document.querySelectorAll('[data-fullscreen-label]').forEach(el=>{el.textContent=fullscreenActive()?'전체화면 종료':'전체화면'});
 });
-function battleMenuMarkup(){return `<h2>게임 메뉴</h2><div class="battle-menu-grid"><button class="btn" data-act="saveManager">저장 및 백업</button><button class="btn" data-act="releaseAbout">게임 소개 · 문의</button><button class="btn" data-act="fullscreen" data-fullscreen-label>${fullscreenActive()?'전체화면 종료':'전체화면'}</button><button class="btn" data-act="readingMode" aria-pressed="${readableBattle}">${readableBattle?'한 화면 모드로':'큰 카드 · 스크롤 모드'}</button><button class="btn" data-act="guide">규칙 안내</button>${state?`<button class="btn" data-act="deck">덱 ${state.deck.length}장</button><button class="btn" data-act="relics">유물 ${state.relics.length}개</button><button class="btn" data-act="log">전투 기록</button>${state.tutorial?'<button class="btn" data-act="mobileTutorial">튜토리얼</button>':''}<button class="btn danger" data-act="restartPrompt">도전 재시작</button>`:''}</div><p class="screen-help">시작·이어하기 시 모바일 전체화면을 시도해요. 종료 후에는 메뉴에서 직접 다시 켤 수 있어요. 화면이 낮거나 확대된 경우에는 스크롤 모드를 사용해요.</p>${fullscreenNotice?`<p role="status">${esc(fullscreenNotice)}</p>`:''}`}
+function battleMenuMarkup(){return `<h2>게임 메뉴</h2><div class="battle-menu-grid"><button class="btn" data-act="saveManager">저장 및 백업</button><button class="btn" data-act="releaseAbout">게임 소개 · 문의</button><button class="btn" data-act="fullscreen" data-fullscreen-label>${fullscreenActive()?'전체화면 종료':'전체화면'}</button><button class="btn" data-act="readingMode" aria-pressed="${readableBattle}">${readableBattle?'한 화면 모드로':'큰 카드 · 스크롤 모드'}</button><button class="btn" data-act="guide">규칙 안내</button>${state?`<button class="btn" data-act="deck">덱 ${state.deck.length}장</button><button class="btn" data-act="relics">유물 ${state.relics.length}개</button><button class="btn" data-act="log">전투 기록</button>${state.tutorial?'<button class="btn" data-act="mobileTutorial">튜토리얼</button>':''}<button class="btn danger" data-act="restartPrompt">도전 재시작</button>`:''}</div>${combatSpeedMarkup()}<p class="screen-help">시작·이어하기 시 모바일 전체화면을 시도해요. 종료 후에는 메뉴에서 직접 다시 켤 수 있어요. 화면이 낮거나 확대된 경우에는 스크롤 모드를 사용해요.</p>${fullscreenNotice?`<p role="status">${esc(fullscreenNotice)}</p>`:''}`}
 // v0.6.21: the action hint and energy preview share live combat costs.
 const ENERGY_ART=["assets/energy-battery-0-e0991b68df0d609b.svg", "assets/energy-battery-1-111f3700e64420c3.svg", "assets/energy-battery-2-625c5bb3a2854c89.svg", "assets/energy-battery-3-346ce767847b9cda.svg", "assets/energy-battery-4-cb24fc2c020e33ba.svg"];
 function battleAvailability(){
@@ -985,7 +1013,7 @@ function renderMobileBattle(){
  </main>`;
 }
 
-function header(){return `<header class="mast"><div><div class="mini">THE SECOND SHIFT · ROGUELITE</div><div class="brand">겸직<b>금지!</b> <span class="ver-tag">v0.6.23</span></div></div><div class="mast-buttons"><button class="btn small" data-act="battleMenu" aria-label="화면 설정 및 게임 메뉴">☰</button><button class="btn small" data-act="guide" aria-label="규칙 안내">❔ 규칙</button>${state?`<button class="btn small" data-act="deck" aria-label="내 덱 보기">🗂️ 덱 ${state.deck.length}</button><button class="btn small danger" data-act="restartPrompt" aria-label="도전 재시작">↻</button>`:''}</div></header>`}
+function header(){return `<header class="mast"><div><div class="mini">THE SECOND SHIFT · ROGUELITE</div><div class="brand">겸직<b>금지!</b> <span class="ver-tag">v0.6.24</span></div></div><div class="mast-buttons"><button class="btn small" data-act="battleMenu" aria-label="화면 설정 및 게임 메뉴">☰</button><button class="btn small" data-act="guide" aria-label="규칙 안내">❔ 규칙</button>${state?`<button class="btn small" data-act="deck" aria-label="내 덱 보기">🗂️ 덱 ${state.deck.length}</button><button class="btn small danger" data-act="restartPrompt" aria-label="도전 재시작">↻</button>`:''}</div></header>`}
 // v0.6.15: selection belongs to the current screen, never to the saved run.
 let journeyReward=null,journeyRoute=null;
 let journeyDockObserver=null;
@@ -1113,8 +1141,8 @@ function showFx(before, kind='card'){
  if((state.synergies||0)>before.synergies)flair('.dual-meter');
 }
 function snapshot(){return !state?null:{hp:state.hp,block:state.block,synergies:state.synergies||0,targetIndex:state.targetIndex}}
-function flyingCard(el,mode,targetIndex){if(!el||!(el instanceof Element)||!el.animate||reducedMotion())return;const box=el.getBoundingClientRect(),target=document.querySelector(mode==='self'?'.hero-unit':'.enemy-unit[data-target="'+targetIndex+'"]')?.getBoundingClientRect();if(!target)return;const g=el.cloneNode(true);g.classList.remove('deal','denied');g.classList.add('fx-card-fly');g.removeAttribute('data-act');g.removeAttribute('data-index');g.setAttribute('aria-hidden','true');g.tabIndex=-1;Object.assign(g.style,{left:box.left+'px',top:box.top+'px',width:box.width+'px',height:box.height+'px'});document.body.appendChild(g);const dx=target.left+target.width/2-box.left-box.width/2,dy=target.top+target.height/2-box.top-box.height/2;const anim=g.animate([{transform:'translate3d(0,0,0) scale(1)',opacity:.9},{transform:`translate3d(${dx*.55}px,${dy*.55-30}px,0) rotate(8deg) scale(.88)`,opacity:1,offset:.65},{transform:`translate3d(${dx}px,${dy}px,0) rotate(20deg) scale(.2)`,opacity:0}],{duration:260,easing:'ease-in',fill:'forwards'});anim.onfinish=()=>g.remove();setTimeout(()=>g.remove(),400)}
-const reducedMotion=()=>!!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+function flyingCard(el,mode,targetIndex){if(!el||!(el instanceof Element)||!el.animate||reducedMotion())return;const box=el.getBoundingClientRect(),target=document.querySelector(mode==='self'?'.hero-unit':'.enemy-unit[data-target="'+targetIndex+'"]')?.getBoundingClientRect();if(!target)return;const g=el.cloneNode(true);g.classList.remove('deal','denied');g.classList.add('fx-card-fly');g.removeAttribute('data-act');g.removeAttribute('data-index');g.setAttribute('aria-hidden','true');g.tabIndex=-1;Object.assign(g.style,{left:box.left+'px',top:box.top+'px',width:box.width+'px',height:box.height+'px'});document.body.appendChild(g);const dx=target.left+target.width/2-box.left-box.width/2,dy=target.top+target.height/2-box.top-box.height/2;const anim=g.animate([{transform:'translate3d(0,0,0) scale(1)',opacity:.9},{transform:`translate3d(${dx*.55}px,${dy*.55-30}px,0) rotate(8deg) scale(.88)`,opacity:1,offset:.65},{transform:`translate3d(${dx}px,${dy}px,0) rotate(20deg) scale(.2)`,opacity:0}],{duration:motionDuration(260),easing:'ease-in',fill:'forwards'});anim.onfinish=()=>g.remove();setTimeout(()=>g.remove(),400)}
+const reducedMotion=()=>combatSpeed==='minimal'||!!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 // v0.6.15: committed run state and transient presentation frames are separate.
 let combatCapture=null,combatPlayback=null,holdCombatRender=false,paintingCombatFrame=false;
 const cloneCombat=s=>JSON.parse(JSON.stringify(s));
@@ -1159,6 +1187,8 @@ function paintBattleFeedback(root,beat){
  if(hero.heal)battleCue(root,'.hero-unit','mend');
  // Keep hero HP and block readable: detailed gains occupy the existing status strip.
  const lines=[];
+ for(const r of beat.records||[]){if(r.k==='cost')lines.push('에너지 −'+r.n);if(r.k==='spend')lines.push(({ingredient:'재료',reagent:'시약',debt:'미수금'}[r.resource])+' −'+r.n)}
+ if(beat.kind==='card'&&beat.state.actionLog?.[0]?.lines.some(s=>s.startsWith('🎓')))lines.push('🎓 '+(trainingFor(beat.state)?.name||'전문화')+' 발동');
  if(hero.damage)lines.push('−'+hero.damage+' HP');
  if(hero.absorbed)lines.push('방어 '+hero.absorbed+' 흡수');
  if(hero.block)lines.push('방어 +'+hero.block);
@@ -1211,7 +1241,7 @@ function advanceCombatPlayback(session){
  if(state!==session.live||document.hidden||reducedMotion()){finishCombatPlayback();return}
  const beat=session.beats.shift();if(!beat){finishCombatPlayback();return}
  session.current=beat;
- try{paintCombatFrame();session.timer=setTimeout(()=>advanceCombatPlayback(session),beat.duration)}catch(error){finishCombatPlayback();throw error}
+ try{paintCombatFrame();session.timer=setTimeout(()=>advanceCombatPlayback(session),motionDuration(beat.duration))}catch(error){finishCombatPlayback();throw error}
 }
 function runCombatPlayback(kind,resolve){
  const before=cloneCombat(state);const capture={before,beats:[],cursor:0};combatCapture=capture;holdCombatRender=true;
@@ -1232,13 +1262,18 @@ function playWithFx(i,target){
  if(!combatCanAnimate()){playCard(i,target);showFx(before);if(state&&(state.synergies||0)>before.synergies&&state.lastDual)dualBanner(state.lastDual.text);return}
  cleanGesture();flyingCard(el,mode,state.targetIndex);runCombatPlayback('card',()=>playCard(i,target));
 }
+let lastEndInput=null;
 function endWithFx(){
  if(turnVisualBusy()||state?.phase!=='battle')return;
+ // Minimal presentation must not turn a double tap into two enemy turns.
+ if(lastEndInput?.run===state&&lastEndInput.stage===state.stage&&lastEndInput.cardsPlayed===state.cardsPlayed&&performance.now()<lastEndInput.until)return;
+ lastEndInput={run:state,stage:state.stage,cardsPlayed:state.cardsPlayed,until:performance.now()+200};
  cleanGesture();selectedCard=null;
  if(!combatCanAnimate()){endTurn();fxRec=null;return}
  discardHandVisual();runCombatPlayback('turn',()=>endTurn());
 }
 function dualBanner(text){
+ if(reducedMotion())return;
  document.querySelectorAll('.combat-dual-notice,.combo-banner').forEach(n=>n.remove());
  const strip=document.querySelector('.quick-preview');if(!strip)return;
  const n=document.createElement('div');n.className='combat-dual-notice';n.setAttribute('role','status');
@@ -1394,7 +1429,7 @@ function discardHandVisual(){
   g.style.padding=getComputedStyle(el).padding;
   document.body.appendChild(g);
   const dx=p.left+p.width/2-r.left-r.width/2,dy=p.top+p.height/2-r.top-r.height/2;
-  const a=g.animate([{transform:'translate(0,0) rotate(0deg)',opacity:.9},{transform:`translate(${dx}px,${dy}px) rotate(18deg) scale(.08)`,opacity:0}],{duration:180,delay:Math.min(count,4)*10,easing:'ease-in',fill:'both'});
+  const a=g.animate([{transform:'translate(0,0) rotate(0deg)',opacity:.9},{transform:`translate(${dx}px,${dy}px) rotate(18deg) scale(.08)`,opacity:0}],{duration:motionDuration(180),delay:motionDuration(Math.min(count,4)*10),easing:'ease-in',fill:'both'});
   a.onfinish=()=>g.remove();setTimeout(()=>g.remove(),300);count++;
  }
  return count?220:0;
@@ -1421,8 +1456,8 @@ function animateHand(before){
  slots.forEach((el,i)=>{
   const old=before.slots[i],card=el.querySelector('.card');if(!old||!card.animate)return;
   const dx=old.x-el.getBoundingClientRect().left,to=getComputedStyle(card).transform;
-  if(Math.abs(dx)>.5)el.animate([{transform:`translateX(${dx}px)`},{transform:'translateX(0)'}],{duration:180,easing:'cubic-bezier(.2,.8,.2,1)'});
-  if(old.transform!==to)card.animate([{transform:old.transform},{transform:to}],{duration:180,easing:'cubic-bezier(.2,.8,.2,1)'});
+  if(Math.abs(dx)>.5)el.animate([{transform:`translateX(${dx}px)`},{transform:'translateX(0)'}],{duration:motionDuration(180),easing:'cubic-bezier(.2,.8,.2,1)'});
+  if(old.transform!==to)card.animate([{transform:old.transform},{transform:to}],{duration:motionDuration(180),easing:'cubic-bezier(.2,.8,.2,1)'});
  });
 }
 function denySelected(){
@@ -1573,7 +1608,16 @@ function eventAllowed(id,i){
  return true;
 }
 function renderEvent(){const event=eventCatalog[state.eventId??0]||eventCatalog[0];return `${header()}${stageStrip()}<section class="panel big-event"><div class="eyebrow">EVENT · RANDOM ENCOUNTER · ${eventCatalog.length}종</div><div class="event-icon">${event.icon}</div><h1>${event.title}</h1><p class="description">${event.desc}</p>${pstats()}<div class="choice-grid">${event.options.map(([title,desc],i)=>`<button class="choice" data-act="previewEvent" data-index="${i}" ${!eventAllowed(state.eventId??0,i)?'disabled':''}><span class="symbol">${['✨','🎲','↪'][i]}</span><strong>${title}</strong><span>${desc}</span></button>`).join('')}</div><p class="footnote">🎭 선택지를 누르면 결과와 비용을 확인한 뒤 확정할 수 있어. 방문한 이벤트는 가능한 한 반복되지 않아.</p></section>`}
-function renderEnd(){const won=state.phase==='victory';return `${header()}<section class="panel end-screen"><div class="eyebrow">${won?'RUN COMPLETE':'GAME OVER'} · ${won?'SUCCESSFUL RESIGNATION':'OVERTIME NEVER ENDS'}</div><div class="end-icon">${won?'🎓':'🥀'}</div><h1>${won?'마왕에게 사표를 던졌다!':'다음 출근을 준비하자'}</h1><p class="description" style="color:#cfc3dc;line-height:1.8">${won?'인사부장이 무너지고 이세계 최초의 정시 퇴근이 실현됐다. 하지만 채용 공고는 다시 올라온다.':'이번 계약은 여기까지야. 직업 조합은 도감에 기록됐으니, 다음에는 더 강력한 콤보로 도전하자.'}</p><div class="pill gold" style="font-size:16px;padding:9px 16px">${pair().icon} ${pair().name}</div><div class="end-stats"><div><strong>${state.defeated||0}</strong><small>승리한 전투</small></div><div><strong>${state.enemiesDefeated??'—'}</strong><small>처치한 적${state.enemiesDefeated==null?' · 이전 저장 미집계':''}</small></div><div><strong>${state.synergies||0}</strong><small>겸직 발동</small></div><div><strong>${state.gold}G</strong><small>최종 보유 골드</small></div></div><button class="btn primary wide" data-act="restart">🔁 새로운 직업으로 재도전</button><p class="small-print">🎴 발견 조합 ${meta.combos.length}/4 · 누적 승리 ${meta.wins||0}회 · 이 게임은 로컬 프로토타입으로 네트워크/결제 기능이 없어.</p></section>`}
+function runBuildMarkup(){
+ const t=trainingFor(state),up=[...new Set(state.deck)].filter(id=>upgraded(id)),alternatives=trainingOptions().filter(id=>!t||id!==state.trainingId);
+ const chips=(ids,source)=>ids.map(id=>`<li>${esc(source[id].name)}</li>`).join('');
+ return `<section class="run-build" aria-label="이번 도전 빌드"><h2>이번 도전의 빌드</h2><h3>전문화 · ${t?esc(t.name):'선택하지 않음'}</h3><p>${t?esc(t.desc):state.contentRevision===20?'이전 저장의 도전은 전문화 없이 진행했어요.':'3구역을 마치면 전문화를 선택할 수 있어요.'}</p><h3>유물 · ${state.relics.length}개</h3>${state.relics.length?`<ul class="build-chips">${chips(state.relics,relics)}</ul>`:'<p>획득한 유물 없음</p>'}${state.sigUpgrade?'<p>이전 기록의 융합 특전 · 비용 1 · 공격 +4 적용</p>':''}<h3>강화 카드 · ${up.length}종</h3>${up.length?`<ul class="build-chips">${chips(up,cards)}</ul>`:'<p>강화한 카드 없음</p>'}<details><summary>마지막 덱 · ${state.deck.length}장</summary><ul class="build-chips">${[...new Set(state.deck)].map(id=>`<li>${esc(cards[id].name)}${upgraded(id)?' ✦':''} ×${state.deck.filter(k=>k===id).length}</li>`).join('')}</ul></details><div class="retry-goal"><h3>${t?'다음에는 다른 전문화로':'다음 도전의 전문화'}</h3>${alternatives.map(id=>`<p><b>${esc(TRAINING[id].name)}</b> · ${esc(TRAINING[id].desc)}<br/><small>대표 카드 · ${TRAINING[id].cards.map(k=>esc(cards[k].name)).join(' · ')}</small></p>`).join('')}<p>같은 직업으로 새로 시작해 3구역 뒤에 선택해 보세요. 덱과 보상은 새 도전에서 다시 모아요.</p></div></section>`;
+}
+function battleLogMarkup(){
+ const groups=state.actionLog||[];
+ return `<h2>📜 전투 기록</h2><p class="log-help">최근 행동부터 표시해요. 각 행동 안에서는 효과가 일어난 순서대로 읽어요.</p><div class="action-log">${groups.map((g,i)=>`<details class="log-group" ${i===0?'open':''}><summary>${g.stage+1}구역 · ${g.turn}턴 · ${esc(g.label)}</summary><ol>${g.lines.map(l=>`<li>${esc(l)}</li>`).join('')}</ol>${g.truncated?'<p>효과가 많아 앞의 40개까지 기록했어요.</p>':''}</details>`).join('')||'<p>아직 행동별 기록이 없어요. 다음 카드 사용부터 기록해요.</p>'}</div><details class="legacy-log"><summary>최근 효과 원문 · 최대 20개</summary><div class="log-list">${(state.logs||[]).map(l=>`<p>${esc(l)}</p>`).join('')||'<p>기록이 없어요.</p>'}</div></details>`;
+}
+function renderEnd(){const won=state.phase==='victory';return `${header()}<section class="panel end-screen"><div class="eyebrow">${won?'RUN COMPLETE':'GAME OVER'} · ${won?'SUCCESSFUL RESIGNATION':'OVERTIME NEVER ENDS'}</div><div class="end-icon">${won?'🎓':'🥀'}</div><h1>${won?'마왕에게 사표를 던졌다!':'다음 출근을 준비하자'}</h1><p class="description" style="color:#cfc3dc;line-height:1.8">${won?'인사부장이 무너지고 이세계 최초의 정시 퇴근이 실현됐다. 하지만 채용 공고는 다시 올라온다.':'이번 계약은 여기까지야. 직업 조합은 도감에 기록됐으니, 다음에는 더 강력한 콤보로 도전하자.'}</p><div class="pill gold" style="font-size:16px;padding:9px 16px">${pair().icon} ${pair().name}</div><div class="end-stats"><div><strong>${state.defeated||0}</strong><small>승리한 전투</small></div><div><strong>${state.enemiesDefeated??'—'}</strong><small>처치한 적${state.enemiesDefeated==null?' · 이전 저장 미집계':''}</small></div><div><strong>${state.synergies||0}</strong><small>겸직 발동</small></div><div><strong>${state.gold}G</strong><small>최종 보유 골드</small></div></div>${runBuildMarkup()}<div class="end-actions"><button class="btn primary wide" data-act="retrySame">🔁 같은 직업으로 재도전</button><button class="btn wide" data-act="restart">직업 선택으로</button><button class="btn wide" data-act="log">마지막 전투 기록</button></div><p class="small-print">🎴 발견 조합 ${meta.combos.length}/4 · 누적 승리 ${meta.wins||0}회 · 이 게임은 로컬 프로토타입으로 네트워크/결제 기능이 없어.</p></section>`}
 const utilityDrawCards=new Set(['receipt','taste','extract','catalyst','pantry','closeBooks','darkBargain','hustle','soul']);
 const upgradedDamageCards=new Set(['audit','collect','chop','flambe','curse','drain','night','blast','hellTax','goldAudit','infernalMenu','grandFeast','strike','surpriseAudit','spiceStorm','eclipse','flashFlask','chainReaction']);
 const upgradedBlockCards=new Set(['ledger','balance','broth','lunch','veil','transmute','goldAudit','guard','riskHedge','distill']);
@@ -1626,7 +1670,7 @@ function detailsForTransaction(){const a=pendingAction;if(!a)return '<p>선택 �
  return '<p>선택 정보가 없어.</p>';
 }
 function jobBriefMarkup(k){const p=pairs[k],g=JOB_GUIDE[k];return `<div class="transaction-head"><span class="txn-icon">${p.icon}</span><div><div class="eyebrow">처음 출근하는 직업 · ${stars(g.level)} ${g.label}</div><h2>${p.name}</h2><p>${g.core}</p></div></div><div class="txn-description"><strong>핵심 자원</strong><p>${g.resourceBrief}</p></div><div class="pd-box" style="margin-top:10px"><b class="h">기본 전략</b><ol>${g.strategy.map(x=>`<li>${x}</li>`).join('')}</ol><b class="h" style="margin-top:8px">대표 조합</b>${comboMarkup(k)}<div class="pd-note">${g.comboNote}</div></div><div class="info-note">✨ 겸직 자동 효과: <b>${dualSummary(k)}</b> (현실+판타지 카드를 같은 턴에, 턴당 1회)</div><div class="txn-actions"><button class="btn primary" data-act="closeModal">확인, 전투 시작</button></div>`}
-const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.6.23</h2>
+const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.6.24</h2>
 <div class="guide-actions"><button class="btn primary small" data-act="tutReplay">🎓 튜토리얼 다시 보기</button></div>
 <div class="guide-sec"><b>⚔ 기본 전투</b><p>카드를 탭하면 전장을 보면서 효과를 확인할 수 있어. 적 또는 내 캐릭터를 탭하면 사용해. 「상세」에서 전체 설명을 볼 수 있어. 손패를 좌우로 넘겨 탐색하고, 위로 끌어 대상에 놓으면 바로 사용해. 에너지는 매 턴 ⚡3, 손패는 5장. 「턴 종료」를 누르면 적이 예고한 행동을 해. 오른쪽 <b>예상 피해</b>를 보고 방어를 챙기자.</p></div>
 <div class="guide-sec"><b>🎴 카드 순환</b><p>이번 턴에 사용한 카드는 버림 더미에 보관하고 다음 턴부터 다시 뽑아. 같은 이름의 다른 사본은 계속 사용할 수 있어. 손패는 최대 10장.</p></div>
@@ -1636,7 +1680,7 @@ const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.6.23</h2>
 <div class="guide-sec"><b>🧬 직업별 핵심 자원</b>${JOB_ORDER.map(k=>`<div class="guide-job"><span>${pairs[k].icon} <b>${pairs[k].name}</b> ${stars(JOB_GUIDE[k].level)}</span><span>${JOB_GUIDE[k].resources.map(resChip).join('')}</span><small>${JOB_GUIDE[k].core} · 겸직: ${dualSummary(k)}</small></div>`).join('')}<p class="footnote">★은 규칙 복잡도야. 별이 많다고 더 강하지 않아.</p></div>
 <div class="guide-sec"><b>🗺 갈림길·보상</b><p>9개 지점마다 길을 골라. 일반 전투는 카드, 정예는 유물(12종), 상점은 구매·제거, 휴식은 회복·피로 회복·강화 중 하나. 구매·제거·강화·이벤트 선택은 모두 <b>미리보기 → 확정</b> 2단계야.</p></div>
 <div class="guide-sec"><b>🎓 사내 전문교육</b><p>새 도전은 3구역을 마친 뒤 전문화 하나를 무료로 선택해. 이번 도전 동안 자동 적용되며 기존 겸직 규칙은 유지돼. 4구역 상점은 미보유 일반 유물 한 칸을 10G 할인해. 기존 진행 중인 도전은 이전 규칙으로 끝까지 이어가.</p></div>
-<div class="guide-sec"><b>💾 저장</b><p>v0.6.23는 v0.6 계열과 같은 저장 키에 자동 저장돼. 이전 C2.2·C2.1·C2·C1·v0.4.1 진행은 원본을 건드리지 않고 복사본으로만 가져와. 브라우저 데이터를 지우면 기록도 지워져.</p></div>`;
+<div class="guide-sec"><b>💾 저장</b><p>v0.6.24는 v0.6 계열과 같은 저장 키에 자동 저장돼. 이전 C2.2·C2.1·C2·C1·v0.4.1 진행은 원본을 건드리지 않고 복사본으로만 가져와. 브라우저 데이터를 지우면 기록도 지워져.</p></div>`;
 const backupOwn=(o,k)=>!!o&&Object.hasOwn(o,k);
 const backupPlain=o=>!!o&&typeof o==='object'&&!Array.isArray(o);
 function checkedBackupTree(value,depth=0,budget={n:0}){
@@ -1652,6 +1696,7 @@ function validateBackupRun(raw){
  if(!backupPlain(raw)||raw.version!==4||!RUN_PHASES.includes(raw.phase)||!backupOwn(pairs,raw.real+'-'+raw.fantasy))throw Error('지원하지 않는 진행 기록이에요.');
  if(!validTrainingSave(raw)||raw.shop?.welfare&&!validWelfare(raw))throw Error('전문교육·복지 상품 기록이 올바르지 않아요.');
  if(!validTurnDiscard(raw))throw Error('이번 턴에 사용한 카드 기록이 올바르지 않아요.');
+ if(!validActionLog(raw.actionLog))throw Error('행동별 전투 기록이 올바르지 않아요.');
  const array=(v,valid,max=300)=>Array.isArray(v)&&v.length<=max&&v.every(valid);
  const card=id=>typeof id==='string'&&backupOwn(cards,id),relic=id=>typeof id==='string'&&backupOwn(relics,id);
  if(!array(raw.deck,card)||!raw.deck.length||!['hand','drawPile','discard'].every(k=>array(raw[k],card)))throw Error('카드 목록이 올바르지 않아요.');
@@ -1687,10 +1732,11 @@ function parseBackup(text){
  if(!backupPlain(x)||x.game!=='aldol-dualjob'||x.backupVersion!==1||!backupOwn(x,'run')||!backupPlain(x.meta)||!backupPlain(x.settings)||typeof x.settings.readableBattle!=='boolean')throw Error('겸직금지! 백업 파일이 아니거나 지원하지 않는 버전이에요.');
  for(const k of ['attempts','wins','best'])if(!Number.isInteger(x.meta[k])||x.meta[k]<0||x.meta[k]>1000000)throw Error('누적 기록이 올바르지 않아요.');
  if(!Array.isArray(x.meta.combos)||!x.meta.combos.every(k=>backupOwn(pairs,k))||!Array.isArray(x.meta.seenPairs)||!x.meta.seenPairs.every(k=>backupOwn(pairs,k))||typeof x.meta.tutorialDone!=='boolean')throw Error('직업·튜토리얼 기록이 올바르지 않아요.');
- return {schema:1,run:validateBackupRun(x.run),meta:cleanMeta(x.meta),settings:{readableBattle:x.settings.readableBattle}};
+ if(x.settings.combatSpeed!==undefined&&!Object.hasOwn(COMBAT_SPEEDS,x.settings.combatSpeed))throw Error('연출 속도 설정이 올바르지 않아요.');
+ return {schema:1,run:validateBackupRun(x.run),meta:cleanMeta(x.meta),settings:{readableBattle:x.settings.readableBattle,combatSpeed:x.settings.combatSpeed||'normal'}};
 }
-function currentSavePacket(){return {schema:1,run:state?(RUN_PHASES.includes(state.phase)?JSON.parse(JSON.stringify(state)):null):(savedRun?JSON.parse(JSON.stringify(savedRun)):null),meta:JSON.parse(JSON.stringify(meta)),settings:{readableBattle}}}
-function backupText(){const x=currentSavePacket();return JSON.stringify({game:'aldol-dualjob',backupVersion:1,gameVersion:'0.6.23',createdAt:new Date().toISOString(),run:x.run,meta:x.meta,settings:x.settings},null,2)}
+function currentSavePacket(){return {schema:1,run:state?(RUN_PHASES.includes(state.phase)?JSON.parse(JSON.stringify(state)):null):(savedRun?JSON.parse(JSON.stringify(savedRun)):null),meta:JSON.parse(JSON.stringify(meta)),settings:{readableBattle,combatSpeed}}}
+function backupText(){const x=currentSavePacket();return JSON.stringify({game:'aldol-dualjob',backupVersion:1,gameVersion:'0.6.24',createdAt:new Date().toISOString(),run:x.run,meta:x.meta,settings:x.settings},null,2)}
 function downloadBackup(){
  try{const blob=new Blob([backupText()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='dualjob-save-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);saveMessage='백업 파일 다운로드를 요청했어요. 저장이 안 되면 아래 백업 텍스트를 복사해 주세요.'}
  catch{saveMessage='다운로드를 시작하지 못했어요. 아래 백업 텍스트를 복사해 주세요.'}
@@ -1708,7 +1754,7 @@ function commitRestore(){
  // A single verified setItem succeeds before any live run/meta is replaced.
  if(!persistSavePacket(next,true)){saveMessage='복원을 저장하지 못했어요. 현재 플레이 화면과 기록은 적용 전 상태로 유지합니다.';modal='saveManager';restoreCandidate=null;render();return}
  restoreCandidate=null;restoreSerial++;cleanGesture();selectedCard=null;selectionProjection=null;journeyReward=null;journeyRoute=null;inspected=null;pendingAction=null;
- state=null;savedRun=next.run;meta=next.meta;readableBattle=next.settings.readableBattle;
+ state=null;savedRun=next.run;meta=next.meta;readableBattle=next.settings.readableBattle;combatSpeed=next.settings.combatSpeed||'normal';
  if(savedRun){pickReal=savedRun.real;pickFantasy=savedRun.fantasy}
  modal='saveManager';saveMessage='복원했어요. 닫은 뒤 이어하기를 누르면 계속할 수 있어요.';render();
 }
@@ -1717,7 +1763,7 @@ function saveManagerMarkup(){
  return `<h2>저장 및 백업</h2><p>진행과 누적 기록은 이 브라우저에 저장됩니다. 다른 주소·기기에서는 백업 파일을 가져와 주세요.</p><div class="save-summary">${run?esc(pairs[run.real+'-'+run.fantasy].name)+' · 구역 '+(run.stage+1)+'/9':'진행 중인 도전 없음'}<br/>누적 승리 ${meta.wins} · 도전 ${meta.attempts}</div>${saveIssue?`<p class="save-error" role="alert">${esc(saveIssue)}</p>`:'<p class="save-ok">자동 저장 사용 중 · 브라우저 데이터 삭제 시 기록도 사라집니다.</p>'}${saveMessage?`<p role="status">${esc(saveMessage)}</p>`:''}<div class="save-actions"><button class="btn primary" data-act="exportSave">백업 파일 내보내기</button><button class="btn calm" data-act="retrySave">현재 기록 저장 재시도</button></div><label class="save-file">백업 파일 가져오기<input id="backup-file" type="file" accept=".json,application/json"/></label><details class="save-text"><summary>파일 저장이 안 되나요? 백업 텍스트 보기</summary><textarea id="backup-output" readonly aria-label="현재 기록 백업 텍스트">${esc(backupText())}</textarea><button class="btn small" data-act="selectBackupText">텍스트 전체 선택</button></details><details class="save-text"><summary>백업 텍스트 붙여넣기</summary><textarea id="backup-input" maxlength="524288" spellcheck="false" aria-label="복원할 백업 텍스트"></textarea><button class="btn calm" data-act="previewBackupText">내용 확인</button></details>`;
 }
 function restoreSaveMarkup(){const x=restoreCandidate,r=x?.run;if(!x)return '';return `<h2>이 기록으로 복원할까요?</h2><div class="save-summary">${r?esc(pairs[r.real+'-'+r.fantasy].name)+' · 구역 '+(r.stage+1)+'/9 · 체력 '+r.hp+'/'+r.maxHp:'진행 중인 도전 없음'}<br/>누적 승리 ${x.meta.wins} · 도전 ${x.meta.attempts}</div><p>현재 진행과 누적 기록, 화면 설정을 위 내용으로 교체합니다. 지금 기록이 필요하면 먼저 백업해 주세요.</p><div class="save-actions"><button class="btn calm" data-act="cancelRestore">취소</button><button class="btn primary" data-act="commitRestore">이 기록으로 복원</button></div>`}
-function releaseAboutMarkup(){return `<h2>겸직금지!</h2><p class="release-tag">공개 테스트 · v0.6.23</p><p>낮에는 직장인, 밤에는 던전 출근. 현실과 판타지 직업을 조합하고 카드를 모아 인사부장 마왕에게 퇴사를 통보하세요.</p><p>직업 4종 · 갈림길 9개 구역 · 싱글플레이 카드 로그라이트</p><h3>기록과 개인정보</h3><p>게임에는 계정·클라우드 저장·게임 분석 전송 기능이 없습니다. 기록은 이 브라우저에 저장됩니다. 배포 후 호스팅 서비스의 접속 로그는 게임 저장과 별도로 처리될 수 있습니다.</p><h3>제작</h3><p>ALDOL · AI 도구를 활용해 제작한 일러스트를 포함합니다. 글꼴 출처와 라이선스는 규칙 안내에서 확인할 수 있어요.</p><h3>버그 제보</h3><p>버전, 기기·브라우저, 문제가 생긴 행동과 스크린샷을 함께 알려 주세요. 백업 파일에는 플레이 기록이 포함되므로 필요할 때만 첨부해 주세요.</p>`}
+function releaseAboutMarkup(){return `<h2>겸직금지!</h2><p class="release-tag">공개 테스트 · v0.6.24</p><p>낮에는 직장인, 밤에는 던전 출근. 현실과 판타지 직업을 조합하고 카드를 모아 인사부장 마왕에게 퇴사를 통보하세요.</p><p>직업 4종 · 갈림길 9개 구역 · 싱글플레이 카드 로그라이트</p><h3>기록과 개인정보</h3><p>게임에는 계정·클라우드 저장·게임 분석 전송 기능이 없습니다. 기록은 이 브라우저에 저장됩니다. 배포 후 호스팅 서비스의 접속 로그는 게임 저장과 별도로 처리될 수 있습니다.</p><h3>제작</h3><p>ALDOL · AI 도구를 활용해 제작한 일러스트를 포함합니다. 글꼴 출처와 라이선스는 규칙 안내에서 확인할 수 있어요.</p><h3>버그 제보</h3><p>버전, 기기·브라우저, 문제가 생긴 행동과 스크린샷을 함께 알려 주세요. 백업 파일에는 플레이 기록이 포함되므로 필요할 때만 첨부해 주세요.</p>`}
 function handleReleaseAction(act){
  if(act==='saveManager'){restoreSerial++;restoreCandidate=null;saveMessage='';modal='saveManager';render();return true}
  if(act==='releaseAbout'){modal='releaseAbout';render();return true}
@@ -2004,7 +2050,7 @@ FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 </pre></details>`}
  else if(modal==='jobBrief'&&state){content=jobBriefMarkup(keyPair());eyebrow='JOB BRIEFING'}
- else if(modal==='log'&&state){content=`<h2>📜 전투 기록</h2><div class="log-list">${(state.logs||[]).map(l=>`<p>${esc(l)}</p>`).join('')||'<p>기록이 없어.</p>'}</div>`;eyebrow='BATTLE LOG · 최근 20개'}
+ else if(modal==='log'&&state){content=battleLogMarkup();eyebrow='BATTLE LOG · 최근 12행동'}
  else if(modal==='deck'&&state){const tally={};for(const id of state.deck)tally[id]=(tally[id]||0)+1;content=`<h2>🗂️ 내 덱 (${state.deck.length}장)</h2><p>${jobs[state.real].name} + ${jobs[state.fantasy].name} = ${pair().name}. 융합 카드 일반 강화: ${upgraded(pair().sig)?'적용 ✦':'미적용'}.${state.sigUpgrade?' 이전 기록의 융합 특전: 비용 1 · 공격 +4 적용.':''}</p><p>이번 턴에 사용한 카드는 다음 턴부터 다시 뽑을 수 있어. 같은 이름의 다른 사본은 사용할 수 있어.</p><div class="deck-list">${Object.entries(tally).map(([id,n])=>`<div class="deck-row"><span>${cards[id].icon} <b>${cards[id].name}</b>${upgraded(id)?' ✦':''} <small class="fam-${cards[id].family}">${toneName[cards[id].family]}</small></span><span class="pill">×${n}</span></div>`).join('')}</div>`}
  else if(modal==='relics'&&state){content=`<h2>💎 보유 유물 (${state.relics.length}/12)</h2><p>유물은 덱에 들어가지 않으며 이번 도전에만 적용돼.</p><div class="relic-grid">${state.relics.map(k=>relicTile(k,'disabled')).join('')||'<p>아직 유물이 없어. 정예 전투나 상점을 방문해봐.</p>'}</div>`}
  else if(modal==='card'){content=cardDetailMarkup();eyebrow='CARD DETAILS'}
@@ -2015,7 +2061,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
  else if(modal==='restartPrompt'){content=`<h2>⚠️ 현재 도전을 초기화할까?</h2><p>진행 중인 덱과 전투는 사라져. 누적 승리 기록과 튜토리얼 진행은 유지돼.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn danger" data-act="restart">도전 포기</button><button class="btn calm" data-act="closeModal">계속 플레이</button></div>`}
  if(!content){modal='';return ''}
  return `<div class="modal-screen" data-act="outsideModal"><div class="modal" role="dialog" aria-modal="true" aria-label="게임 상세 및 확인"><div class="modal-top"><span class="eyebrow">${eyebrow}</span><button class="close-x" data-act="closeModal" aria-label="닫기">×</button></div>${content}${['card','transaction','jobBrief'].includes(modal)?'':'<div style="display:flex;justify-content:flex-end;margin-top:18px"><button class="btn small" data-act="closeModal">✕ 닫기</button></div>'}</div></div>`}
-function render(){if(holdCombatRender)return;if(combatPlayback&&!paintingCombatFrame){paintCombatFrame();return}syncBattleViewport();validateSelection();selectionProjection=selectedCard?projectSelection(selectedCard.index):null;const app=document.querySelector('#app');app.classList.toggle('flow-app',!state||['map','reward','training'].includes(state.phase));if(state?.phase!=='reward')journeyReward=null;if(state?.phase!=='map')journeyRoute=null;let out='';if(!state)out=renderTitle();else if(state.phase==='battle')out=renderBattle();else if(state.phase==='training')out=renderTraining();else if(state.phase==='map')out=renderMap();else if(state.phase==='reward')out=renderReward();else if(state.phase==='relicReward')out=renderRelicReward();else if(state.phase==='shop')out=renderShop();else if(state.phase==='rest')out=renderRest();else if(state.phase==='event')out=renderEvent();else out=renderEnd();
+function render(){document.body.dataset.combatSpeed=combatSpeed;if(holdCombatRender)return;if(combatPlayback&&!paintingCombatFrame){paintCombatFrame();return}syncBattleViewport();validateSelection();selectionProjection=selectedCard?projectSelection(selectedCard.index):null;const app=document.querySelector('#app');app.classList.toggle('flow-app',!state||['map','reward','training'].includes(state.phase));if(state?.phase!=='reward')journeyReward=null;if(state?.phase!=='map')journeyRoute=null;let out='';if(!state)out=renderTitle();else if(state.phase==='battle')out=renderBattle();else if(state.phase==='training')out=renderTraining();else if(state.phase==='map')out=renderMap();else if(state.phase==='reward')out=renderReward();else if(state.phase==='relicReward')out=renderRelicReward();else if(state.phase==='shop')out=renderShop();else if(state.phase==='rest')out=renderRest();else if(state.phase==='event')out=renderEvent();else out=renderEnd();
  const oldEnergy=app.querySelector('.energy-meter'),energyBefore=oldEnergy?{value:Number(oldEnergy.dataset.energy),src:oldEnergy.querySelector('img')?.getAttribute('src')}:null;
  const handBefore=captureHand();const scrollLeft=app.querySelector('.hand')?.scrollLeft||0;const hadModal=!!app.querySelector('.modal');app.innerHTML=out+renderModal();bindJourneyDock();const handNow=app.querySelector('.hand');if(handNow)handNow.scrollLeft=scrollLeft;paintSelection(selectionProjection);animateHand(handBefore);animateEnergy(energyBefore);bindHandNavigation();
  if(state?.phase==='battle'&&state.tutorial&&!modal){const s=TUTORIAL[state.tutorial.step];if(s)app.querySelectorAll(s.focus).forEach(el=>el.classList.add('tut-focus'))}
@@ -2047,6 +2093,8 @@ document.querySelector('#app').addEventListener('click',ev=>{
  if(act==='status'){statusKey=el.dataset.key;modal='status';render();return}
  if(act==='battleMenu'||act==='mobileTutorial'){modal=act;render();return}
  if(act==='fullscreen'){toggleGameFullscreen();return}
+ if(act==='combatSpeed'&&Object.hasOwn(COMBAT_SPEEDS,el.dataset.speed)){combatSpeed=el.dataset.speed;persistSavePacket(currentSavePacket());render();document.querySelector('[data-act=combatSpeed][data-speed='+combatSpeed+']')?.focus({preventScroll:true});return}
+ if(act==='retrySame'&&['victory','defeat'].includes(state?.phase)){pickReal=state.real;pickFantasy=state.fantasy;modal='';selectedCard=null;newRun();return}
  if(act==='readingMode'){readableBattle=!readableBattle;persistSavePacket(currentSavePacket());modal='';cleanGesture();render();return}
  if(act==='guide'||act==='deck'||act==='relics'||act==='restartPrompt'||act==='log'){modal=act;render();return}
  if(act==='inspectCard'||act==='inspectReward'){const i=Number(el.dataset.index),source=act==='inspectCard'?'hand':'reward',id=source==='hand'?state?.hand[i]:state?.rewardOptions[i];if(!id||!cards[id])return;inspected={id,index:i,source};modal='card';render();return}
