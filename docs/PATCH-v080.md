@@ -96,5 +96,5 @@
 
 ## 호스팅 이관: Vercel → Cloudflare Pages (2026-11-22 17:00, 알돌 지시)
 - Vercel `dualjob` 프로젝트의 GitHub 연결 해제(대시보드에서 Remove Connection 확인) — 이후 main 푸시는 Vercel 배포를 유발하지 않음. 프로젝트 자체는 삭제 안 함.
-- 배포는 Cloudflare Pages Git 연결로 이관(새 프로젝트 `dualjob-git`, Pages가 main 푸시 시 직접 빌드·배포; 기존 직접 업로드 프로젝트 `dualjob`은 도메인 이동 후 정리 예정). GitHub Actions 경유안은 폐기: 시크릿 설정에 필요한 Cloudflare 대시보드 로그인이 Turnstile에 막혀 토큰을 만들 수 없었고(알돌 직접 입력까지 실패), API로 만든 토큰은 값이 화면에서 가려져 GitHub에 넣을 수 없었음. 워크플로 파일 삭제. `vercel.json` 삭제, build.py의 vercel.json 복사 제거, README/AGENTS.md/docs/DEPLOYMENT.md의 Vercel 언급을 Cloudflare로 교체.
+- 배포는 Cloudflare Pages Git 연결로 이관(기존 직접 업로드 프로젝트 `dualjob`을 대시보드에서 Git 연결로 전환 — API의 직접 업로드 프로젝트 소스 변경은 8000069로 막혔으나 대시보드 연결은 됨; 새 프로젝트 생성·도메인 이동 불필요). GitHub Actions 경유안은 폐기: 시크릿 설정에 필요한 Cloudflare 대시보드 로그인이 Turnstile에 막혀 토큰을 만들 수 없었고(알돌 직접 입력까지 실패), API로 만든 토큰은 값이 화면에서 가려져 GitHub에 넣을 수 없었음. API로 Git 연결 프로젝트 생성도 인증(authorize) 단계가 대시보드 전용이라 8000011로 막힘. 워크플로 파일 삭제. `vercel.json` 삭제, build.py의 vercel.json 복사 제거, README/AGENTS.md/docs/DEPLOYMENT.md의 Vercel 언급을 Cloudflare로 교체. 전환 완료 2026-11-22 18:01: Git 연결 후 첫 프로덕션 배포 3db6cdbf 성공(커밋 7cbefbf), 라이브 game.js SHA 3b8f3cf7… 로컬 dist와 바이트 일치.
 - 위쪽 "푸시하면 Vercel 프로덕션 자동 배포됨" 메모 2건은 이관 전 상태 기록으로, 이관 이후에는 적용되지 않음.

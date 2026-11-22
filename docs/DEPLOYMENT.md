@@ -4,7 +4,7 @@
 - 호스팅: Cloudflare Pages 정적 사이트 (2026-11-22 Vercel에서 이관, Vercel Git 연결 해제됨)
 - 구현 기준 main: v0.8.0 (2026-11-22 라이브 배포, 배포본 ddd91aaf; 이후 main 푸시는 Cloudflare Pages Git 연결 경유)
 - 저장소: https://github.com/aldol2678/dualjob
-- 자동 배포: `main` → Cloudflare Pages Git 연결(`dualjob-git` 프로젝트, Pages가 main 푸시 시 직접 빌드·배포) → Cloudflare Pages 프로덕션 → https://dualjob.aldol.app/
+- 자동 배포: `main` → Cloudflare Pages Git 연결(`dualjob` 프로젝트, Pages가 main 푸시 시 직접 빌드·배포) → Cloudflare Pages 프로덕션 → https://dualjob.aldol.app/
 - 빌드 명령: `python3 scripts/build.py`
 - 배포 폴더: `dist/`
 - 설치 명령: 없음 (Python 표준 라이브러리만 사용)
