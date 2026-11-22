@@ -69,7 +69,7 @@ CHROMIUM_PATH=/path/to/chromium node qa/release70-assets-check.cjs
 
 ## 배포
 
-Cloudflare Pages의 `dualjob-git` 프로젝트와 Git 연결되어 있으며, `main`에 반영된 변경은 운영 주소로 자동 배포됩니다. 빌드 명령은 `python3 scripts/build.py`, 배포 폴더는 `dist/`입니다. 배포 절차는 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)를 참고하세요.
+Cloudflare Pages의 `dualjob` 프로젝트와 Git 연결되어 있으며, `main`에 반영된 변경은 운영 주소로 자동 배포됩니다. 빌드 명령은 `python3 scripts/build.py`, 배포 폴더는 `dist/`입니다. 배포 절차는 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)를 참고하세요.
 
 ## 라이선스와 크레딧
 
