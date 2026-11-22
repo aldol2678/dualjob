@@ -2,9 +2,9 @@
 
 현실 직업과 판타지 직업을 조합하는 카드 로그라이트입니다. 이 후보에서는 새 도전이 12구역이며 기존 9구역 저장은 그대로 이어집니다.
 
-**[게임 플레이](https://dualjob.aldol.app/)** · 기준 main v0.6.24 · 이 브랜치: v0.7.0 확장 후보
+**[게임 플레이](https://dualjob.aldol.app/)** · 기준 main v0.7.0 · 이 브랜치: v0.8.0 확장 후보
 
-12구역, 카드 16종·유물 8종 추가, 직업 보급과 후반 적 패턴을 구현했습니다. 범위·저장 호환·검증 및 남은 확인은 [docs/PATCH-v070.md](docs/PATCH-v070.md)에 정리했습니다. 후보 브랜치의 구현은 운영 배포 완료를 뜻하지 않습니다.
+배달기사·정령술사 베이스 2종과 융합 5종(저승 배달원·연금 배달원·정령 배달부·정령 세무사·식령 요리사) 추가, 카드 32종·유물 4종·전문화 10종 추가. 범위·저장 호환·검증 및 남은 확인은 [docs/PATCH-v080.md](docs/PATCH-v080.md)에 정리했습니다. 후보 브랜치의 구현은 운영 배포 완료를 뜻하지 않습니다.
 
 ## 실행
 
@@ -69,7 +69,7 @@ CHROMIUM_PATH=/path/to/chromium node qa/release70-assets-check.cjs
 
 ## 배포
 
-Vercel의 `dualjob` 프로젝트와 연결되어 있으며, `main`에 반영된 변경은 운영 주소로 자동 배포됩니다. 빌드 명령은 `python3 scripts/build.py`, 배포 폴더는 `dist/`입니다. 배포 절차는 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)를 참고하세요.
+Cloudflare Pages의 `dualjob-git` 프로젝트와 Git 연결되어 있으며, `main`에 반영된 변경은 운영 주소로 자동 배포됩니다. 빌드 명령은 `python3 scripts/build.py`, 배포 폴더는 `dist/`입니다. 배포 절차는 [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)를 참고하세요.
 
 ## 라이선스와 크레딧
 
