@@ -1,17 +1,15 @@
 # 배포
 
 - 운영 주소: https://dualjob.aldol.app/
-- 호스팅: Vercel 정적 사이트
-- 구현 기준 main: v0.6.24 (`afc0fc94a7b89806ef675e61ecd4785f97332471`, 2026-10-29 조회)
-- 다음 패치 후보: v0.7.0. 구현·검증 범위는 [PATCH-v070.md](PATCH-v070.md) 참조. 운영 배포 완료를 뜻하지 않습니다.
-- 0.7 새 도전을 0.6.24에서 이어하기는 지원하지 않습니다. 롤백 전 새 저장을 백업하고 캠페인 호환 수정 빌드로 복구해야 합니다.
+- 호스팅: Cloudflare Pages 정적 사이트 (2026-11-22 Vercel에서 이관, Vercel Git 연결 해제됨)
+- 구현 기준 main: v0.8.0 (2026-11-22 라이브 배포, 배포본 ddd91aaf; 이후 main 푸시는 Cloudflare Pages Git 연결 경유)
 - 저장소: https://github.com/aldol2678/dualjob
-- 자동 배포: `main` → Vercel Production → https://dualjob.aldol.app/
+- 자동 배포: `main` → Cloudflare Pages Git 연결(`dualjob-git` 프로젝트, Pages가 main 푸시 시 직접 빌드·배포) → Cloudflare Pages 프로덕션 → https://dualjob.aldol.app/
 - 빌드 명령: `python3 scripts/build.py`
 - 배포 폴더: `dist/`
 - 설치 명령: 없음 (Python 표준 라이브러리만 사용)
 
-`python3 scripts/build.py`로 만든 `dist/`가 배포 단위입니다. `src/`, `qa/`, 플레이 백업은 배포하지 않습니다. Vercel 설정은 루트 `vercel.json`에서 복사합니다.
+`python3 scripts/build.py`로 만든 `dist/`가 배포 단위입니다. `src/`, `qa/`, 플레이 백업은 배포하지 않습니다.
 
 운영 파일은 해시가 포함된 JS·CSS·에셋 이름을 사용합니다. HTML은 `no-cache`, 에셋은 장기 캐시입니다. 변경 후에는 새 해시 파일과 이를 참조하는 HTML을 함께 배포하세요.
 
@@ -23,7 +21,7 @@
 
 ## 변경 반영
 
-로컬 빌드와 관련 회귀 검사를 통과한 변경을 `main`에 반영합니다. Vercel의 해당 커밋 배포가 `Ready`인지 확인한 뒤 운영 주소와 변경 기능을 확인하세요. 빌드가 실패하면 기존 성공 배포가 유지되므로, 단순 푸시 성공을 배포 완료로 보지 않습니다. GitHub Actions는 별도로 설정하지 않았으며 게임 회귀 검사는 현재 수동 실행합니다.
+로컬 빌드와 관련 회귀 검사를 통과한 변경을 `main`에 반영합니다. Cloudflare Pages의 해당 커밋 배포가 성공했는지 확인한 뒤 운영 주소와 변경 기능을 확인하세요. 빌드가 실패하면 기존 성공 배포가 유지되므로, 단순 푸시 성공을 배포 완료로 보지 않습니다. 게임 회귀 검사는 현재 수동 실행합니다(푸시 전 로컬에서 실행).
 
 ## v0.6.16 콘텐츠 패치
 
