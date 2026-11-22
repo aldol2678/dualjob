@@ -3,16 +3,16 @@
 (()=>{
 // UI pilot 01. Embedded assets keep this file offline and saves free of image data.
 const UI_SYMBOLS = {"health": "<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#f57591\" d=\"M16 27C12 24 4 18 4 11a7 7 0 0 1 12-4 7 7 0 0 1 12 4c0 7-8 13-12 16Z\"/><path d=\"M8 11q1-4 5-2\" fill=\"none\" stroke=\"#ffe5d2\" stroke-width=\"2.5\"/></g></svg>", "attack": "<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#e4f5ee\" d=\"m12 21 1-8L25 4l3 3-9 12-7 2Z\"/><path d=\"m15 18 9-10\" stroke=\"#65cbbf\" stroke-width=\"2\"/><path d=\"m8 17 7 7M6 26l6-6\" fill=\"none\" stroke=\"#f4c56f\" stroke-width=\"4\"/><path d=\"m5 25 2 2\" stroke=\"#f4c56f\" stroke-width=\"4\"/></g></svg>", "block": "<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#6ed1c7\" d=\"M16 3 27 7v8c0 7-7 12-11 14C12 27 5 22 5 15V7Z\"/><path fill=\"#b5ede0\" stroke=\"none\" d=\"M16 7v17c-5-3-8-7-8-10V9Z\"/><path fill=\"#f5ce82\" d=\"m16 10 4 5-4 6-4-6Z\"/></g></svg>", "energy": "<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#ffd274\" d=\"m18 3-13 16h9l-1 10L28 12h-10l3-9Z\"/><path d=\"m17 8-6 8h6\" fill=\"none\" stroke=\"#fff0c5\" stroke-width=\"2\"/></g></svg>", "curse": "<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#c398ee\" d=\"M10 16h12v10H10Z\"/><path fill=\"#f2d89e\" d=\"M16 3c4 5 6 7 4 10-2 3-7 2-8 0-2-3 1-6 4-10Z\"/><path d=\"M7 27h18M13 18v4\" fill=\"none\" stroke=\"#edd9ff\" stroke-width=\"2.5\"/></g></svg>"};
-const UI_PORTRAITS = {"enemy_clerk":"assets/asset-4c415c538bda9da1.webp","enemy_minion":"assets/asset-7b996364e449a385.webp","hero_chef_warlock":"assets/asset-17f12608f034ae40.webp","hero_accountant_warlock":"assets/asset-70682a3db947e514.webp","hero_accountant_alchemist":"assets/asset-b410910e08a0b50f.webp","hero_chef_alchemist":"assets/asset-950bc127d00e4e6e.webp","enemy_healer":"assets/asset-76a9a79213815573.webp","enemy_ghost":"assets/asset-2724e38724810a26.webp","enemy_golem":"assets/asset-eb2560a375e2f206.webp","enemy_wraith":"assets/asset-69d8f6064058e690.webp","enemy_boss":"assets/asset-7fd1c796f7e3937d.webp"};
+const UI_PORTRAITS = {"enemy_clerk":"assets/asset-4c415c538bda9da1.webp","enemy_minion":"assets/asset-7b996364e449a385.webp","hero_chef_warlock":"assets/asset-17f12608f034ae40.webp","hero_accountant_warlock":"assets/asset-70682a3db947e514.webp","hero_accountant_alchemist":"assets/asset-b410910e08a0b50f.webp","hero_chef_alchemist":"assets/asset-950bc127d00e4e6e.webp","hero_courier_warlock":"assets/asset-4def6a42f1f598c5.webp","hero_courier_alchemist":"assets/asset-ba9d5cd845016090.webp","hero_courier_spirit":"assets/asset-fe92a7c8e72357cd.webp","hero_accountant_spirit":"assets/asset-c3132feaf6c0ba5b.webp","hero_chef_spirit":"assets/asset-87d7a566c58fce50.webp","enemy_healer":"assets/asset-76a9a79213815573.webp","enemy_ghost":"assets/asset-2724e38724810a26.webp","enemy_golem":"assets/asset-eb2560a375e2f206.webp","enemy_wraith":"assets/asset-69d8f6064058e690.webp","enemy_boss":"assets/asset-7fd1c796f7e3937d.webp"};
 Object.assign(UI_SYMBOLS,{"debt": "<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#f6dfac\" d=\"M6 3h16v25l-4-2-4 2-4-2-4 2Z\"/><path d=\"M10 8h8M10 12h6M10 16h4\" stroke=\"#96704f\"/><circle cx=\"23\" cy=\"22\" r=\"6\" fill=\"#f3b957\"/><path d=\"M23 19v6M21 20h3M22 24h3\" stroke=\"#76502d\"/></g></svg>", "ingredient": "<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#78cb83\" d=\"m19 12-2-8 4 2 2-4 2 5 4-1-4 8Z\"/><path fill=\"#f7a24e\" d=\"M19 10c-5 2-13 12-14 17 5-1 15-8 18-13Z\"/><path d=\"m16 14 3 2M11 19l3 2\" stroke=\"#b76a3c\"/><path d=\"m20 8 2 4\" stroke=\"#438760\"/></g></svg>", "reagent": "<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#d9edec\" d=\"M12 5h8v8l8 13c1 2-1 3-3 3H7c-2 0-4-1-3-3l8-13Z\"/><path fill=\"#70d8d2\" d=\"M9 20h14l4 7H5Z\"/><rect x=\"11\" y=\"2\" width=\"10\" height=\"5\" rx=\"2\" fill=\"#cf9f6d\"/><path d=\"m13 15-3 5\" stroke=\"#fff5db\" stroke-width=\"2.4\"/><circle cx=\"18\" cy=\"23\" r=\"1.4\" fill=\"#e2ffed\" stroke=\"none\"/></g></svg>", "fatigue": "<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#a7b3e5\" d=\"M19 4C10 3 4 9 5 18c1 8 11 13 18 7-10 0-15-12-4-21Z\"/><path d=\"M21 8h7l-7 7h7\" fill=\"none\" stroke=\"#cfb2ef\" stroke-width=\"2.5\"/></g></svg>", "overtime": "<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 12h3c6 0 6 9 0 9h-3\" fill=\"none\" stroke=\"#eed9b0\" stroke-width=\"3\"/><path fill=\"#f5dfb7\" d=\"M4 11h19v10c0 5-19 5-19 0Z\"/><path d=\"M7 28h18\" stroke=\"#baa083\" stroke-width=\"2.5\"/><path d=\"M8 7V3M14 7V2\" stroke=\"#bcb1d3\"/><circle cx=\"23\" cy=\"23\" r=\"7\" fill=\"#e6ac68\"/><path d=\"M23 19v4l3 2\" fill=\"none\"/></g></svg>", "draw": "<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"4\" y=\"8\" width=\"16\" height=\"21\" rx=\"3\" fill=\"#9580b8\"/><rect x=\"8\" y=\"4\" width=\"16\" height=\"21\" rx=\"3\" fill=\"#eddcb7\"/><path fill=\"#bc91de\" d=\"m16 8 5 7-5 7-5-7Z\"/><path d=\"M27 15V3m-4 4 4-4 3 4\" stroke=\"#91dfd4\" stroke-width=\"2.6\" fill=\"none\"/></g></svg>", "heal": "<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#79d6a5\" d=\"M16 28 5 17C-3 8 9 1 16 9 23 1 35 8 27 17Z\"/><path d=\"M16 12v10M11 17h10\" stroke=\"#effde7\" stroke-width=\"3.3\"/></g></svg>"});
 // v0.7: deterministic UI symbols; text labels remain accessible.
 Object.assign(UI_SYMBOLS,{"gold":"<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><ellipse cx=\"16\" cy=\"22\" rx=\"11\" ry=\"6\" fill=\"#dda24d\"/><ellipse cx=\"16\" cy=\"17\" rx=\"11\" ry=\"6\" fill=\"#f4c56f\"/><ellipse cx=\"16\" cy=\"11\" rx=\"11\" ry=\"6\" fill=\"#ffdc84\"/><path d=\"M12 11h8m-4-3v6\" stroke=\"#966633\"/></g></svg>","supply":"<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#c58d56\" d=\"m4 10 12-6 12 6v15l-12 5-12-5Z\"/><path fill=\"#f1cf90\" d=\"m4 10 12 5 12-5-12-6Z\"/><path fill=\"#79d1c7\" d=\"m11 7 12 5v7l-6 2v-7L7 9Z\"/><path d=\"M16 15v15\" fill=\"none\"/></g></svg>","relic":"<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#bb8cec\" d=\"m8 5 16 0 6 9-14 15L2 14Z\"/><path fill=\"#e6c9ff\" d=\"m8 5 8 9 8-9Z\"/><path d=\"m2 14 28 0M16 14v15\" fill=\"none\"/></g></svg>","synergy":"<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#78d4c7\" d=\"m10 3 4 9 9 4-9 4-4 9-4-9-5-4 5-4Z\"/><path fill=\"#d4a6f0\" d=\"m24 3 2 5 5 2-5 2-2 5-2-5-5-2 5-2Z\"/></g></svg>","shop":"<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#dfbd83\" d=\"M6 13h20v15H6Z\"/><path fill=\"#78cabe\" d=\"m5 4 22 0 3 9c-2 4-6 4-8 0-3 4-7 4-10 0-3 4-7 4-10 0Z\"/><path fill=\"#705476\" d=\"M13 20h7v8h-7Z\"/></g></svg>","event":"<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#b58bdc\" d=\"M6 4h20v24H6Z\"/><path d=\"M12 11c0-5 9-5 9 0 0 4-5 4-5 8\" fill=\"none\" stroke=\"#ffdf99\" stroke-width=\"3\"/><circle cx=\"16\" cy=\"24\" r=\"1.5\" fill=\"#ffdf99\" stroke=\"none\"/></g></svg>","elite":"<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#f4c56f\" d=\"m3 8 8 6 5-10 5 10 8-6-4 19H7Z\"/><path fill=\"#bd8ce5\" d=\"m16 16 4 4-4 4-4-4Z\"/></g></svg>","boss":"<svg class=\"ui-symbol\" aria-hidden=\"true\" focusable=\"false\" xmlns=\"http://www.w3.org/2000/svg\" width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><g stroke=\"#271638\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path fill=\"#b479bb\" d=\"m7 12-4-9 9 5h8l9-5-4 9v10l-9 7-9-7Z\"/><path d=\"m10 15 4 2m8-2-4 2M12 23h8\" stroke=\"#ffe4a9\" stroke-width=\"3\"/></g></svg>"});
 function routeIcon(type){return statIcon(({battle:"attack",elite:"elite",shop:"shop",rest:"heal",event:"event",boss:"boss",supply:"supply"})[type],nodeInfo[type]?.icon||"")}
 function statIcon(kind,fallback=''){
- const key={hpLoss:'health',scaleCurse:'curse',scaleDebt:'debt',scaleIng:'ingredient',scaleRea:'reagent',fatigueGauge:'fatigue'}[kind]||kind;
+ const key={hpLoss:'health',scaleCurse:'curse',scaleDebt:'debt',scaleIng:'ingredient',scaleRea:'reagent',scaleOrder:'order',scaleSpirit:'spirit',fatigueGauge:'fatigue'}[kind]||kind;
  return UI_SYMBOLS[key]||esc(fallback);
 }
-const PORTRAIT_VIEWS={"enemy_clerk":"29 38 205 174","enemy_minion":"63 40 133 184","hero_chef_warlock":"36 19 181 220","hero_accountant_warlock":"29.5 23 194 217.5","hero_accountant_alchemist":"32.5 11.5 188 237.5","hero_chef_alchemist":"53.5 8.5 155 241.5","enemy_healer":"27 25.5 210.5 212.5","enemy_ghost":"30.5 10 200.5 236","enemy_golem":"9.5 23.5 239 217.5","enemy_wraith":"38.5 3.5 185.5 248.5","enemy_boss":"21.5 4.5 216.5 247"};
+const PORTRAIT_VIEWS={"enemy_clerk":"29 38 205 174","enemy_minion":"63 40 133 184","hero_chef_warlock":"36 19 181 220","hero_accountant_warlock":"29.5 23 194 217.5","hero_accountant_alchemist":"32.5 11.5 188 237.5","hero_chef_alchemist":"53.5 8.5 155 241.5","hero_courier_warlock":"19 1 216 254","hero_courier_alchemist":"20 1 216 254","hero_courier_spirit":"11 1 234 254","hero_accountant_spirit":"24 1 207 254","hero_chef_spirit":"22 1 212 254","enemy_healer":"27 25.5 210.5 212.5","enemy_ghost":"30.5 10 200.5 236","enemy_golem":"9.5 23.5 239 217.5","enemy_wraith":"38.5 3.5 185.5 248.5","enemy_boss":"21.5 4.5 216.5 247"};
 Object.assign(UI_PORTRAITS,{"enemy_stock-audit":"assets/enemy-stock-audit-613e721ebba7a1cb.webp","enemy_cross-exam":"assets/enemy-cross-exam-63c39e5387e47a5b.webp"});
 Object.assign(PORTRAIT_VIEWS,{"enemy_stock-audit":"0 0 256 256","enemy_cross-exam":"0 0 256 256"});
 function portraitMarkup(id){return UI_PORTRAITS[id]?`<svg class="game-portrait" data-asset="${id}" viewBox="${PORTRAIT_VIEWS[id]}" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><image href="${UI_PORTRAITS[id]}" x="0" y="0" width="256" height="256"/></svg>`:''}
@@ -24,13 +24,20 @@ const jobs={
  accountant:{name:'회계사',icon:'🧮',desc:'장부·미수금·방어',kind:'현실',tag:'금융'},
  chef:{name:'요리사',icon:'👩‍🍳',desc:'재료·회복·화력',kind:'현실',tag:'조리'},
  warlock:{name:'흑마법사',icon:'🧙',desc:'저주·흡혈·금단 계약',kind:'판타지',tag:'암흑'},
- alchemist:{name:'연금술사',icon:'⚗️',desc:'시약·변환·연금 폭발',kind:'판타지',tag:'연금'}
+ alchemist:{name:'연금술사',icon:'⚗️',desc:'시약·변환·연금 폭발',kind:'판타지',tag:'연금'},
+ courier:{name:'배달기사',icon:'📦',desc:'주문서·속도·완료',kind:'현실',tag:'배달'},
+ spirit:{name:'정령술사',icon:'🔮',desc:'정령·자동 행동·소환',kind:'판타지',tag:'정령'}
 };
 const pairs={
  'accountant-warlock':{name:'영혼세무사',icon:'📜',passive:'겸직 자동 발동: 미수금 +2 · 저주 +1 · 방어 +5',flavor:'생전 세금은 사후에도 징수된다.',sig:'hellTax'},
  'accountant-alchemist':{name:'황금회계사',icon:'💰',passive:'겸직 자동 발동: 미수금 +2 · 시약 +2 · 방어 +5',flavor:'세상의 모든 비용은 황금으로 전환된다.',sig:'goldAudit'},
  'chef-warlock':{name:'지옥주방장',icon:'🍖',passive:'겸직 자동 발동: 재료 +1 · 저주 +2 · 체력 2 회복',flavor:'오늘의 특선은 저주받은 스테이크.',sig:'infernalMenu'},
- 'chef-alchemist':{name:'마도셰프',icon:'🍲',passive:'겸직 자동 발동: 재료 +1 · 시약 +1 · 카드 1장',flavor:'재료와 시약의 경계가 사라진다.',sig:'grandFeast'}
+ 'chef-alchemist':{name:'마도셰프',icon:'🍲',passive:'겸직 자동 발동: 재료 +1 · 시약 +1 · 카드 1장',flavor:'재료와 시약의 경계가 사라진다.',sig:'grandFeast'},
+ 'courier-warlock':{name:'저승 배달원',icon:'💀',passive:'겸직 자동 발동: 주문서 +2 · 저주 +1 · 방어 +5',flavor:'죽은 자의 주문도 배달합니다.',sig:'underworldExpress'},
+ 'courier-alchemist':{name:'연금 배달원',icon:'🧪',passive:'겸직 자동 발동: 주문서 +2 · 시약 +2 · 방어 +5',flavor:'시약은 제시간에 배달하는 것이 일이다.',sig:'sameDayAlchemy'},
+ 'courier-spirit':{name:'정령 배달부',icon:'🔮',passive:'겸직 자동 발동: 주문서 +1 · 정령 +1 · 카드 1장',flavor:'정령이 대신 배달합니다.',sig:'spiritQuick'},
+ 'accountant-spirit':{name:'정령 세무사',icon:'📜',passive:'겸직 자동 발동: 미수금 +2 · 정령 +1 · 방어 +5',flavor:'정령이 미수금을 대신 받아옵니다.',sig:'spiritCollection'},
+ 'chef-spirit':{name:'식령 요리사',icon:'🍲',passive:'겸직 자동 발동: 재료 +1 · 정령 +1 · 체력 2 회복',flavor:'재료에 정령이 깃듭니다.',sig:'spiritFeast'}
 };
 const cards={
  ledger:{name:'전표 정리',family:'real',job:'accountant',icon:'🧾',cost:1,desc:'방어 6. 미수금 +2.',effect:'ledger'},
@@ -96,13 +103,55 @@ const EXPANSION_CARDS={
 };
 for(const c of Object.values(EXPANSION_CARDS))c.release=7;
 Object.assign(cards,EXPANSION_CARDS);
-const SELF_CARDS=new Set(['balance','broth','taste','lunch','soul','extract','transmute','catalyst','elixir','guard','hustle','riskHedge','pantry','hotMeal','darkBargain','distill','prepStation','slowSimmer','stockSolution','reactiveShield','courseExchange']);
+// v0.8.0: courier + spirit base jobs (11 cards each) and 5 fusion jobs (2 each).
+// Release-gated like the v0.7.0 expansion: only expansion07 runs see them,
+// so classic 9-zone runs and their saves are untouched.
+const V080_CARDS={
+ swiftDelivery:{name:'신속 배달',family:'real',job:'courier',icon:'📦',cost:1,desc:'피해 5. 이번 턴에 이미 적을 처치했으면 피해 +4.',effect:'swiftDelivery'},
+ orderStack:{name:'주문서 더미',family:'real',job:'courier',icon:'🗂️',cost:0,desc:'주문서 +2. 카드 1장 뽑기.',effect:'orderStack'},
+ designatedDelivery:{name:'지정 배달',family:'real',job:'courier',icon:'🎯',cost:1,desc:'피해 6. 주문서 +1.',effect:'designatedDelivery'},
+ dawnDelivery:{name:'새벽 배송',family:'real',job:'courier',icon:'🌅',cost:1,desc:'주문서 +1. 카드 1장 뽑기. 전투 시작 손패에 있으면 주문서 +1.',effect:'dawnDelivery'},
+ codPickup:{name:'착불 수령',family:'real',job:'courier',icon:'💰',cost:1,desc:'방어 6. 주문서 +1.',effect:'codPickup'},
+ deliveryStamp:{name:'배달 완료 도장',family:'real',job:'courier',icon:'📮',cost:0,desc:'주문서 2 소모. 피해 5+소모량. 카드 1장 뽑기.',effect:'deliveryStamp'},
+ rightTurn:{name:'우회전 전용',family:'real',job:'courier',icon:'↪️',cost:1,desc:'방어 4. 다음 턴 시작 시 주문서 +1.',effect:'rightTurn'},
+ lostFound:{name:'분실물 센터',family:'real',job:'courier',icon:'🧳',cost:1,desc:'버린 카드 1장을 손패로 가져오기. 주문서 1 소모 시 2장.',effect:'lostFound'},
+ elevatorOut:{name:'엘리베이터 고장',family:'real',job:'courier',icon:'🛗',cost:1,desc:'피해 4. 모든 적에게 주문서 표시 1. 표시된 적 처치 시 주문서 +1.',effect:'elevatorOut'},
+ nightSurcharge:{name:'야간 할증',family:'real',job:'courier',icon:'🌙',cost:2,desc:'피해 9. 주문서 3 이상이면 피해 +5.',effect:'nightSurcharge'},
+ deliveryCanon:{name:'배달의 정석',family:'real',job:'courier',icon:'📜',cost:1,desc:'주문서 +3. 이번 턴에 주문서를 쓰지 않으면 다음 턴 에너지 +1.',effect:'deliveryCanon'},
+ summonSpirit:{name:'정령 소환',family:'fantasy',job:'spirit',icon:'🔮',cost:1,desc:'정령 +1.',effect:'summonSpirit'},
+ spiritBond:{name:'정령 교감',family:'fantasy',job:'spirit',icon:'🤝',cost:1,desc:'정령 2 소모. 방어 4+소모량×2. 체력 1+소모량 회복.',effect:'spiritBond'},
+ emberSpirit:{name:'작은 불꽃 정령',family:'fantasy',job:'spirit',icon:'🔥',cost:0,desc:'정령 +1. 이번 턴 종료 시 정령 피해 +2.',effect:'emberSpirit'},
+ windSpirit:{name:'바람 정령의 손길',family:'fantasy',job:'spirit',icon:'🌬️',cost:1,desc:'정령 1 소모. 카드 1+소모량 장 뽑기.',effect:'windSpirit'},
+ earthSpirit:{name:'땅 정령의 방벽',family:'fantasy',job:'spirit',icon:'🪨',cost:1,desc:'정령 1 소모. 방어 5+소모량×5.',effect:'earthSpirit'},
+ spiritWrath:{name:'정령의 분노',family:'fantasy',job:'spirit',icon:'😤',cost:2,desc:'정령 전원 소모. 소모한 기수 × 피해 7.',effect:'spiritWrath'},
+ spiritContract:{name:'정령 계약서',family:'fantasy',job:'spirit',icon:'📝',cost:1,desc:'정령 +1. 이 직업의 다른 자원 +1.',effect:'spiritContract'},
+ spiritUpkeep:{name:'소환 유지비',family:'fantasy',job:'spirit',icon:'🕯️',cost:0,desc:'정령 1기당 체력 1 회복 (최대 3).',effect:'spiritUpkeep'},
+ spiritSighting:{name:'정령 목격담',family:'fantasy',job:'spirit',icon:'👀',cost:1,desc:'정령 +1. 카드 1장 뽑기.',effect:'spiritSighting'},
+ grandSpirit:{name:'대정령 강림',family:'fantasy',job:'spirit',icon:'👑',cost:2,desc:'정령 3 소모. 모든 적에게 피해 6+소모량×2. 방어 6.',effect:'grandSpirit'},
+ spiritDismissal:{name:'정령 해고 통지',family:'fantasy',job:'spirit',icon:'📤',cost:1,desc:'정령 1 소모. 적 1명의 공격력 -3 (이번 전투).',effect:'spiritDismissal'},
+ underworldExpress:{name:'저승 특급배송',family:'fusion',job:'fusion',pair:'courier-warlock',icon:'💀',cost:2,desc:'주문서 2 소모. 저주 걸린 모든 적에게 피해 6+소모량. 저주 3 이상인 적은 피해 +4.',effect:'underworldExpress'},
+ soulReceipt:{name:'영혼 수령증',family:'fusion',job:'fusion',pair:'courier-warlock',icon:'🧾',cost:1,desc:'저주 2 소모. 주문서 1+소모량. 체력 2+소모량 회복.',effect:'soulReceipt'},
+ sameDayAlchemy:{name:'당일배송 연금술',family:'fusion',job:'fusion',pair:'courier-alchemist',icon:'⚗️',cost:1,desc:'시약 1 소모. 주문서 +2. 피해 5+소모량×2.',effect:'sameDayAlchemy'},
+ explosiveParcel:{name:'폭발성 택배',family:'fusion',job:'fusion',pair:'courier-alchemist',icon:'📦',cost:2,desc:'주문서 2 + 시약 2 소모. 피해 10+총 소모량. 적 처치 시 시약 +1.',effect:'explosiveParcel'},
+ spiritQuick:{name:'정령 퀵서비스',family:'fusion',job:'fusion',pair:'courier-spirit',icon:'⚡',cost:1,desc:'정령 1 소모. 이번 턴 배달 보너스 2배. 피해 6.',effect:'spiritQuick'},
+ spiritHub:{name:'정령 배송센터',family:'fusion',job:'fusion',pair:'courier-spirit',icon:'🏬',cost:2,desc:'정령 +1. 주문서 +2. 이번 턴 종료 시 정령 피해 +2.',effect:'spiritHub'},
+ spiritCollection:{name:'정령 추심',family:'fusion',job:'fusion',pair:'accountant-spirit',icon:'📋',cost:1,desc:'정령 1 소모. 미수금 +4. 턴 종료 시 미수금 +1.',effect:'spiritCollection'},
+ spiritLien:{name:'정령 담보권',family:'fusion',job:'fusion',pair:'accountant-spirit',icon:'🔏',cost:2,desc:'미수금 5 이상인 적에게 피해 10. 정령 +1.',effect:'spiritLien'},
+ spiritFeast:{name:'정령 만찬',family:'fusion',job:'fusion',pair:'chef-spirit',icon:'🍲',cost:2,desc:'재료 2 + 정령 1 소모. 체력 4+소모량. 방어 4+소모량.',effect:'spiritFeast'},
+ livingCourse:{name:'살아있는 코스요리',family:'fusion',job:'fusion',pair:'chef-spirit',icon:'🍽️',cost:1,desc:'재료 1 소모. 정령 +1. 피해 5. 정령 2기 이상이면 피해 +4.',effect:'livingCourse'}
+};
+for(const c of Object.values(V080_CARDS))c.release=8;
+Object.assign(cards,V080_CARDS);
+
+const SELF_CARDS=new Set(['balance','broth','taste','lunch','soul','extract','transmute','catalyst','elixir','guard','hustle','riskHedge','pantry','hotMeal','darkBargain','distill','prepStation','slowSimmer','stockSolution','reactiveShield','courseExchange','orderStack','codPickup','rightTurn','deliveryCanon','lostFound','dawnDelivery','summonSpirit','spiritBond','emberSpirit','windSpirit','earthSpirit','spiritContract','spiritUpkeep','spiritSighting','spiritHub','spiritFeast']);
 const targetMode=id=>SELF_CARDS.has(id)?'self':'enemy';
 const initialDeck={
  accountant:['ledger','ledger','audit','balance','receipt','collect'],
  chef:['chop','chop','broth','taste','lunch'],
  warlock:['curse','curse','drain','veil','soul'],
- alchemist:['extract','blast','transmute','transmute','catalyst']
+ alchemist:['extract','blast','transmute','transmute','catalyst'],
+ courier:['swiftDelivery','swiftDelivery','orderStack','designatedDelivery','codPickup','dawnDelivery'],
+ spirit:['summonSpirit','summonSpirit','emberSpirit','spiritBond','earthSpirit']
 };
 // Presentation-only floor data: saved stage numbers and route choices stay compatible.
 const rooms=[
@@ -195,6 +244,22 @@ const EXPANSION_RELICS={
 };
 for(const r of Object.values(EXPANSION_RELICS))r.release=7;
 Object.assign(relics,EXPANSION_RELICS);
+// v0.8.0 relics: generic (no pair/job lock) so every career can find them.
+const V080_RELICS={
+ swiftParcelBox:{name:'신속 배송함',icon:'📦',rarity:'일반',desc:'매 전투 시작 시 주문서 +1.',price:50},
+ deliveryLog:{name:'배달 일지',icon:'📒',rarity:'일반',job:'courier',desc:'적 처치 시 주문서 +1.',price:50},
+ spiritFlute:{name:'정령 피리',icon:'🪈',rarity:'희귀',job:'spirit',desc:'정령 턴 종료 피해 +1 (정령 1기당).',price:64},
+ deadLetter:{name:'반송 우편',icon:'✉️',rarity:'희귀',pair:'courier-warlock',desc:'턴당 처음 주문서를 소비하면 저주 +1.',price:64},
+ expressFlask:{name:'특급 플라스크',icon:'🧪',rarity:'희귀',pair:'courier-alchemist',desc:'턴당 처음 시약을 소비하면 주문서 +1.',price:64},
+ parcelSpirit:{name:'택배 정령',icon:'📦',rarity:'희귀',pair:'courier-spirit',desc:'턴당 처음 정령을 소비하면 주문서 +1.',price:64},
+ collectionSeal:{name:'추심 봉인',icon:'🔏',rarity:'희귀',pair:'accountant-spirit',desc:'턴당 처음 미수금을 소비하면 정령 +1.',price:64},
+ feastBell:{name:'만찬 종',icon:'🔔',rarity:'희귀',pair:'chef-spirit',desc:'턴당 처음 재료를 소비하면 정령 +1.',price:64},
+ orderSatchel:{name:'주문서 가방',icon:'👜',rarity:'일반',desc:'주문서 최대 보유 12 → 16.',price:52},
+ spiritLantern:{name:'정령 등불',icon:'🏮',rarity:'희귀',desc:'정령 최대 3기 → 4기.',price:66},
+ spiritCharm:{name:'정령 부적',icon:'🧿',rarity:'일반',desc:'매 전투 시작 시 정령 +1.',price:54}
+};
+for(const r of Object.values(V080_RELICS))r.release=8;
+Object.assign(relics,V080_RELICS);
 const relicKeys=Object.keys(relics);
 
 // v0.6.21: one career course per NEW run. Legacy runs keep revision 20 rules.
@@ -206,7 +271,17 @@ const TRAINING={
  fermentation:{pair:'chef-warlock',name:'저주 숙성',desc:'턴당 첫 재료 소비 카드: 모든 생존 적에게 저주 +1. 한 명만 남았다면 저주 +2.',cards:['lunch','hotMeal','eclipse']},
  furnace:{pair:'chef-warlock',name:'지옥 화덕',desc:'턴당 첫 재료 소비 공격: 주 대상에게 소비량×2, 최대 +6 피해. 그 카드의 회복량 −2 (최소 0).',cards:['flambe','infernalMenu','spiceStorm']},
  course:{pair:'chef-alchemist',name:'코스 요리',desc:'현실↔판타지 연속 사용: 방어 +4·이번 턴 다음 융합 공격 +4. 턴당 1회. 공용·융합은 연결을 끊어요.',cards:['taste','extract','grandFeast']},
- molecular:{pair:'chef-alchemist',name:'분자요리',desc:'턴당 첫 자원 소비 카드: 재료만 소비 → 시약 +1, 시약만 소비 → 재료 +1, 둘 다 소비 → 방어 +4.',cards:['lunch','blast','grandFeast']}
+ molecular:{pair:'chef-alchemist',name:'분자요리',desc:'턴당 첫 자원 소비 카드: 재료만 소비 → 시약 +1, 시약만 소비 → 재료 +1, 둘 다 소비 → 방어 +4.',cards:['lunch','blast','grandFeast']},
+ expressCrew:{pair:'courier-warlock',name:'특급배송반',desc:'처치 시 주문서 +1 추가 획득 (기본 +1 포함 총 +2).',cards:['swiftDelivery','underworldExpress']},
+ underworldPost:{pair:'courier-warlock',name:'저승 우체국',desc:'턴 종료: 저주 걸린 적 1명당 주문서 +1 (최대 2). 턴당 1회.',cards:['curse','night','underworldExpress']},
+ quickAlchemy:{pair:'courier-alchemist',name:'퀵 연금술',desc:'턴당 첫 시약 소비 카드: 주문서 +1.',cards:['blast','sameDayAlchemy','elixir']},
+ hazard:{pair:'courier-alchemist',name:'위험물 취급',desc:'폭발성 택배 피해 +4, 대신 체력 2 소모.',cards:['explosiveParcel','sameDayAlchemy']},
+ autoDeliveryNet:{pair:'courier-spirit',name:'자동 배송망',desc:'턴 종료: 정령 1기당 주문서 +1 (최대 2). 턴당 1회.',cards:['summonSpirit','spiritQuick']},
+ directDelivery:{pair:'courier-spirit',name:'직배송',desc:'정령 소모 카드 피해 +3.',cards:['spiritWrath','spiritQuick']},
+ autoCollection:{pair:'accountant-spirit',name:'자동 추심반',desc:'턴 종료: 정령 1기당 미수금 1 회수 (피해 2). 턴당 1회.',cards:['spiritCollection','collect']},
+ seizureSpirit:{pair:'accountant-spirit',name:'압류 정령',desc:'미수금 회수 카드 피해 +3.',cards:['collect','spiritLien']},
+ agingSpirit:{pair:'chef-spirit',name:'식령 숙성',desc:'재료 획득 시 25% 확률로 정령 +1.',cards:['pantry','spiritFeast']},
+ feastPrep:{pair:'chef-spirit',name:'만찬 준비',desc:'정령 만찬 회복량 +4, 방어 +4.',cards:['spiritFeast','livingCourse']}
 };
 const freshTrainingTurn=()=>({used:false,lastFamily:null,fusionReady:false});
 function trainingFor(s){return s?.contentRevision===21&&Object.hasOwn(TRAINING,s.trainingId)&&TRAINING[s.trainingId].pair===s.real+'-'+s.fantasy?TRAINING[s.trainingId]:null}
@@ -233,7 +308,7 @@ function trainingTarget(s,preferred=-1){
 }
 // Spending is captured BEFORE any relic refund; a course can never trigger itself.
 let trainingCard=null;
-function spendResource(key,n){const spent=Math.min(n,state[key]);state[key]-=spent;if(spent){rec({k:'spend',resource:key,n:spent});log((key==='ingredient'?'🥕 재료':'🧪 시약')+' '+spent+' 소비')}if(trainingCard)trainingCard.spent[key]+=spent;return spent}
+function spendResource(key,n){const spent=Math.min(n,state[key]);state[key]-=spent;if(key==='order')state.orderSpent=(state.orderSpent||0)+spent;if(spent){rec({k:'spend',resource:key,n:spent});log((key==='ingredient'?'🥕 재료':key==='reagent'?'🧪 시약':key==='order'?'📦 주문서':'🔮 정령')+' '+spent+' 소비')}if(trainingCard)trainingCard.spent[key]+=spent;return spent}
 function spendDebt(e,limit=Infinity){const n=Math.min(e.debt||0,limit);e.debt=(e.debt||0)-n;if(n){rec({k:'spend',resource:'debt',n});log('📋 '+e.name+' 미수금 '+n+' 소비')}if(trainingCard)trainingCard.spent.debt+=n;return n}
 function spendCurse(e,limit){const n=Math.min(e.curse||0,limit);e.curse=(e.curse||0)-n;if(n){rec({k:'spend',resource:'curse',n});log('🕯️ '+e.name+' 저주 '+n+' 소비')}return n}
 function trainingDamageBonus(e){
@@ -242,6 +317,9 @@ function trainingDamageBonus(e){
  if(state.trainingId==='enforcement'&&!t.used&&c.spent.debt>0){bonus=Math.min(4,c.spent.debt*2);c.enforcement=true;t.used=true}
  if(state.trainingId==='furnace'&&!t.used&&c.spent.ingredient>0){bonus=Math.min(6,c.spent.ingredient*2);c.furnace=true;t.used=true}
  if(state.trainingId==='course'&&t.fusionReady&&cards[c.id].family==='fusion'){bonus=4;t.fusionReady=false}
+ if(state.trainingId==='hazard'&&c.id==='explosiveParcel'){bonus=4}
+ if(state.trainingId==='directDelivery'&&c.spent.spirit>0){bonus=3}
+ if(state.trainingId==='seizureSpirit'&&['collect','partialCollect'].includes(c.id)&&c.spent.debt>0){bonus=3}
  if(bonus){c.bonusApplied=true;log('🎓 '+trainingFor(state).name+' · 추가 피해 '+bonus)}
  return bonus;
 }
@@ -255,6 +333,8 @@ function afterTrainingCard(c){
  if(!t.used&&id==='molecular'&&(spent.ingredient>0||spent.reagent>0)){
   t.used=true;if(spent.ingredient>0&&spent.reagent>0)gainBlock(4);else if(spent.ingredient>0)reagent(1);else ingredient(1);log('🎓 분자요리 · 자원 교환');
  }
+ if(!t.used&&id==='quickAlchemy'&&spent.reagent>0){t.used=true;order(1);log('🎓 퀵 연금술 · 주문서 +1')}
+ if(id==='hazard'&&c.id==='explosiveParcel'){state.hp=Math.max(0,state.hp-2);log('🎓 위험물 취급 · 체력 2 소모')}
  if(id==='course'){
   const f=cards[c.id].family;
   if(!t.used&&['real','fantasy'].includes(f)&&t.lastFamily&&t.lastFamily!==f){t.used=true;t.fusionReady=true;gainBlock(4);log('🎓 코스 완성 · 이번 턴 다음 융합 공격 +4')}
@@ -270,12 +350,23 @@ function applyTrainingEnd(s){
   if(i<0)return null;s.enemies[i].debt--;s.enemies[i].curse=Math.min(30,s.enemies[i].curse+1);block=4;
  }else if(s.trainingId==='investment'){
   i=trainingTarget(s);if(s.reagent<3||i<0)return null;s.reagent--;s.enemies[i].debt=Math.min(40,(s.enemies[i].debt||0)+2);block=5;
+ }else if(s.trainingId==='underworldPost'){
+  let gained=0;for(const e of s.enemies||[])if(e.hp>0&&(e.curse||0)>0&&gained<2)gained++;
+  if(!gained)return null;s.order=Math.min(12,(s.order||0)+gained);
+ }else if(s.trainingId==='autoDeliveryNet'){
+  const n=Math.min(2,s.spirit||0);if(!n)return null;s.order=Math.min(12,(s.order||0)+n);
+ }else if(s.trainingId==='autoCollection'){
+  let hit=-1;for(let j=0;j<(s.spirit||0);j++){const t2=(s.enemies||[]).findIndex(e=>e.hp>0&&(e.debt||0)>0);if(t2<0)break;const e=s.enemies[t2];e.debt--;e.hp=Math.max(0,e.hp-2);hit=t2}
+  if(hit<0)return null;i=hit;
  }else return null;
  s.block+=block;s.trainingTurn.used=true;return {i,block};
 }
 const WELFARE={
  'accountant-warlock':['overtimeClock','manaAmp'],'accountant-alchemist':['overtimeClock','lunchVoucher'],
- 'chef-warlock':['protectiveApron','manaAmp'],'chef-alchemist':['overtimeClock','protectiveApron']
+ 'chef-warlock':['protectiveApron','manaAmp'],'chef-alchemist':['overtimeClock','protectiveApron'],
+ 'courier-warlock':['overtimeClock','protectiveApron'],'courier-alchemist':['overtimeClock','lunchVoucher'],
+ 'courier-spirit':['reservePocket','overtimeClock'],'accountant-spirit':['overtimeClock','manaAmp'],
+ 'chef-spirit':['protectiveApron','lunchVoucher']
 };
 function prepareWelfareShop(){
  if(state.contentRevision!==21||state.stage!==3)return;
@@ -297,7 +388,7 @@ function renderTraining(){
  const selected=trainingChoice?.run===state&&trainingOptions().includes(trainingChoice.id)?trainingChoice.id:null;
  return `<main class="flow-screen training-flow">${flowHeader()}<section class="journey-panel"><div class="flow-kicker">3구역 완료 · 사내 전문교육</div><h1>이번 출근의 전문 분야는?</h1><p class="flow-lead">${pair().name}의 특성을 하나 고르세요. 무료이며 이번 도전이 끝날 때까지 자동으로 적용돼요.</p><div class="training-options">${trainingOptions().map(id=>{const t=TRAINING[id];return `<button type="button" class="training-option" data-act="selectTraining" data-id="${id}" aria-pressed="${selected===id}"><strong>${t.name}${selected===id?' ✓':''}</strong><span>${t.desc}</span><small>대표 카드 · ${t.cards.map(k=>cards[k].name).join(' · ')}</small></button>`}).join('')}</div><p class="flow-muted">확정 전에는 바꿀 수 있어요. 교육은 보상이나 상점·휴식 기회를 소비하지 않아요.</p></section><footer class="journey-dock training-dock"><div class="dock-copy"><b>${selected?TRAINING[selected].name:'전문화를 선택하세요'}</b><small>이번 도전 동안 유지</small></div><button class="btn primary" data-act="confirmTraining" ${selected?'':'disabled'}>교육 확정 →</button></footer></main>`;
 }
-function trainingInfoMarkup(){const t=trainingFor(state),limit=['posthumous','investment'].includes(state?.trainingId)?'턴을 끝낼 때 조건을 보고 한 번 발동해요.':'어떤 카드로 발동했든 전문화는 한 턴에 한 번 발동해요.';return t?`<h2>🎓 ${t.name}</h2><p>${t.desc}</p><p>대표 카드 · ${t.cards.map(id=>cards[id].name).join(' · ')}</p><p>이번 도전 동안 유지돼요. ${limit}</p>`:''}
+function trainingInfoMarkup(){const t=trainingFor(state),limit=['posthumous','investment','underworldPost','autoDeliveryNet','autoCollection'].includes(state?.trainingId)?'턴을 끝낼 때 조건을 보고 한 번 발동해요.':'어떤 카드로 발동했든 전문화는 한 턴에 한 번 발동해요.';return t?`<h2>🎓 ${t.name}</h2><p>${t.desc}</p><p>대표 카드 · ${t.cards.map(id=>cards[id].name).join(' · ')}</p><p>이번 도전 동안 유지돼요. ${limit}</p>`:''}
 function trainingStatus(){const t=state.trainingTurn;if(state.trainingId==='course'&&t.fusionReady)return '융합 +4 준비';return t.used?'이번 턴 사용함':'조건 충족 시 발동'}
 function battleLocationMarkup(){const location=esc(routeRooms()[state.stage].label)+' · '+state.turn+'턴',t=trainingFor(state);return t?`<button class="mb-location training-location" data-act="trainingInfo" aria-label="${t.name}. ${trainingStatus()}. 전문화 설명 보기"><span>${location}</span><small>${t.name} · ${trainingStatus()}</small></button>`:`<span class="mb-location"><span>${location}</span></span>`}
 
@@ -325,7 +416,7 @@ const hasRelic=id=>!!state?.relics?.includes(id);
 function eligibleRelics(s=state){return relicKeys.filter(k=>{
  const r=relics[k];if(!expandedRun(s))return !r.release;
  if(r.pair&&r.pair!==s.real+'-'+s.fantasy)return false;
- const job={ledgerBeyond:'accountant',infinitePot:'chef',glassRetort:'alchemist',ravenFeather:'warlock'}[k];
+ const job={ledgerBeyond:'accountant',infinitePot:'chef',glassRetort:'alchemist',ravenFeather:'warlock',deliveryLog:'courier',spiritFlute:'spirit'}[k];
  return !job||job===s.real||job===s.fantasy;
 })}
 const relicOptions=n=>shuffle(eligibleRelics().filter(k=>!state.relics.includes(k))).slice(0,n);
@@ -449,6 +540,10 @@ function sanitizeRun(raw){
   x.floorDecisions=x.floorDecisions&&typeof x.floorDecisions==='object'&&!Array.isArray(x.floorDecisions)?Object.fromEntries([5,6].filter(i=>[0,1].includes(x.floorDecisions[i])).map(i=>[i,x.floorDecisions[i]])):{};
   x.deferredBonus=x.deferredBonus===28?28:0;x.floorCopy=cards[x.floorCopy]?x.floorCopy:null;
  x.ingredient=Math.max(0,num(x.ingredient,0));x.reagent=Math.max(0,num(x.reagent,0));
+ x.order=Math.max(0,Math.min(16,num(x.order,0)));x.spirit=Math.max(0,Math.min(4,num(x.spirit,0)));
+ x.turnKills=Math.max(0,num(x.turnKills,0));x.orderSpent=Math.max(0,num(x.orderSpent,0));
+ x.detour=!!x.detour;x.statute=!!x.statute;x.spiritBonus=Math.max(0,num(x.spiritBonus,0));
+ x.deliveryBonus2x=!!x.deliveryBonus2x;x.collectionTick=!!x.collectionTick;
  x.synergies=num(x.synergies,0);x.defeated=num(x.defeated,0);x.overtimes=num(x.overtimes,0);
  // Older saves counted victories only; do not invent missing enemy totals.
  x.enemiesDefeated=Number.isSafeInteger(x.enemiesDefeated)&&x.enemiesDefeated>=0?x.enemiesDefeated:null;
@@ -508,7 +603,7 @@ const getCost=id=>{const base=costBase(id);if(base===99)return 99;let v=base-(up
 let activeCard=null, activeBonus=0, fxRec=null;
 const rec=o=>{if(fxRec)fxRec.push(o)};
 const preventLethal=()=>{if(state.hp>0)return false;if(hasRelic('severancePackage')&&!state.relicUsed.severancePackage){state.relicUsed.severancePackage=true;state.hp=Math.min(state.maxHp,20);state.block+=12;log('👑 최후의 퇴직금 발동! HP 20 · 방어 12');return true}return false};
-function countDefeat(beforeHp,e){if(beforeHp>0&&e.hp<=0&&Number.isSafeInteger(state.enemiesDefeated))state.enemiesDefeated++;}
+function countDefeat(beforeHp,e){if(beforeHp>0&&e.hp<=0){if(Number.isSafeInteger(state.enemiesDefeated))state.enemiesDefeated++;state.turnKills=(state.turnKills||0)+1;if(state.real==='courier'||state.fantasy==='courier'){let gain=state.trainingId==='expressCrew'?2:1;if(state.deliveryBonus2x)gain*=2;order(gain)}if(e.orderMark)order(1);if(hasRelic('deliveryLog'))order(1);}}
 function enterBossPhase(e){
  if(state.nodeType!=='boss'||e.id!=='boss'||e.hp<=0||e.hp>e.maxHp/2||state.bossPhase===2)return;
  state.bossPhase=2;log('🚨 인사부장 2페이즈 · 겸직 적발 심사 개시! 현실·판타지 카드로 소명하자.');
@@ -516,8 +611,10 @@ function enterBossPhase(e){
 const damage=x=>{if(!state.enemy)return;const e=state.enemy;const beforeHp=e.hp;const old=e.block||0;const amount=Math.max(0,Math.round(x+activeBonus+trainingDamageBonus(e)+(activeCard&&upgraded(activeCard)?3:0)));const wasCursed=(e.curse||0)>0;const blocked=Math.min(amount,old);e.block=old-blocked;e.hp=Math.max(0,e.hp-(amount-blocked));countDefeat(beforeHp,e);state.lastHitIndex=state.targetIndex;state.lastHitDamage=amount-blocked;rec({k:'dmg',i:state.targetIndex,raw:amount,dealt:amount-blocked,blocked,kill:e.hp<=0});if(e.hp<=0&&wasCursed&&hasRelic('ravenFeather')&&!state.relicUsed.ravenFeather){state.relicUsed.ravenFeather=true;heal(4)}log('⚔️ '+e.name+'에게 '+(amount-blocked)+' 피해'+(blocked?' (방어 '+blocked+' 흡수)':''));enterBossPhase(e);};
 const gainBlock=n=>{const v=n+(activeCard&&upgraded(activeCard)?3:0);state.block+=v;rec({k:'block',n:v});log('🛡️ 방어 '+v+' 획득');};
 const heal=(n,cardEffect=false)=>{if(activeCard&&upgraded(activeCard))n+=2;if(cardEffect&&trainingCard?.furnace)n=Math.max(0,n-2);const gained=Math.max(0,Math.min(n,state.maxHp-state.hp));state.hp+=gained;rec({k:'heal',n,gained});log('💚 체력 '+gained+' 회복');};
-const ingredient=n=>{const before=state.ingredient;state.ingredient=Math.min(12,before+n);n=state.ingredient-before;rec({k:'ingredient',n});log('🥕 재료 +'+n);};
+const ingredient=n=>{const before=state.ingredient;state.ingredient=Math.min(12,before+n);n=state.ingredient-before;rec({k:'ingredient',n});log('🥕 재료 +'+n);if(n>0&&state.trainingId==='agingSpirit'&&state.phase==='battle'&&Math.random()<0.25)spirit(1);};
 const reagent=n=>{const before=state.reagent;state.reagent=Math.min(12,before+n);n=state.reagent-before;rec({k:'reagent',n});log('🧪 시약 +'+n);};
+const order=n=>{const before=state.order||0;state.order=Math.min(hasRelic('orderSatchel')?16:12,before+n);n=state.order-before;rec({k:'order',n});log('📦 주문서 +'+n);};
+const spirit=n=>{const before=state.spirit||0;state.spirit=Math.min(hasRelic('spiritLantern')?4:3,before+n);n=state.spirit-before;rec({k:'spirit',n});log('🔮 정령 +'+n);};
 const debt=n=>{const before=state.enemy.debt||0;state.enemy.debt=Math.min(40,before+n);n=state.enemy.debt-before;rec({k:'debt',i:state.targetIndex,n});log('📋 적 미수금 +'+n);};
 const curse=n=>{const before=state.enemy.curse||0;state.enemy.curse=Math.min(30,before+n);n=state.enemy.curse-before;rec({k:'curse',i:state.targetIndex,n});log('🕯️ 적 저주 +'+n);};
 function draw(n){
@@ -539,6 +636,38 @@ function addFatigue(n){for(let i=0;i<n;i++){state.deck.push('fatigue');state.dis
 function forEachEnemy(fn){const old=state.targetIndex;for(let i=0;i<state.enemies.length;i++){if(state.enemies[i].hp>0){state.targetIndex=i;ensureTarget();fn(state.enemy,i)}}state.targetIndex=old;ensureTarget()}
 function applyCard(id){const e=state.enemy;let num;
 switch(id){
+case 'swiftDelivery':damage(5+((state.turnKills||0)>0?4:0));break;
+case 'orderStack':order(2);draw(1);break;
+case 'designatedDelivery':damage(6);if(e.hp>0)order(1);break;
+case 'dawnDelivery':order(1);draw(1);break;
+case 'codPickup':gainBlock(6);order(1);break;
+case 'deliveryStamp':num=spendResource('order',2);damage(5+num);draw(1);break;
+case 'rightTurn':gainBlock(4);state.detour=true;break;
+case 'lostFound':{const n=spendResource('order',1);const want=n?2:1;for(let k=0;k<want;k++){if(state.hand.length>=10)break;const pool=state.discard.slice(0,-1);const id2=pool.pop();if(!id2)break;const ix=state.discard.lastIndexOf(id2);if(ix>=0)state.discard.splice(ix,1);state.hand.push(id2);rec({k:'draw',n:1});log('🧳 분실물 회수 · '+cards[id2].name)}break}
+case 'elevatorOut':damage(4);forEachEnemy(a=>{a.orderMark=1});log('🛗 모든 적에게 주문서 표시');break;
+case 'nightSurcharge':damage(9+((state.order||0)>=3?5:0));break;
+case 'deliveryCanon':order(3);state.statute=true;break;
+case 'summonSpirit':spirit(1);break;
+case 'spiritBond':num=spendResource('spirit',2);gainBlock(4+num*2);heal(1+num,true);break;
+case 'emberSpirit':spirit(1);state.spiritBonus=(state.spiritBonus||0)+2;break;
+case 'windSpirit':num=spendResource('spirit',1);draw(1+num);break;
+case 'earthSpirit':num=spendResource('spirit',1);gainBlock(5+num*5);break;
+case 'spiritWrath':num=spendResource('spirit',state.spirit||0);damage(num*7);break;
+case 'spiritContract':{spirit(1);const k2=keyPair();if(k2.includes('accountant'))debt(1);else if(k2.includes('warlock'))curse(1);else if(k2.includes('alchemist'))reagent(1);else if(k2.includes('chef'))ingredient(1);else if(k2.includes('courier'))order(1);break}
+case 'spiritUpkeep':heal(Math.min(3,state.spirit||0),true);break;
+case 'spiritSighting':spirit(1);draw(1);break;
+case 'grandSpirit':num=spendResource('spirit',3);forEachEnemy(()=>damage(6+num*2));gainBlock(6);break;
+case 'spiritDismissal':num=spendResource('spirit',1);if(num){e.baseAttack=Math.max(0,(e.baseAttack||0)-3);log('📤 '+e.name+' 공격력 -3')}break;
+case 'underworldExpress':num=spendResource('order',2);forEachEnemy(a=>{if((a.curse||0)>0)damage(6+num+((a.curse||0)>=3?4:0))});break;
+case 'soulReceipt':num=spendCurse(e,2);order(1+num);heal(2+num,true);break;
+case 'sameDayAlchemy':num=spendResource('reagent',1);order(2);damage(5+num*2);break;
+case 'explosiveParcel':num=spendResource('order',2)+spendResource('reagent',2);damage(10+num);if(e.hp<=0)reagent(1);break;
+case 'spiritQuick':num=spendResource('spirit',1);if(num)state.deliveryBonus2x=true;damage(6);break;
+case 'spiritHub':spirit(1);order(2);state.spiritBonus=(state.spiritBonus||0)+2;break;
+case 'spiritCollection':num=spendResource('spirit',1);if(num){debt(4);state.collectionTick=true}break;
+case 'spiritLien':if((e.debt||0)>=5){damage(10);spirit(1)}else log('🔏 미수금 5 미만 · 효과 없음');break;
+case 'spiritFeast':{const a=spendResource('ingredient',2),b=spendResource('spirit',1),fp=state.trainingId==='feastPrep';heal(4+a+b*2+(fp?4:0),true);gainBlock(4+a+b*2+(fp?4:0));break}
+case 'livingCourse':num=spendResource('ingredient',1);spirit(1);damage(5+((state.spirit||0)>=2?4:0));break;
 case 'partialCollect':num=spendDebt(e,2);damage(4+num*3);break;
 case 'spreadLedger':forEachEnemy(()=>debt(2));break;
 case 'interestClaim':damage(4+Math.min(8,(e.debt||0)*2));break;
@@ -603,9 +732,14 @@ const DUAL_EFFECTS={
  'accountant-warlock':[['debt',2],['curse',1],['block',5]],
  'accountant-alchemist':[['debt',2],['reagent',2],['block',5]], // C2.2: 미수금 +1→+2 (두 회계사 계열 공통)
  'chef-warlock':[['ingredient',1],['curse',2],['heal',2]],
- 'chef-alchemist':[['ingredient',1],['reagent',1],['draw',1]]
+ 'chef-alchemist':[['ingredient',1],['reagent',1],['draw',1]],
+ 'courier-warlock':[['order',2],['curse',1],['block',5]],
+ 'courier-alchemist':[['order',2],['reagent',2],['block',5]],
+ 'courier-spirit':[['order',1],['spirit',1],['draw',1]],
+ 'accountant-spirit':[['debt',2],['spirit',1],['block',5]],
+ 'chef-spirit':[['ingredient',1],['spirit',1],['heal',2]]
 };
-const EFFECT_LABEL={debt:'📋 미수금',curse:'🕯️ 저주',block:'🛡️ 방어',draw:'🎴 카드',ingredient:'🥕 재료',reagent:'🧪 시약',heal:'💚 체력'};
+const EFFECT_LABEL={debt:'📋 미수금',curse:'🕯️ 저주',block:'🛡️ 방어',draw:'🎴 카드',ingredient:'🥕 재료',reagent:'🧪 시약',heal:'💚 체력',order:'📦 주문서',spirit:'🔮 정령'};
 const dualEffectList=(k=keyPair())=>DUAL_EFFECTS[k]||[];
 const dualSummary=(k)=>dualEffectList(k).map(([e,n])=>EFFECT_LABEL[e]+' +'+n).join(' · ');
 function tryAutoDual(){
@@ -616,7 +750,7 @@ function tryAutoDual(){
    if(k==='heal'){const h=state.hp;heal(n);gained.push(EFFECT_LABEL.heal+' +'+(state.hp-h));continue}
   if(k==='draw'){const h=state.hand.length;draw(n);gained.push(EFFECT_LABEL.draw+' +'+(state.hand.length-h));continue}
   const holder=k==='debt'||k==='curse'?state.enemy:state,prior=holder[k]||0;
-  if(k==='debt')debt(n);else if(k==='curse')curse(n);else if(k==='ingredient')ingredient(n);else if(k==='reagent')reagent(n);
+  if(k==='debt')debt(n);else if(k==='curse')curse(n);else if(k==='ingredient')ingredient(n);else if(k==='reagent')reagent(n);else if(k==='order')order(n);else if(k==='spirit')spirit(n);
   gained.push(EFFECT_LABEL[k]+' +'+((holder[k]||0)-prior));
  }
  if(hasRelic('dualContract')&&!state.relicTurn.dualContract){state.relicTurn.dualContract=true;state.energy++;const h=state.hand.length;draw(1);gained.push('📜 ⚡+1'+(state.hand.length>h?' · 🎴+1':''))}
@@ -642,7 +776,7 @@ function resolveOvertime(){
 }
 
 // ── 직업 안내(난이도는 '규칙 복잡도' 잠정치. 플레이테스트 후 이 표만 고치면 화면 전체에 반영된다) ──
-const JOB_ORDER=['chef-warlock','accountant-warlock','accountant-alchemist','chef-alchemist'];
+const JOB_ORDER=['chef-warlock','accountant-warlock','accountant-alchemist','chef-alchemist','courier-warlock','courier-alchemist','accountant-spirit','chef-spirit','courier-spirit'];
 const JOB_GUIDE={
  'chef-warlock':{level:1,label:'입문',recommended:true,core:'재료 확보 · 공격 · 회복',style:'재료를 모아 때리고, 저주로 깎고, 먹으면서 버틴다.',resources:['ingredient','curse'],
   strategy:['재료 손질·육수 끓이기로 🥕 재료를 쌓아.','저주 계약으로 🕯️ 저주를 걸면 턴마다 자동 피해.','재료 2~3개가 모이면 화염 불쇼·금단의 풀코스로 마무리, 위험하면 도시락으로 회복.'],
@@ -659,7 +793,27 @@ const JOB_GUIDE={
  'chef-alchemist':{level:4,label:'전문가',core:'재료·시약 조합',style:'재료와 시약을 함께 모아 한 장에 몰아 쓴다.',resources:['ingredient','reagent'],
   strategy:['간 보기·시약 채집 같은 0코스트 드로우로 손패를 돌리며 두 자원을 확보해.','카드마다 소모하는 자원이 달라. 상세 보기에서 꼭 확인해.','재료 2 + 시약 2가 모이면 연금 연회로 최대 효율.'],
   combo:['taste','extract','grandFeast'],comboNote:'간 보기(현실) + 시약 채집(판타지) → 겸직으로 재료·시약·카드 +1 → 연금 연회(자원 최대 4개 소모)',
-  resourceBrief:'🥕 <b>재료</b>와 🧪 <b>시약</b> 모두 나에게 쌓이고, 카드마다 소모하는 자원이 달라. 둘 다 2개씩 모았을 때 연금 연회가 가장 강해.'}
+  resourceBrief:'🥕 <b>재료</b>와 🧪 <b>시약</b> 모두 나에게 쌓이고, 카드마다 소모하는 자원이 달라. 둘 다 2개씩 모았을 때 연금 연회가 가장 강해.'},
+ 'courier-warlock':{level:2,label:'보통',core:'저주 누적과 배달 완료',style:'저주를 걸고, 저주 걸린 적을 순서대로 처치해 주문서를 굴린다.',resources:['order','curse'],
+  strategy:['저주 계약으로 🕯️ 저주를 걸어.','저주 걸린 적을 처치하면 📦 주문서 +1 (배달 완료).','주문서 2개가 모이면 저승 특급배송으로 저주 걸린 적들을 한 번에 처리해.'],
+  combo:['swiftDelivery','curse','underworldExpress'],comboNote:'신속 배달(현실) + 저주 계약(판타지) → 겸직으로 주문서 +2 → 저승 특급배송(저주 걸린 적 전체)',
+  resourceBrief:'📦 <b>주문서</b>는 내 쪽에 쌓여. 적을 처치하면 +1, 배달 카드가 소모해 더 세게 때리거나 뽑게 해. 🕯️ <b>저주</b>는 적에게 쌓이고, 턴이 끝날 때마다 중첩×2 피해를 줘.'},
+ 'courier-alchemist':{level:3,label:'상급',core:'주문서·시약 타이밍',style:'시약을 모으고 주문서로 타이밍을 맞춘다. 폭발을 배달 완료와 겹치는 순간이 킬각이다.',resources:['order','reagent'],
+  strategy:['시약 채집·촉매 주입으로 🧪 시약을 확보해.','주문서 더미·지정 배달로 📦 주문서를 쌓아.','시약과 주문서가 모이면 당일배송 연금술·폭발성 택배로 연속 마무리.'],
+  combo:['swiftDelivery','extract','sameDayAlchemy'],comboNote:'신속 배달(현실) + 시약 채집(판타지) → 겸직으로 주문서·시약 +2 → 당일배송 연금술(시약×2)',
+  resourceBrief:'📦 <b>주문서</b>는 내 쪽에, 🧪 <b>시약</b>도 내 쪽에 쌓여. 시약은 카드마다 최대 2개씩 소모해 피해를 키우고, 주문서는 배달 카드의 연료야. <b>어떤 자원을 언제 쓸지</b>가 핵심이야.'},
+ 'courier-spirit':{level:4,label:'전문가',core:'정령 자동 피해·주문서 운영',style:'정령이 턴 종료에 자동으로 치고, 나는 주문서를 쌓아 배달 보너스를 노린다.',resources:['order','spirit'],
+  strategy:['정령 소환으로 🔮 정령을 늘려 턴 종료 피해를 쌓아.','주문서 더미로 📦 주문서를 확보해.','정령 퀵서비스로 배달 보너스를 2배로 만들거나 정령 배송센터로 둘 다 키워.'],
+  combo:['swiftDelivery','summonSpirit','spiritQuick'],comboNote:'신속 배달(현실) + 정령 소환(판타지) → 겸직으로 주문서·정령 +1 → 정령 퀵서비스(배달 보너스 2배)',
+  resourceBrief:'📦 <b>주문서</b>와 🔮 <b>정령</b> 모두 나에게 쌓여. 정령은 1기당 턴 종료 시 무작위 적에게 피해 3을 주고 최대 3기까지 늘어나. 정령을 소모하는 카드와 모으는 카드의 균형이 핵심이야.'},
+ 'accountant-spirit':{level:3,label:'상급',core:'미수금·정령 회수',style:'미수금을 쌓고 정령이 턴 종료에 조금씩 회수한다. 기다리는 맛의 채권 덱이다.',resources:['debt','spirit'],
+  strategy:['전표 정리·추심 통지로 한 적에게 📋 미수금을 쌓아.','정령 소환으로 🔮 정령을 늘려.','미수금 5 이상이면 정령 담보권으로 한 번에 터뜨려.'],
+  combo:['ledger','summonSpirit','spiritCollection'],comboNote:'전표 정리(현실) + 정령 소환(판타지) → 겸직으로 미수금 +2 → 정령 추심(미수금 +4)',
+  resourceBrief:'📋 <b>미수금</b>은 적에게 쌓이는 표식이야. 회수 카드를 쓰면 추가 피해를 주고 사라져. 🔮 <b>정령</b>은 내 쪽에 쌓이고 턴 종료 시 무작위 적에게 피해 3을 줘.'},
+ 'chef-spirit':{level:2,label:'보통',core:'재료·정령 버티기',style:'재료를 모아 정령 만찬으로 크게 회복·방어한다. 버티면서 후반 한 방을 노린다.',resources:['ingredient','spirit'],
+  strategy:['재료 손질·간 보기로 🥕 재료를 쌓아.','정령 소환으로 🔮 정령을 늘려.','재료 2 + 정령 1이 모이면 정령 만찬으로 회복과 방어를 한 번에 해결해.'],
+  combo:['taste','summonSpirit','spiritFeast'],comboNote:'간 보기(현실) + 정령 소환(판타지) → 겸직으로 재료·정령 +1 → 정령 만찬(체력·방어 8)',
+  resourceBrief:'🥕 <b>재료</b>와 🔮 <b>정령</b> 모두 나에게 쌓여. 재료는 요리 카드가 소모해 회복·피해를 키우고, 정령은 턴 종료 시 자동으로 적을 친다.'}
 };
 const stars=n=>`<span class="stars" role="img" aria-label="난이도 ${n}/4"><span class="s-on">${'★'.repeat(n)}</span><span class="s-off">${'★'.repeat(4-n)}</span></span>`;
 function seePair(k){if(!meta.seenPairs.includes(k)){meta.seenPairs.push(k);saveMeta()}}
@@ -785,9 +939,21 @@ function endTurn(){
 function resolveEndTurn(){
  state.discard.push(...state.hand);state.hand=[];state.turnDiscard={};fxRec=[];
  const training=applyTrainingEnd(state);if(training){rec({k:'block',n:training.block});log('🎓 '+trainingFor(state).name+' · 턴 종료 효과');captureCombatBeat('training',training.i,'🎓 '+trainingFor(state).name)}
- let taken=0,absorbedAll=0,ticks=0,fatigueAdded=0,hrReward=false;
+ let taken=0,absorbedAll=0,ticks=0,fatigueAdded=0,hrReward=false,spiritDmg=0;
  for(const e of livingEnemies())e.block=0;
  captureCombatBeat('start',null,'적의 턴');
+ // v0.8.0: 정령 턴 종료 피해 — 정령 1기당 무작위 생존 적에게 피해 3 (+이번 턴 보너스, 1기당 최대 +2).
+ if((state.spirit||0)>0&&livingEnemies().length){
+  let bonus=state.spiritBonus||0;
+  for(let s=0;s<state.spirit;s++){
+   const alive=livingEnemies();if(!alive.length)break;
+   const e=alive[rng(alive.length)],extra=Math.min(2,bonus);bonus-=extra;const d=3+extra+(hasRelic('spiritFlute')?1:0);
+   const beforeHp=e.hp;e.hp=Math.max(0,e.hp-d);countDefeat(beforeHp,e);spiritDmg+=d;
+   rec({k:'spiritHit',i:state.enemies.indexOf(e),n:d,kill:e.hp<=0});log('🔮 정령 피해 '+d+' · '+e.name);
+   captureCombatBeat('spirit',state.enemies.indexOf(e),e.name+' · 정령 피해 '+d);enterBossPhase(e);
+  }
+ }
+ if(state.collectionTick){ensureTarget();if(state.enemy?.hp>0)debt(1);state.collectionTick=false;}
  for(const e of livingEnemies()){
   const ei=state.enemies.indexOf(e);
   if(e.curse>0){const d=e.curse*2,beforeHp=e.hp;e.hp=Math.max(0,e.hp-d);countDefeat(beforeHp,e);e.curse--;ticks+=d;rec({k:'tick',i:ei,n:d,kill:e.hp<=0});log('🕯️ '+e.name+' 저주 피해 '+d);captureCombatBeat('tick',ei,e.name+' · 저주 피해 '+d)}
@@ -810,9 +976,9 @@ function resolveEndTurn(){
   captureCombatBeat('enemy',ei,e.name+' · '+(a.type==='guard'?'방어 +'+a.block:a.type==='charge'?'충전':a.type==='prepare'?'야근 예고':(a.type==='slam'?'강타 ':'공격 ')+a.damage)+(a.fatigue?' · 피로 카드 +'+a.fatigue:''));
   if(state.hp<=0){if(!preventLethal()){finishRun(false);return}captureCombatBeat('revive',null,'퇴직금 패키지 · 체력 회복')}
  }
- const summary='🌙 적 턴 결과 · 받은 피해 '+taken+(absorbedAll?' · 방어로 '+absorbedAll+' 막음':'')+(ticks?' · 저주 피해 '+ticks:'')+(fatigueAdded?' · 임시 피로 카드 +'+fatigueAdded:'');
+ const summary='🌙 적 턴 결과 · 받은 피해 '+taken+(absorbedAll?' · 방어로 '+absorbedAll+' 막음':'')+(ticks?' · 저주 피해 '+ticks:'')+(spiritDmg?' · 정령 피해 '+spiritDmg:'')+(fatigueAdded?' · 임시 피로 카드 +'+fatigueAdded:'');
  if(!livingEnemies().length){log(summary);victory();return}
- state.turn++;state.block=0;state.energy=hrReward?4:3;state.usedReal=false;state.usedFantasy=false;state.synergy=false;state.dualTurnUsed=false;state.relicTurn={};state.trainingTurn=freshTrainingTurn();
+ state.turn++;state.block=0;state.energy=(hrReward?4:3)+((state.statute&&!state.orderSpent)?1:0);if(state.statute&&!state.orderSpent)log('📜 배달의 정석 · 다음 턴 에너지 +1');state.usedReal=false;state.usedFantasy=false;state.synergy=false;state.dualTurnUsed=false;state.relicTurn={};state.trainingTurn=freshTrainingTurn();state.turnKills=0;state.orderSpent=0;state.statute=false;state.spiritBonus=0;state.deliveryBonus2x=false;if(state.detour){order(1);state.detour=false;log('↪️ 우회전 전용 · 주문서 +1')}
  ensureTarget();draw(5);dealFrom=0;chooseIntent();log(summary);if(hrReward)log('📋 겸직 소명 성공 · 다음 턴 에너지 +1');tutorialEvent('endTurn');save();render();
 }
 
@@ -822,9 +988,12 @@ function spawnEnemy(){
  state.enemies=ids.map(id=>{const e=enemies[id],scale=nt==='boss'?0:Math.floor(difficultyStage/2)*3,variant=id==='wraith'?encounter.variant:null;return {id,name:variant==='stock-audit'?'재고 감사관':variant==='cross-exam'?'겸직 심사관':e.name,icon:e.icon,hp:e.maxHp+scale,maxHp:e.maxHp+scale,baseAttack:e.attack+Math.floor(difficultyStage/3),block:0,debt:0,curse:0,...(variant?{variant}:{})}});
  state.targetIndex=0;ensureTarget();state.block=hasRelic('lunchVoucher')?6:0;state.energy=3;
  state.drawPile=shuffle([...state.deck]);state.discard=[];state.turnDiscard={};state.hand=[];state.turn=1;state.usedReal=false;state.usedFantasy=false;state.synergy=false;state.dualTurnUsed=false;state.lastDual=null;
- state.lastHitIndex=null;state.lastHitDamage=0;state.overtimeUsed=false;state.ingredient=0;state.reagent=0;state.logs=[];state.actionLog=[];
+ state.lastHitIndex=null;state.lastHitDamage=0;state.overtimeUsed=false;state.ingredient=0;state.reagent=0;state.order=0;state.spirit=0;state.turnKills=0;state.orderSpent=0;state.detour=false;state.statute=false;state.spiritBonus=0;state.deliveryBonus2x=false;state.collectionTick=false;state.logs=[];state.actionLog=[];
  state.trainingTurn=freshTrainingTurn();state.relicTurn={};state.relicUsed={severancePackage:!!state.relicUsed?.severancePackage};state.bossPhase=nt==='boss'?1:0;state.floorCopy=null;state.phase='battle';
  dealFrom=0;if(state.workFatigue>=3){draw(4);state.hand.push('fatigue');log('💤 피로도 '+state.workFatigue+': 시작 손패 1장이 임시 피로 카드')}else draw(5);
+ if(state.hand.includes('dawnDelivery')){order(1);log('🌅 새벽 배송 · 전투 시작 주문서 +1')}
+ if(hasRelic('swiftParcelBox'))order(1);
+ if(hasRelic('spiritCharm'))spirit(1);
  if(state.stage===2){state.floorCopy=pair().sig;state.hand.push(pair().sig);log('🖨️ 복사실 특전 · '+cards[pair().sig].name+' 임시 사본 1장 (이번 전투 한정)')}
   if(hasRelic('reservePocket'))draw(1);
   chooseIntent();log('🚪 '+routeRooms()[state.stage].label+' · '+encounter.name);log(encounter.hint);
@@ -833,7 +1002,7 @@ function newRun(){
  meta.attempts=(meta.attempts||0)+1;const key=pickReal+'-'+pickFantasy;if(!meta.combos.includes(key))meta.combos.push(key);saveMeta();
  trainingChoice=null;
  state={version:4,campaignId:'expansion07',contentRevision:21,trainingId:null,trainingTurn:freshTrainingTurn(),workFatigue:0,dualTurnUsed:false,lastDual:null,overtimes:0,tutorial:meta.tutorialDone?null:{step:0},phase:'map',stage:0,real:pickReal,fantasy:pickFantasy,maxHp:72,hp:72,block:0,energy:3,gold:30,
- ingredient:0,reagent:0,deck:[...initialDeck[pickReal],...initialDeck[pickFantasy],pairs[key].sig],drawPile:[],discard:[],turnDiscard:{},hand:[],enemy:null,
+ ingredient:0,reagent:0,order:0,spirit:0,turnKills:0,orderSpent:0,detour:false,statute:false,spiritBonus:0,deliveryBonus2x:false,collectionTick:false,deck:[...initialDeck[pickReal],...initialDeck[pickFantasy],pairs[key].sig],drawPile:[],discard:[],turnDiscard:{},hand:[],enemy:null,
  turn:1,usedReal:false,usedFantasy:false,synergy:false,synergies:0,overtimeUsed:false,sigUpgrade:false,defeated:0,enemiesDefeated:0,logs:[],actionLog:[],message:'',rewardOptions:[],rewardFor:0,
  relics:[],upgrades:{},path:[],nodeType:null,relicTurn:{},relicUsed:{},shop:null,eventId:null,eventHistory:[],floorDecisions:{},deferredBonus:0,floorCopy:null,bossPhase:0};
  savedRun=null;save();render();
@@ -865,7 +1034,7 @@ function resolveCard(index,target){
  state.hand.splice(index,1);state.discard.push(id);state.turnDiscard=state.turnDiscard||{};state.turnDiscard[id]=(state.turnDiscard[id]||0)+1;
  if(c.family==='real')state.usedReal=true;if(c.family==='fantasy')state.usedFantasy=true;
  state.cardsPlayed=(state.cardsPlayed||0)+1;log('🃏 '+c.name+' 사용 · 에너지 '+paid+' 소비');
- const trainingContext={id,target:targetMode(id)==='enemy'?state.targetIndex:-1,spent:{debt:0,ingredient:0,reagent:0},bonusApplied:false};
+ const trainingContext={id,target:targetMode(id)==='enemy'?state.targetIndex:-1,spent:{debt:0,ingredient:0,reagent:0,order:0,spirit:0},bonusApplied:false};
  trainingCard=trainingContext;
  try{applyCard(id)}finally{activeCard=null;activeBonus=0;trainingCard=null}
  if(upgraded(id)&&utilityDrawCards.has(id)){draw(1);log('✦ 강화 보너스: 카드 1장')}
@@ -882,6 +1051,11 @@ function afterExpansionRelics(c,{beforeCurse,lastHand}){
  once('emberLadle',c.spent.ingredient>0&&livingEnemies().some(e=>e.curse>=2),()=>heal(3));
  once('pairedCutlery',c.spent.ingredient>0&&c.spent.reagent>0,()=>draw(1));
  once('lastStand',lastHand,()=>gainBlock(4));
+ once('deadLetter',c.spent.order>0,()=>curse(1));
+ once('expressFlask',c.spent.reagent>0,()=>order(1));
+ once('parcelSpirit',c.spent.spirit>0,()=>order(1));
+ once('collectionSeal',c.spent.debt>0,()=>spirit(1));
+ once('feastBell',c.spent.ingredient>0,()=>spirit(1));
  once('sturdyFolder',cards[c.id].family==='neutral',()=>gainBlock(3));
 }
 function playCard(index,target){
@@ -911,7 +1085,7 @@ function previewCard(id,{target,base=false,forceUp=null}={}){
  try{c=JSON.parse(JSON.stringify(real))}catch{return null}
  if(base||c.phase!=='battle'||!Array.isArray(c.enemies)||!c.enemies.some(e=>e.hp>0)){
   c.phase='battle';c.enemies=[{id:'dummy',name:'',icon:'',hp:999,maxHp:999,block:0,debt:0,curse:0,baseAttack:0}];c.targetIndex=0;
-  c.trainingId=null;c.trainingTurn=freshTrainingTurn();c.ingredient=0;c.reagent=0;c.relics=[];c.relicTurn={};c.relicUsed={};c.drawPile=Array(20).fill('strike');c.discard=[];c.turnDiscard={};c.hand=[];target=0;
+  c.trainingId=null;c.trainingTurn=freshTrainingTurn();c.ingredient=0;c.reagent=0;c.order=0;c.spirit=0;c.relics=[];c.relicTurn={};c.relicUsed={};c.drawPile=Array(20).fill('strike');c.discard=[];c.turnDiscard={};c.hand=[];target=0;
  }
  c.hp=Math.max(1,Math.min(c.hp,c.maxHp-30));c.energy=99;c.logs=[];
  if(forceUp!==null){c.upgrades={...(c.upgrades||{}),[id]:!!forceUp}}
@@ -926,7 +1100,7 @@ function previewCard(id,{target,base=false,forceUp=null}={}){
   const hits=r.filter(x=>x.k==='dmg');const main=hits.find(x=>x.i===tgt)||hits[0];
   const healRaw=sum('heal'),gained=r.filter(x=>x.k==='heal').reduce((a,x)=>a+x.gained,0);
   const onT=k=>r.filter(x=>x.k===k&&x.i===tgt).reduce((a,x)=>a+x.n,0);
-  out={cost,attack:main?main.raw:0,hits:hits.length,block:sum('block'),heal:healRaw,draw:sum('draw'),debt:onT('debt'),curse:onT('curse'),ingredient:sum('ingredient'),reagent:sum('reagent'),
+  out={cost,attack:main?main.raw:0,hits:hits.length,block:sum('block'),heal:healRaw,draw:sum('draw'),debt:onT('debt'),curse:onT('curse'),ingredient:sum('ingredient'),reagent:sum('reagent'),order:sum('order'),spirit:sum('spirit'),
    energy:c.energy-(99-cost),hpLoss:Math.max(0,hp0+gained-c.hp),aoe:new Set(hits.map(x=>x.i)).size>1};
  }catch(e){out=null}
  finally{state=real;[activeCard,activeBonus,fxRec]=keep}
@@ -994,6 +1168,7 @@ function selectEvent(option){if(state.phase!=='event')return;
  if(ok)nextStage();else render();
 }
 function restart(){state=null;savedRun=null;safeRemove(KEY);modal='';pendingAction=null;render()}
+function quitToTitle(){if(state&&state.phase!=='victory'&&state.phase!=='defeat'){savedRun=state;safeSet(KEY,state)}state=null;careerOpen=false;modal='';pendingAction=null;render()}
 // v0.6.15: presentation preferences are separate from the saved run.
 let readableBattle=false, fullscreenPending=false, fullscreenNotice='', viewportFrame=0;
 readableBattle=!!saveCache?.settings?.readableBattle;
@@ -1052,7 +1227,7 @@ for(const name of ['fullscreenchange','webkitfullscreenchange'])document.addEven
  fullscreenPending=false;fullscreenNotice='';document.querySelector('.screen-notice')?.remove();scheduleBattleViewport();
  document.querySelectorAll('[data-fullscreen-label]').forEach(el=>{el.textContent=fullscreenActive()?'전체화면 종료':'전체화면'});
 });
-function battleMenuMarkup(){return `<h2>게임 메뉴</h2><div class="battle-menu-grid"><button class="btn" data-act="saveManager">저장 및 백업</button><button class="btn" data-act="releaseAbout">게임 소개 · 문의</button><button class="btn" data-act="fullscreen" data-fullscreen-label>${fullscreenActive()?'전체화면 종료':'전체화면'}</button><button class="btn" data-act="readingMode" aria-pressed="${readableBattle}">${readableBattle?'한 화면 모드로':'큰 카드 · 스크롤 모드'}</button><button class="btn" data-act="guide">규칙 안내</button>${state?`<button class="btn" data-act="deck">덱 ${state.deck.length}장</button><button class="btn" data-act="relics">유물 ${state.relics.length}개</button><button class="btn" data-act="log">전투 기록</button>${state.tutorial?'<button class="btn" data-act="mobileTutorial">튜토리얼</button>':''}<button class="btn danger" data-act="restartPrompt">도전 재시작</button>`:''}</div>${combatSpeedMarkup()}<p class="screen-help">시작·이어하기 시 모바일 전체화면을 시도해요. 종료 후에는 메뉴에서 직접 다시 켤 수 있어요. 화면이 낮거나 확대된 경우에는 스크롤 모드를 사용해요.</p>${fullscreenNotice?`<p role="status">${esc(fullscreenNotice)}</p>`:''}`}
+function battleMenuMarkup(){return `<h2>게임 메뉴</h2><div class="battle-menu-grid"><button class="btn" data-act="saveManager">저장 및 백업</button><button class="btn" data-act="releaseAbout">게임 소개 · 문의</button><button class="btn" data-act="fullscreen" data-fullscreen-label>${fullscreenActive()?'전체화면 종료':'전체화면'}</button><button class="btn" data-act="readingMode" aria-pressed="${readableBattle}">${readableBattle?'한 화면 모드로':'큰 카드 · 스크롤 모드'}</button><button class="btn" data-act="guide">규칙 안내</button>${state?`<button class="btn" data-act="deck">덱 ${state.deck.length}장</button><button class="btn" data-act="relics">유물 ${state.relics.length}개</button><button class="btn" data-act="log">전투 기록</button>${state.tutorial?'<button class="btn" data-act="mobileTutorial">튜토리얼</button>':''}<button class="btn" data-act="toTitle">메인으로</button><button class="btn danger" data-act="restartPrompt">도전 재시작</button>`:''}</div>${combatSpeedMarkup()}<p class="screen-help">시작·이어하기 시 모바일 전체화면을 시도해요. 종료 후에는 메뉴에서 직접 다시 켤 수 있어요. 화면이 낮거나 확대된 경우에는 스크롤 모드를 사용해요.</p>${fullscreenNotice?`<p role="status">${esc(fullscreenNotice)}</p>`:''}`}
 // v0.6.21: the action hint and energy preview share live combat costs.
 const ENERGY_ART=["assets/energy-battery-0-e0991b68df0d609b.svg", "assets/energy-battery-1-111f3700e64420c3.svg", "assets/energy-battery-2-625c5bb3a2854c89.svg", "assets/energy-battery-3-346ce767847b9cda.svg", "assets/energy-battery-4-cb24fc2c020e33ba.svg"];
 function battleAvailability(){
@@ -1100,7 +1275,7 @@ function mobileSelectionOutcome(){
   parts.push('이번 적 턴 피해 '+current.net+'→'+p.forecast.net);
   if(current.fatigue!==p.forecast.fatigue)parts.push('피로 카드 '+current.fatigue+'→'+p.forecast.fatigue);
  }
- for(const [key,label] of [['ingredient','재료'],['reagent','시약']]){const delta=after[key]-before[key];if(delta)parts.push(label+' '+(delta>0?'+':'')+delta)}
+ for(const [key,label] of [['ingredient','재료'],['reagent','시약'],['order','주문서'],['spirit','정령']]){const delta=(after[key]||0)-(before[key]||0);if(delta)parts.push(label+' '+(delta>0?'+':'')+delta)}
  for(const [key,label] of [['curse','저주'],['debt','미수금']]){
   const changes=before.enemies.map((e,i)=>(after.enemies[i]?.[key]||0)-(e[key]||0));
   const affected=changes.filter(Boolean);if(affected.length===1)parts.push(label+' '+(affected[0]>0?'+':'')+affected[0]);
@@ -1133,7 +1308,7 @@ function renderMobileBattle(){
  </main>`;
 }
 
-function header(){return `<header class="mast"><div><div class="mini">THE SECOND SHIFT · ROGUELITE</div><div class="brand">겸직<b>금지!</b> <span class="ver-tag">v0.7.0</span></div></div><div class="mast-buttons"><button class="btn small" data-act="battleMenu" aria-label="화면 설정 및 게임 메뉴">☰</button><button class="btn small" data-act="guide" aria-label="규칙 안내">❔ 규칙</button>${state?`<button class="btn small" data-act="deck" aria-label="내 덱 보기">🗂️ 덱 ${state.deck.length}</button><button class="btn small danger" data-act="restartPrompt" aria-label="도전 재시작">↻</button>`:''}</div></header>`}
+function header(){return `<header class="mast"><div><div class="mini">THE SECOND SHIFT · ROGUELITE</div><div class="brand">겸직<b>금지!</b> <span class="ver-tag">v0.8.0</span></div></div><div class="mast-buttons"><button class="btn small" data-act="battleMenu" aria-label="화면 설정 및 게임 메뉴">☰</button><button class="btn small" data-act="guide" aria-label="규칙 안내">❔ 규칙</button>${state?`<button class="btn small" data-act="deck" aria-label="내 덱 보기">🗂️ 덱 ${state.deck.length}</button><button class="btn small danger" data-act="restartPrompt" aria-label="도전 재시작">↻</button>`:''}</div></header>`}
 // v0.6.15: selection belongs to the current screen, never to the saved run.
 let journeyReward=null,journeyRoute=null;
 let journeyDockObserver=null;
@@ -1150,10 +1325,13 @@ function flowPairTile(k){
  return `<button type="button" class="career-tile ${selected?'selected':''}" data-act="pickPair" data-pair="${k}" aria-pressed="${selected}" aria-label="${p.name}, 규칙 복잡도 ${g.label}. ${g.core}"><span class="career-portrait" aria-hidden="true">${heroMarkup({real,fantasy})}</span><span class="career-name">${p.name}</span><span class="career-core">${g.core}</span><span class="career-level">${g.recommended?'첫 플레이 추천 · ':''}${g.label}</span><span class="career-check" aria-hidden="true">${selected?'✓':''}</span></button>`;
 }
 function flowPairDetail(k){const p=pairs[k],g=JOB_GUIDE[k];return `<details class="flow-details career-details"><summary>${p.name} · 직업 자세히</summary><div class="flow-detail-body"><p>${esc(g.style)}</p><h3>기본 전략</h3><ol>${g.strategy.map(s=>'<li>'+esc(s)+'</li>').join('')}</ol><h3>대표 카드 조합</h3>${comboMarkup(k)}<p>${esc(g.comboNote)}</p><h3>겸직 효과 · 턴당 1회</h3><p>${dualSummary(k)}</p><p class="flow-muted">복잡도는 자원과 규칙 관리의 난이도이며 직업의 강함을 뜻하지 않아요.</p></div></details>`}
+let careerOpen=false;
 function renderTitle(){
  const k=pickReal+'-'+pickFantasy,p=pairs[k],imp=importCandidate();
- const resume=savedRun?`<section class="journey-resume"><div><b>${pairs[savedRun.real+'-'+savedRun.fantasy].name}</b><small>${routeRooms(savedRun)[savedRun.stage].label} ${savedRun.stage+1}/${campaignLength(savedRun)} · 체력 ${savedRun.hp}/${savedRun.maxHp}</small></div><button class="btn calm" data-act="resume">이어하기 →</button></section>`:imp?`<details class="flow-details legacy-import"><summary>이전 기록 가져오기 · ${pairs[imp.run.real+'-'+imp.run.fantasy].name}</summary><div class="flow-detail-body"><p>${esc(imp.label)} · 구역 ${imp.run.stage+1}/${campaignLength(imp.run)}. 원본을 보존하고 복사본으로 이어갑니다.</p><button class="btn calm" data-act="importRun">복사해서 이어하기</button></div></details>`:'';
- return `<main class="flow-screen title-flow">${flowHeader()}${resume}<section class="journey-intro"><span class="release-tag">공개 테스트</span><h1>퇴근했더니 <em>던전으로 출근?</em></h1><p>현실 × 판타지 직업으로 12개 구역을 돌파하세요.</p></section><section class="career-select" aria-labelledby="career-heading"><h2 id="career-heading">출근할 직업</h2><div class="career-grid">${JOB_ORDER.map(flowPairTile).join('')}</div></section>${flowPairDetail(k)}<p class="flow-muted flow-help">${meta.tutorialDone?'규칙은 메뉴에서 다시 볼 수 있어요.':'첫 전투에서 조작과 겸직을 알려드려요.'} 시작할 때 전체화면을 시도하며, 지원하지 않으면 일반 화면으로 진행해요.</p><p class="flow-record">승리 ${meta.wins||0} · 도전 ${meta.attempts||0} · 경험한 직업 ${meta.combos.length}/4</p><div class="release-links"><button class="btn small" data-act="saveManager">저장 및 백업</button><button class="btn small" data-act="releaseAbout">게임 소개 · 문의</button></div><footer class="journey-dock start-dock"><div class="dock-copy" aria-live="polite"><b>${p.name}</b><small>${savedRun?'새 출근 시 기존 진행을 덮어씁니다.':'선택한 직업 · 자동 저장'}</small></div><button class="btn primary" data-act="start" aria-label="${p.name} · 출근하기">출근하기 →</button></footer></main>`;
+ const resume=savedRun?`<section class="journey-resume"><div><b>${pairs[savedRun.real+'-'+savedRun.fantasy].name}</b><small>${routeRooms(savedRun)[savedRun.stage].label} ${savedRun.stage+1}/${campaignLength(savedRun)} · 체력 ${savedRun.hp}/${savedRun.maxHp}</small></div></section>`:imp?`<details class="flow-details legacy-import"><summary>이전 기록 가져오기 · ${pairs[imp.run.real+'-'+imp.run.fantasy].name}</summary><div class="flow-detail-body"><p>${esc(imp.label)} · 구역 ${imp.run.stage+1}/${campaignLength(imp.run)}. 원본을 보존하고 복사본으로 이어갑니다.</p><button class="btn calm" data-act="importRun">복사해서 이어하기</button></div></details>`:'';
+ const main=`<main class="flow-screen title-flow">${flowHeader()}${resume}<section class="title-hero" aria-label="겸직금지! 타이틀"><div class="title-hero-copy"><span class="release-tag">공개 테스트</span><h1 class="title-logo">겸직금지!</h1><p class="title-en">Dual Job!</p><p class="title-tagline">퇴근했더니 <em>던전으로 출근?</em> 현실 × 판타지 직업으로 12개 구역을 돌파하세요.</p><div class="title-menus"><button class="btn primary" data-act="newGame">새 게임 →</button><button class="btn" data-act="resume" ${savedRun?'':'disabled'}>이어하기</button><button class="btn" data-act="saveManager">저장 및 백업</button><button class="btn" data-act="releaseAbout">게임 소개 · 문의</button></div></div></section><p class="flow-record">승리 ${meta.wins||0} · 도전 ${meta.attempts||0} · 경험한 직업 ${meta.combos.length}/9</p></main>`;
+ const career=`<main class="flow-screen title-flow">${flowHeader()}<button class="btn small career-back" data-act="backToTitle">← 메인으로</button><section class="career-select" aria-labelledby="career-heading"><h2 id="career-heading">출근할 직업</h2><div class="career-grid">${JOB_ORDER.map(flowPairTile).join('')}</div></section>${flowPairDetail(k)}<p class="flow-muted flow-help">${meta.tutorialDone?'규칙은 메뉴에서 다시 볼 수 있어요.':'첫 전투에서 조작과 겸직을 알려드려요.'} 시작할 때 전체화면을 시도하며, 지원하지 않으면 일반 화면으로 진행해요.</p><p class="flow-record">승리 ${meta.wins||0} · 도전 ${meta.attempts||0} · 경험한 직업 ${meta.combos.length}/9</p><footer class="journey-dock start-dock"><div class="dock-copy" aria-live="polite"><b>${p.name}</b><small>${savedRun?'새 출근 시 기존 진행을 덮어씁니다.':'선택한 직업 · 자동 저장'}</small></div><button class="btn primary" data-act="start" aria-label="${p.name} · 출근하기">출근하기 →</button></footer></main>`;
+ return careerOpen?career:main;
 }
 function validJourneyReward(){return journeyReward&&state?.phase==='reward'&&journeyReward.run===state&&journeyReward.stage===state.stage&&state.rewardOptions[journeyReward.index]===journeyReward.id}
 function supplyFocusMarkup(){
@@ -1222,6 +1400,8 @@ const TERMS={
  curse:{name:'저주',icon:'🕯️',desc:'적에게 쌓는 표식. 내가 턴을 끝내면 적이 행동하기 전에 중첩×2 피해를 주고 1 줄어. 밤의 파동·검은 일식은 저주에 비례해 강해져.'},
  ingredient:{name:'재료',icon:'🥕',desc:'요리사 카드가 모으는 내 자원. 화염 불쇼·도시락 등이 소모해 피해나 회복을 키워. 전투가 끝나면 0. 최대 12.'},
  reagent:{name:'시약',icon:'🧪',desc:'연금술사 카드가 모으는 내 자원. 연금 폭발 등이 최대 2개씩 소모해 피해·회복을 키워. 전투가 끝나면 0. 최대 12.'},
+ order:{name:'주문서',icon:'📦',desc:'배달기사 카드가 모으는 내 자원. 적을 처치하면 +1. 배달 카드가 소모해 피해나 뽑기를 키워. 전투가 끝나면 0. 최대 12(주문서 가방 보유 시 16).'},
+ spirit:{name:'정령',icon:'🔮',desc:'정령술사 카드가 모으는 내 자원. 1기당 턴 종료 시 무작위 적 1명에게 피해 3. 최대 3기(정령 등불 보유 시 4기). 정령을 소모하는 카드도 있어. 전투가 끝나면 0.'},
  draw:{name:'카드 뽑기',icon:'🎴',desc:'덱이 비면 버린 카드 중 이번 턴에 쓰지 않은 카드를 섞어 뽑아. 이번 턴에 사용한 카드는 다음 턴부터 다시 뽑을 수 있어. 같은 이름의 다른 사본은 사용할 수 있고, 손패는 최대 10장.'},
  health:{name:'체력',icon:'❤️',desc:'전투가 끝나도 유지돼. 0이 되면 이번 도전은 끝나. 최대 체력 이상은 회복되지 않아.'},
  energy:{name:'에너지',icon:'⚡',desc:'카드 왼쪽 위 숫자만큼 소모해. 매 턴 3으로 돌아와. 모자라면 카드가 잠겨. 초과근무로 전투당 1번 +1.'},
@@ -1233,7 +1413,7 @@ const TERMS={
 };
 let inspected=null,statusKey='';
 const toneName={real:'현실 직업',fantasy:'판타지 직업',fusion:'융합 기술',neutral:'공용 카드'};
-const TERM_HINTS={block:/방어/,debt:/미수금/,curse:/저주/,ingredient:/재료/,reagent:/시약/,draw:/카드 .*뽑기|카드 \d장|드로우/,health:/체력|생명력/,energy:/에너지/,fatigue:/피로|사용 불가/};
+const TERM_HINTS={block:/방어/,debt:/미수금/,curse:/저주/,ingredient:/재료/,reagent:/시약/,order:/주문서/,spirit:/정령/,draw:/카드 .*뽑기|카드 \d장|드로우/,health:/체력|생명력/,energy:/에너지/,fatigue:/피로|사용 불가/};
 function termsFor(id){const d=cards[id].desc;return Object.keys(TERM_HINTS).filter(k=>TERM_HINTS[k].test(d))}
 function termButton(key,label){const t=TERMS[key];if(!t)return '';return `<button class="pill stat-token" data-act="status" data-key="${key}" title="${esc(t.desc)}" aria-label="${t.name} 설명 보기">${label||t.icon+' '+t.name} <span aria-hidden="true">ⓘ</span></button>`}
 // C2.2 전투 피드백: 실제 효과 기록(fxRec)을 읽어 표시한다. 광역 공격은 맞은 적마다, 처치는 「처치!」,
@@ -1262,7 +1442,7 @@ function showFx(before, kind='card'){
  Object.entries(debt).forEach(([i,n])=>at(E(i),'📋+'+n,'status',220,40));Object.entries(cur).forEach(([i,n])=>at(E(i),'🕯+'+n,'curse',260,40));
  const hpd=state.hp-before.hp;if(hpd>0)at('.hero-unit','+'+hpd,'heal');if(hpd<0)at('.hero-unit',''+hpd,'damage');
  if(state.block>before.block)at('.hero-unit','🛡 +'+(state.block-before.block),'block',60,22);
- const res=r.filter(x=>x.k==='ingredient'||x.k==='reagent');if(res.length){const ing=res.filter(x=>x.k==='ingredient').reduce((a,x)=>a+x.n,0),rea=res.filter(x=>x.k==='reagent').reduce((a,x)=>a+x.n,0);if(ing)at('.res-pill.res-ingredient','🥕+'+ing,'status',80);if(rea)at('.res-pill.res-reagent','🧪+'+rea,'status',80)}
+ const res=r.filter(x=>x.k==='ingredient'||x.k==='reagent'||x.k==='order'||x.k==='spirit');if(res.length){const ing=res.filter(x=>x.k==='ingredient').reduce((a,x)=>a+x.n,0),rea=res.filter(x=>x.k==='reagent').reduce((a,x)=>a+x.n,0),ord=res.filter(x=>x.k==='order').reduce((a,x)=>a+x.n,0),spi=res.filter(x=>x.k==='spirit').reduce((a,x)=>a+x.n,0);if(ing)at('.res-pill.res-ingredient','🥕+'+ing,'status',80);if(rea)at('.res-pill.res-reagent','🧪+'+rea,'status',80);if(ord)at('.res-pill.res-order','📦+'+ord,'status',80);if(spi)at('.res-pill.res-spirit','🔮+'+spi,'status',80)}
  if((state.synergies||0)>before.synergies)flair('.dual-meter');
 }
 function snapshot(){return !state?null:{hp:state.hp,block:state.block,synergies:state.synergies||0,targetIndex:state.targetIndex}}
@@ -1428,7 +1608,7 @@ function cardDetailMarkup(){if(!inspected||!state)return '<p>카드 정보가 �
 function heroMarkup(profile=state){const art=portraitMarkup('hero_'+profile.real+'_'+profile.fantasy);if(art)return art;const chef=profile.real==='chef',warlock=profile.fantasy==='warlock';return `<svg viewBox="0 0 116 124" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="cape-${profile.real}-${profile.fantasy}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${warlock?'#a376db':'#4db4b7'}"/><stop offset="1" stop-color="#25294b"/></linearGradient></defs><ellipse cx="58" cy="116" rx="44" ry="7" fill="#070f20" opacity=".55"/><path d="M40 75L27 112Q57 122 90 112L76 76" fill="url(#cape-${profile.real}-${profile.fantasy})" stroke="#d8b978" stroke-width="2"/><path d="M43 74Q59 64 74 74L85 104Q58 116 33 103Z" fill="${chef?'#f8e5bd':'#292d57'}" stroke="#d4b58a" stroke-width="2"/><circle cx="58" cy="51" r="23" fill="#f2c8a7" stroke="#704966" stroke-width="2"/>${warlock?'<path d="M28 43Q32 4 62 8Q87 13 88 43L78 38Q56 17 37 42Z" fill="#343159" stroke="#b994ec" stroke-width="3"/>':'<path d="M39 29Q55 15 75 29L73 35Q55 29 41 35Z" fill="#61b4bb"/>'}${chef?'<path d="M36 28Q28 10 43 9Q52 -2 62 8Q79 0 81 16L77 34H37Z" fill="#fff1d8" stroke="#d7b995" stroke-width="2"/>':'<path d="M36 44Q54 28 80 44L76 32Q61 22 42 33Z" fill="#403253"/>'}<circle cx="49" cy="53" r="3" fill="#332945"/><circle cx="67" cy="53" r="3" fill="#332945"/>${profile.real==='accountant'?'<rect x="40" y="46" width="17" height="15" rx="5" fill="none" stroke="#493d51" stroke-width="2"/><rect x="60" y="46" width="17" height="15" rx="5" fill="none" stroke="#493d51" stroke-width="2"/><path d="M57 53H60" stroke="#493d51" stroke-width="2"/>':''}<path d="M51 64Q58 69 65 64" fill="none" stroke="#b36a78" stroke-width="2" stroke-linecap="round"/><path d="M37 81Q25 84 24 98M79 81Q92 84 92 98" stroke="#edc09e" stroke-width="10" stroke-linecap="round"/><rect x="${warlock?'83':'15'}" y="78" width="24" height="24" rx="4" fill="${warlock?'#b08de1':'#ffe0a1'}" stroke="#25233b" stroke-width="3"/>${warlock?'<path d="M94 83L89 90L96 91L91 98" fill="none" stroke="#312449" stroke-width="2"/>':'<path d="M20 84H34M20 90H31M20 96H34" stroke="#635172" stroke-width="2"/>'}</svg>`}
 function enemyMarkup(e,i){const it=intentInfo(e),dead=e.hp<=0,tg=i===state.targetIndex&&!dead;
  return `<button type="button" data-act="targetEnemy" data-index="${i}" data-target="${i}" class="enemy-unit ${dead?'dead':''} ${tg?'targeted':''}" ${dead?'disabled':''} aria-label="${esc(e.name)}, 체력 ${e.hp}/${e.maxHp}${e.block?', 방어 '+e.block:''}, 이번 행동 ${esc(it.text)}${it.sub?', '+esc(it.sub):''}${e.debt?', 미수금 '+e.debt:''}${e.curse?', 저주 '+e.curse:''}${tg?', 현재 공격 대상':', 탭하면 공격 대상으로 선택'}">${tg?'<span class="target-tag">🎯 대상</span>':''}<span class="enemy-intent intent-${dead?'dead':it.cls}">${dead?'처치 완료':statIcon(it.cls==='guard'?'block':it.cls==='charge'?'energy':it.cls==='prepare'||it.cls==='curse'?'fatigue':'attack',it.icon)+' <span class="intent-copy"><strong>'+esc(it.text)+'</strong>'+(it.sub?'<small>'+esc(it.sub)+'</small>':'')+'</span>'}</span><span class="enemy-avatar" aria-hidden="true">${enemyPortrait(e)}</span><b>${esc(e.name)}</b>${bar(e.hp,e.maxHp)}<span class="enemy-hp">${statIcon('health')} ${e.hp}/${e.maxHp}${e.block?` <i class="eblock">${statIcon('block')}${e.block}</i>`:''}</span><span class="enemy-effects">${e.debt?`<i class="st st-debt">${statIcon('debt')}${e.debt}</i>`:''}${e.curse?`<i class="st st-curse">${statIcon('curse')}${e.curse}</i>`:''}</span><span class="damage-preview" aria-hidden="true"></span></button>`}
-function resValue(k){return k==='ingredient'?state.ingredient:k==='reagent'?state.reagent:k==='debt'?(state.enemy?.debt||0):(state.enemy?.curse||0)}
+function resValue(k){return k==='ingredient'?state.ingredient:k==='reagent'?state.reagent:k==='order'?(state.order||0):k==='spirit'?(state.spirit||0):k==='debt'?(state.enemy?.debt||0):(state.enemy?.curse||0)}
 function jobbarMarkup(){const g=JOB_GUIDE[keyPair()],ot=overtimeStatus(),r=state.usedReal,f=state.usedFantasy,done=state.dualTurnUsed,wf=state.workFatigue||0;
  const res=g.resources.map(k=>{const v=resValue(k),onEnemy=k==='debt'||k==='curse';return `<button type="button" class="res-pill res-${k}" data-act="status" data-key="${k}" aria-label="${TERMS[k].name} ${v}${onEnemy?', 현재 대상 기준':''}. 설명 보기"><span aria-hidden="true">${statIcon(k,TERMS[k].icon)}</span><b>${v}</b><small>${TERMS[k].name}${onEnemy?'<br/>대상':''}</small></button>`}).join('');
  const pips=Array.from({length:6},(_,i)=>`<i class="pip ${i<wf?'on':''} ${i===2||i===4?'gap':''}"></i>`).join('');
@@ -1617,10 +1797,13 @@ Object.assign(FACE_STATS,{
  prepStation:[['ingredient','+3']],slowSimmer:[['block',4],['scaleIng','유지 · 추가 ≤8']],serveNow:[['attack',6],['draw','조건부 +1']],
  bindingSeal:[['curse','+3']],cashCurse:[['attack',6],['scaleCurse','최대 2 소비']],shadowShelter:[['block',4],['scaleCurse','유지 · 추가 ≤8']],
  stockSolution:[['reagent','+3']],reactiveShield:[['block',5],['scaleRea','×4']],recycleFlask:[['attack',7],['draw','조건부 +1']],
- soulLien:[['attack',4],['scaleDebt','유지 · 추가 ≤8']],goldReserve:[['block',4],['reagent','소비량']],hellMarinade:[['curse','+1'],['all','전체']],courseExchange:[['block',4],['draw','조건부 +1']]
+ soulLien:[['attack',4],['scaleDebt','유지 · 추가 ≤8']],goldReserve:[['block',4],['reagent','소비량']],hellMarinade:[['curse','+1'],['all','전체']],courseExchange:[['block',4],['draw','조건부 +1']],
+ swiftDelivery:[['attack',5],['scaleOrder','처치 시 +4']],orderStack:[['order','+2'],['draw','+1']],designatedDelivery:[['attack',6],['order','+1']],dawnDelivery:[['order','+1'],['draw','+1']],codPickup:[['block',6],['order','+1']],deliveryStamp:[['attack',7],['draw','+1']],rightTurn:[['block',4],['order','다음 턴 +1']],lostFound:[['draw','회수 1'],['scaleOrder','주문서 소모 시 2장']],elevatorOut:[['attack',4],['scaleOrder','표시 적 처치 시 +1']],nightSurcharge:[['attack',9],['scaleOrder','주문서 3↑ +5']],deliveryCanon:[['order','+3'],['energy','다음 턴 +1']],
+ summonSpirit:[['spirit','+1']],spiritBond:[['block',8],['heal',3]],emberSpirit:[['spirit','+1'],['scaleSpirit','종료 시 피해 +2']],windSpirit:[['draw','+2']],earthSpirit:[['block',10]],spiritWrath:[['attack',0],['scaleSpirit','기수 ×7']],spiritContract:[['spirit','+1']],spiritUpkeep:[['heal','기수당 +1']],spiritSighting:[['spirit','+1'],['draw','+1']],grandSpirit:[['attack',12],['all','전체'],['block',6]],spiritDismissal:[['scaleSpirit','공격력 -3']],
+ underworldExpress:[['attack',8],['all','저주 대상']],soulReceipt:[['order','+3'],['heal',4]],sameDayAlchemy:[['attack',7],['order','+2']],explosiveParcel:[['attack',14]],spiritQuick:[['attack',6],['scaleSpirit','배달 보너스 2배']],spiritHub:[['spirit','+1'],['order','+2']],spiritCollection:[['debt','+4'],['scaleSpirit','종료 시 +1']],spiritLien:[['attack',10],['spirit','+1']],spiritFeast:[['heal',8],['block',8]],livingCourse:[['attack',5],['spirit','+1']]
 });
-const FACE_TOKENS={attack:['⚔','공격','offense'],block:['🛡','방어','defense'],heal:['💚','회복','healing'],draw:['🎴','드로우','utility'],energy:['⚡','에너지','resource'],hpLoss:['❤️','체력 소모','offense'],debt:['📋','미수금','resource'],curse:['🕯','저주','utility'],ingredient:['🥕','재료','resource'],reagent:['🧪','시약','resource'],scaleDebt:['📋','미수금 비례','utility'],scaleCurse:['🕯','저주 비례','utility'],scaleRea:['🧪','시약 비례','utility'],scaleIng:['🥕','재료 비례','utility'],scaleBoth:['🥕🧪','복합 자원 비례','utility'],all:['🌐','광역','utility'],disabled:['⛔','방해 카드','offense']};
-const FACE_DAMAGE_CARDS=new Set(['audit','collect','chop','flambe','curse','drain','night','blast','hellTax','goldAudit','infernalMenu','grandFeast','strike','surpriseAudit','spiceStorm','eclipse','flashFlask','chainReaction','partialCollect','interestClaim','serveNow','cashCurse','recycleFlask','soulLien']);
+const FACE_TOKENS={attack:['⚔','공격','offense'],block:['🛡','방어','defense'],heal:['💚','회복','healing'],draw:['🎴','드로우','utility'],energy:['⚡','에너지','resource'],hpLoss:['❤️','체력 소모','offense'],debt:['📋','미수금','resource'],curse:['🕯','저주','utility'],ingredient:['🥕','재료','resource'],reagent:['🧪','시약','resource'],order:['📦','주문서','resource'],spirit:['🔮','정령','resource'],scaleDebt:['📋','미수금 비례','utility'],scaleCurse:['🕯','저주 비례','utility'],scaleRea:['🧪','시약 비례','utility'],scaleIng:['🥕','재료 비례','utility'],scaleBoth:['🥕🧪','복합 자원 비례','utility'],scaleOrder:['📦','주문서 조건','utility'],scaleSpirit:['🔮','정령 조건','utility'],all:['🌐','광역','utility'],disabled:['⛔','방해 카드','offense']};
+const FACE_DAMAGE_CARDS=new Set(['audit','collect','chop','flambe','curse','drain','night','blast','hellTax','goldAudit','infernalMenu','grandFeast','strike','surpriseAudit','spiceStorm','eclipse','flashFlask','chainReaction','partialCollect','interestClaim','serveNow','cashCurse','recycleFlask','soulLien','swiftDelivery','designatedDelivery','deliveryStamp','elevatorOut','nightSurcharge','spiritWrath','grandSpirit','underworldExpress','sameDayAlchemy','explosiveParcel','spiritQuick','spiritLien','livingCourse']);
 // C2.2: 앞면 수치는 previewCard(실제 효과 함수 실행)로 계산한다. 전투 중에는 현재 대상·자원·강화·유물을 반영하고,
 // 전투 밖(보상·상점·덱·강화 비교)에서는 카드 자체 수치(강화 반영)를 보여 준다. 공격 수치는 적 방어 적용 전 값.
 function cardNumbers(id,{forceUp=null,live=true}={}){
@@ -1633,7 +1816,7 @@ function cardNumbers(id,{forceUp=null,live=true}={}){
 }
 function faceValue(kind,n){
  switch(kind){case 'attack':return n.attack;case 'block':return n.block;case 'heal':return n.heal;case 'draw':return '+'+n.draw;case 'energy':return '+'+n.energy;
-  case 'hpLoss':return '−'+n.hpLoss;case 'debt':return '+'+n.debt;case 'curse':return '+'+n.curse;case 'ingredient':return '+'+n.ingredient;case 'reagent':return '+'+n.reagent;default:return null}
+  case 'hpLoss':return '−'+n.hpLoss;case 'debt':return '+'+n.debt;case 'curse':return '+'+n.curse;case 'ingredient':return '+'+n.ingredient;case 'reagent':return '+'+n.reagent;case 'order':return '+'+n.order;case 'spirit':return '+'+n.spirit;default:return null}
 }
 function faceStatsMarkup(id,opt={}){
  const rows=FACE_STATS[id]||[];const n=id==='fatigue'?null:opt.numbers||cardNumbers(id,opt);
@@ -1670,7 +1853,7 @@ function upgradeDiff(id){
  const a=cardNumbers(id,{forceUp:false,live:false}),b=cardNumbers(id,{forceUp:true,live:false});if(!a||!b)return [];
  const out=[];const add=(icon,label,x,y,fmt=v=>v)=>{if(x!==y)out.push({icon,label,before:fmt(x),after:fmt(y)})};
  add('⚡','비용',a.cost,b.cost);add('⚔','공격',a.attack,b.attack);add('🛡','방어',a.block,b.block);add('💚','회복',a.heal,b.heal);add('🎴','드로우',a.draw,b.draw,v=>'+'+v);
- add('📋','미수금',a.debt,b.debt,v=>'+'+v);add('🕯','저주',a.curse,b.curse,v=>'+'+v);add('🥕','재료',a.ingredient,b.ingredient,v=>'+'+v);add('🧪','시약',a.reagent,b.reagent,v=>'+'+v);add('⚡','에너지 획득',a.energy,b.energy,v=>'+'+v);
+ add('📋','미수금',a.debt,b.debt,v=>'+'+v);add('🕯','저주',a.curse,b.curse,v=>'+'+v);add('🥕','재료',a.ingredient,b.ingredient,v=>'+'+v);add('🧪','시약',a.reagent,b.reagent,v=>'+'+v);add('📦','주문서',a.order,b.order,v=>'+'+v);add('🔮','정령',a.spirit,b.spirit,v=>'+'+v);add('⚡','에너지 획득',a.energy,b.energy,v=>'+'+v);
  return out;
 }
 function upgradeDiffMarkup(id){const d=upgradeDiff(id);if(!d.length)return '<li>강화해도 바뀌는 수치가 없는 카드야.</li>';const scale=(FACE_STATS[id]||[]).some(([x])=>x.startsWith('scale'));return d.map(x=>`<li>${x.icon} ${x.label} <b>${x.before}</b> → <b class="up-after">${x.after}</b></li>`).join('')+(scale?'<li class="up-note">자원 비례 추가분(×)은 강화와 무관하게 그대로 더해져.</li>':'')}
@@ -1689,6 +1872,7 @@ const RELIC_ART={"overtimeClock":"assets/relic-overtimeClock-9269fad8355b639a.we
 Object.assign(RELIC_ART,{"spectralSeal":"assets/relic-spectralSeal-bedce64e766a20a7.webp","compoundAbacus":"assets/relic-compoundAbacus-08d97cbb2ffc6531.webp","emberLadle":"assets/relic-emberLadle-b1350aa08007afdc.webp","pairedCutlery":"assets/relic-pairedCutlery-b8a36ce4577c639b.webp","crossBadge":"assets/relic-crossBadge-9cecbc47412fa5e0.webp","reservePocket":"assets/relic-reservePocket-6ab4b937101db5a7.webp","lastStand":"assets/relic-lastStand-6bba72463d5a2d7f.webp","sturdyFolder":"assets/relic-sturdyFolder-7b2e3380f17cf48d.webp"});
 function relicArtMarkup(id){return RELIC_ART[id]?`<img class="relic-art" data-asset="relic_${id}" src="${RELIC_ART[id]}" alt="" aria-hidden="true" width="256" height="256" draggable="false"/>`:esc(relics[id]?.icon||'')}
 for(const [id,source] of Object.entries({partialCollect:'collect',spreadLedger:'surpriseAudit',interestClaim:'audit',prepStation:'pantry',slowSimmer:'broth',serveNow:'taste',bindingSeal:'curse',cashCurse:'night',shadowShelter:'veil',stockSolution:'distill',reactiveShield:'transmute',recycleFlask:'flashFlask'}))CARD_ART[id]=CARD_ART[source];
+for(const [id,source] of Object.entries({swiftDelivery:'chop',orderStack:'receipt',designatedDelivery:'audit',dawnDelivery:'pantry',codPickup:'balance',deliveryStamp:'closeBooks',rightTurn:'guard',lostFound:'hustle',elevatorOut:'surpriseAudit',nightSurcharge:'night',deliveryCanon:'ledger',summonSpirit:'curse',spiritBond:'veil',emberSpirit:'flambe',windSpirit:'extract',earthSpirit:'transmute',spiritWrath:'eclipse',spiritContract:'darkBargain',spiritUpkeep:'elixir',spiritSighting:'contagion',grandSpirit:'chainReaction',spiritDismissal:'cashCurse',underworldExpress:'hellTax',soulReceipt:'soulLien',sameDayAlchemy:'goldAudit',explosiveParcel:'blast',spiritQuick:'recycleFlask',spiritHub:'courseExchange',spiritCollection:'goldReserve',spiritLien:'soulLien',spiritFeast:'grandFeast',livingCourse:'infernalMenu'}))CARD_ART[id]=CARD_ART[source];
 Object.assign(CARD_ART,{"soulLien":"assets/card-soulLien-5379c027eaf737b8.webp","goldReserve":"assets/card-goldReserve-3d856556dacd3a55.webp","hellMarinade":"assets/card-hellMarinade-17c2d7da6ddd5375.webp","courseExchange":"assets/card-courseExchange-133442b4a9acd75d.webp"});
 function cardThumbMarkup(id){return CARD_ART[id]?`<img class="card-thumb" data-asset="card_${id}" src="${CARD_ART[id]}" alt="" aria-hidden="true" width="384" height="176" draggable="false"/>`:esc(cards[id]?.icon||'')}
 const CARD_BACK="assets/asset-5bc6e1896de3002a.svg";
@@ -1697,7 +1881,7 @@ function cardArtMarkup(id){
  return `<div class="art-stage ${art?'illustrated':'art-symbol'}" aria-hidden="true">${art?`<img class="card-art" data-asset="card_${id}" src="${art}" alt="" width="384" height="176" draggable="false"/>`:statIcon(id==='fatigue'?'fatigue':(FACE_STATS[id]||[])[0]?.[0]||'draw','✦')}</div>`;
 }
 function resourceTextMarkup(text){
- const icons={'🥕':'ingredient','🕯':'curse','💚':'heal','🛡':'block','⚡':'energy','🧪':'reagent','📋':'debt','🎴':'draw'};
+ const icons={'🥕':'ingredient','🕯':'curse','💚':'heal','🛡':'block','⚡':'energy','🧪':'reagent','📋':'debt','🎴':'draw','📦':'order','🔮':'spirit'};
  return esc(text).replace(/🥕|🕯️?|💚|🛡️?|⚡|🧪|📋|🎴/gu,icon=>statIcon(icons[icon.replace(/\uFE0F/g,'')],icon));
 }
 function renderCard(id,opt={}){const c=cards[id]||cards.fatigue;const inHand=Number.isInteger(opt.index)&&!opt.reward&&!opt.preview;const inBattle=state&&state.phase==='battle';const cost=getCost(id);const canUse=inBattle&&id!=='fatigue'&&state.energy>=cost;const locked=inHand&&!canUse;const family={real:'현실',fantasy:'판타지',fusion:'융합',neutral:'공용'}[c.family];
@@ -1752,11 +1936,11 @@ function battleLogMarkup(){
  const groups=state.actionLog||[];
  return `<h2>📜 전투 기록</h2><p class="log-help">최근 행동부터 표시해요. 각 행동 안에서는 효과가 일어난 순서대로 읽어요.</p><div class="action-log">${groups.map((g,i)=>`<details class="log-group" ${i===0?'open':''}><summary>${g.stage+1}구역 · ${g.turn}턴 · ${esc(g.label)}</summary><ol>${g.lines.map(l=>`<li>${esc(l)}</li>`).join('')}</ol>${g.truncated?'<p>효과가 많아 앞의 40개까지 기록했어요.</p>':''}</details>`).join('')||'<p>아직 행동별 기록이 없어요. 다음 카드 사용부터 기록해요.</p>'}</div><details class="legacy-log"><summary>최근 효과 원문 · 최대 20개</summary><div class="log-list">${(state.logs||[]).map(l=>`<p>${esc(l)}</p>`).join('')||'<p>기록이 없어요.</p>'}</div></details>`;
 }
-function renderEnd(){const won=state.phase==='victory';return `${header()}<section class="panel end-screen"><div class="eyebrow">${won?'RUN COMPLETE':'GAME OVER'} · ${won?'SUCCESSFUL RESIGNATION':'OVERTIME NEVER ENDS'}</div><div class="end-icon">${won?'🎓':'🥀'}</div><h1>${won?'마왕에게 사표를 던졌다!':'다음 출근을 준비하자'}</h1><p class="description" style="color:#cfc3dc;line-height:1.8">${won?'인사부장이 무너지고 이세계 최초의 정시 퇴근이 실현됐다. 하지만 채용 공고는 다시 올라온다.':'이번 계약은 여기까지야. 직업 조합은 도감에 기록됐으니, 다음에는 더 강력한 콤보로 도전하자.'}</p><div class="pill gold" style="font-size:16px;padding:9px 16px">${pair().icon} ${pair().name}</div><div class="end-stats"><div><strong>${state.defeated||0}</strong><small>승리한 전투</small></div><div><strong>${state.enemiesDefeated??'—'}</strong><small>처치한 적${state.enemiesDefeated==null?' · 이전 저장 미집계':''}</small></div><div><strong>${state.synergies||0}</strong><small>겸직 발동</small></div><div><strong>${state.gold}G</strong><small>최종 보유 골드</small></div></div>${runBuildMarkup()}<div class="end-actions"><button class="btn primary wide" data-act="retrySame">🔁 같은 직업으로 재도전</button><button class="btn wide" data-act="restart">직업 선택으로</button><button class="btn wide" data-act="log">마지막 전투 기록</button></div><p class="small-print">🎴 발견 조합 ${meta.combos.length}/4 · 누적 승리 ${meta.wins||0}회 · 이 게임은 로컬 프로토타입으로 네트워크/결제 기능이 없어.</p></section>`}
-const utilityDrawCards=new Set(['receipt','taste','extract','catalyst','pantry','closeBooks','darkBargain','hustle','soul','spreadLedger','prepStation','bindingSeal','stockSolution','hellMarinade']);
-const upgradedDamageCards=new Set(['audit','collect','chop','flambe','curse','drain','night','blast','hellTax','goldAudit','infernalMenu','grandFeast','strike','surpriseAudit','spiceStorm','eclipse','flashFlask','chainReaction','partialCollect','interestClaim','serveNow','cashCurse','recycleFlask','soulLien']);
-const upgradedBlockCards=new Set(['ledger','balance','broth','lunch','veil','transmute','goldAudit','guard','riskHedge','distill','slowSimmer','shadowShelter','reactiveShield','goldReserve','courseExchange']);
-const upgradedHealCards=new Set(['lunch','drain','elixir','infernalMenu','grandFeast','hotMeal']);
+function renderEnd(){const won=state.phase==='victory';return `${header()}<section class="panel end-screen"><div class="eyebrow">${won?'RUN COMPLETE':'GAME OVER'} · ${won?'SUCCESSFUL RESIGNATION':'OVERTIME NEVER ENDS'}</div><div class="end-icon">${won?'🎓':'🥀'}</div><h1>${won?'마왕에게 사표를 던졌다!':'다음 출근을 준비하자'}</h1><p class="description" style="color:#cfc3dc;line-height:1.8">${won?'인사부장이 무너지고 이세계 최초의 정시 퇴근이 실현됐다. 하지만 채용 공고는 다시 올라온다.':'이번 계약은 여기까지야. 직업 조합은 도감에 기록됐으니, 다음에는 더 강력한 콤보로 도전하자.'}</p><div class="pill gold" style="font-size:16px;padding:9px 16px">${pair().icon} ${pair().name}</div><div class="end-stats"><div><strong>${state.defeated||0}</strong><small>승리한 전투</small></div><div><strong>${state.enemiesDefeated??'—'}</strong><small>처치한 적${state.enemiesDefeated==null?' · 이전 저장 미집계':''}</small></div><div><strong>${state.synergies||0}</strong><small>겸직 발동</small></div><div><strong>${state.gold}G</strong><small>최종 보유 골드</small></div></div>${runBuildMarkup()}<div class="end-actions"><button class="btn primary wide" data-act="retrySame">🔁 같은 직업으로 재도전</button><button class="btn wide" data-act="restart">메인으로</button><button class="btn wide" data-act="log">마지막 전투 기록</button></div><p class="small-print">🎴 발견 조합 ${meta.combos.length}/4 · 누적 승리 ${meta.wins||0}회 · 이 게임은 로컬 프로토타입으로 네트워크/결제 기능이 없어.</p></section>`}
+const utilityDrawCards=new Set(['receipt','taste','extract','catalyst','pantry','closeBooks','darkBargain','hustle','soul','spreadLedger','prepStation','bindingSeal','stockSolution','hellMarinade','orderStack','dawnDelivery','deliveryStamp','windSpirit','spiritSighting']);
+const upgradedDamageCards=new Set(['audit','collect','chop','flambe','curse','drain','night','blast','hellTax','goldAudit','infernalMenu','grandFeast','strike','surpriseAudit','spiceStorm','eclipse','flashFlask','chainReaction','partialCollect','interestClaim','serveNow','cashCurse','recycleFlask','soulLien','swiftDelivery','designatedDelivery','deliveryStamp','elevatorOut','nightSurcharge','spiritWrath','grandSpirit','underworldExpress','sameDayAlchemy','explosiveParcel','spiritQuick','spiritLien','livingCourse']);
+const upgradedBlockCards=new Set(['ledger','balance','broth','lunch','veil','transmute','goldAudit','guard','riskHedge','distill','slowSimmer','shadowShelter','reactiveShield','goldReserve','courseExchange','codPickup','rightTurn','earthSpirit','spiritBond','spiritFeast']);
+const upgradedHealCards=new Set(['lunch','drain','elixir','infernalMenu','grandFeast','hotMeal','spiritBond','spiritUpkeep','spiritFeast','soulReceipt']);
 function upgradeModifiers(id){const c=cards[id],d=[];if(c.cost>=2&&c.cost!==99)d.push('에너지 비용 1 감소');if(upgradedDamageCards.has(id))d.push('적중할 때마다 피해 +3');if(upgradedBlockCards.has(id))d.push('방어 획득마다 +3');if(upgradedHealCards.has(id))d.push('회복 발동마다 체력 +2');if(utilityDrawCards.has(id))d.push('카드 추가 드로우 +1');return d.length?d:['강화 보너스 적용'];}
 function beginTransaction(kind,v){if(!state||modal)return;let a=null;
  if(kind==='shopCard'&&state.phase==='shop'){const i=Number(v),id=state.shop?.cards[i];if(id&&cards[id]&&!state.shop.cardBought[i])a={kind,id,index:i,price:cardPrice(id),phase:'shop'};}
@@ -1805,7 +1989,7 @@ function detailsForTransaction(){const a=pendingAction;if(!a)return '<p>선택 �
  return '<p>선택 정보가 없어.</p>';
 }
 function jobBriefMarkup(k){const p=pairs[k],g=JOB_GUIDE[k];return `<div class="transaction-head"><span class="txn-icon">${p.icon}</span><div><div class="eyebrow">처음 출근하는 직업 · ${stars(g.level)} ${g.label}</div><h2>${p.name}</h2><p>${g.core}</p></div></div><div class="txn-description"><strong>핵심 자원</strong><p>${g.resourceBrief}</p></div><div class="pd-box" style="margin-top:10px"><b class="h">기본 전략</b><ol>${g.strategy.map(x=>`<li>${x}</li>`).join('')}</ol><b class="h" style="margin-top:8px">대표 조합</b>${comboMarkup(k)}<div class="pd-note">${g.comboNote}</div></div><div class="info-note">✨ 겸직 자동 효과: <b>${dualSummary(k)}</b> (현실+판타지 카드를 같은 턴에, 턴당 1회)</div><div class="txn-actions"><button class="btn primary" data-act="closeModal">확인, 전투 시작</button></div>`}
-const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.7.0</h2>
+const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.8.0</h2>
 <div class="guide-actions"><button class="btn primary small" data-act="tutReplay">🎓 튜토리얼 다시 보기</button></div>
 <div class="guide-sec"><b>⚔ 기본 전투</b><p>카드를 탭하면 전장을 보면서 효과를 확인할 수 있어. 적 또는 내 캐릭터를 탭하면 사용해. 「상세」에서 전체 설명을 볼 수 있어. 손패를 좌우로 넘겨 탐색하고, 위로 끌어 대상에 놓으면 바로 사용해. 에너지는 매 턴 ⚡3, 손패는 5장. 「턴 종료」를 누르면 적이 예고한 행동을 해. 오른쪽 <b>예상 피해</b>를 보고 방어를 챙기자.</p></div>
 <div class="guide-sec"><b>🎴 카드 순환</b><p>이번 턴에 사용한 카드는 버림 더미에 보관하고 다음 턴부터 다시 뽑아. 같은 이름의 다른 사본은 계속 사용할 수 있어. 손패는 최대 10장.</p></div>
@@ -1815,7 +1999,7 @@ const GUIDE_HTML=()=>`<h2>📖 이세계 출근 안내서 · v0.7.0</h2>
 <div class="guide-sec"><b>🧬 직업별 핵심 자원</b>${JOB_ORDER.map(k=>`<div class="guide-job"><span>${pairs[k].icon} <b>${pairs[k].name}</b> ${stars(JOB_GUIDE[k].level)}</span><span>${JOB_GUIDE[k].resources.map(resChip).join('')}</span><small>${JOB_GUIDE[k].core} · 겸직: ${dualSummary(k)}</small></div>`).join('')}<p class="footnote">★은 규칙 복잡도야. 별이 많다고 더 강하지 않아.</p></div>
 <div class="guide-sec"><b>🗺 갈림길·보상</b><p>새 도전은 12개 구역, 기존 저장은 9개 구역에서 길을 골라. 5·9구역의 직업 보급에서는 계열을 골라 카드를 받을 수 있어. 일반 전투는 카드, 정예는 유물(전체 20종 · 직업별 후보는 다름), 상점은 구매·제거, 휴식은 회복·피로 회복·강화 중 하나. 구매·제거·강화·이벤트 선택은 모두 <b>미리보기 → 확정</b> 2단계야.</p></div>
 <div class="guide-sec"><b>🎓 사내 전문교육</b><p>새 도전은 3구역을 마친 뒤 전문화 하나를 무료로 선택해. 이번 도전 동안 자동 적용되며 기존 겸직 규칙은 유지돼. 4구역 상점은 미보유 일반 유물 한 칸을 10G 할인해. 기존 진행 중인 도전은 이전 규칙으로 끝까지 이어가.</p></div>
-<div class="guide-sec"><b>💾 저장</b><p>v0.7.0는 v0.6 계열과 같은 저장 키에 자동 저장돼. 이전 C2.2·C2.1·C2·C1·v0.4.1 진행은 원본을 건드리지 않고 복사본으로만 가져와. 브라우저 데이터를 지우면 기록도 지워져.</p></div>`;
+<div class="guide-sec"><b>💾 저장</b><p>v0.8.0는 v0.6 계열과 같은 저장 키에 자동 저장돼. 이전 C2.2·C2.1·C2·C1·v0.4.1 진행은 원본을 건드리지 않고 복사본으로만 가져와. 브라우저 데이터를 지우면 기록도 지워져.</p></div>`;
 const backupOwn=(o,k)=>!!o&&Object.hasOwn(o,k);
 const backupPlain=o=>!!o&&typeof o==='object'&&!Array.isArray(o);
 function checkedBackupTree(value,depth=0,budget={n:0}){
@@ -1871,7 +2055,7 @@ function parseBackup(text){
  return {schema:1,run:validateBackupRun(x.run),meta:cleanMeta(x.meta),settings:{readableBattle:x.settings.readableBattle,combatSpeed:x.settings.combatSpeed||'normal'}};
 }
 function currentSavePacket(){return {schema:1,run:state?(RUN_PHASES.includes(state.phase)?JSON.parse(JSON.stringify(state)):null):(savedRun?JSON.parse(JSON.stringify(savedRun)):null),meta:JSON.parse(JSON.stringify(meta)),settings:{readableBattle,combatSpeed}}}
-function backupText(){const x=currentSavePacket();return JSON.stringify({game:'aldol-dualjob',backupVersion:1,gameVersion:'0.7.0',createdAt:new Date().toISOString(),run:x.run,meta:x.meta,settings:x.settings},null,2)}
+function backupText(){const x=currentSavePacket();return JSON.stringify({game:'aldol-dualjob',backupVersion:1,gameVersion:'0.8.0',createdAt:new Date().toISOString(),run:x.run,meta:x.meta,settings:x.settings},null,2)}
 function downloadBackup(){
  try{const blob=new Blob([backupText()],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='dualjob-save-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);saveMessage='백업 파일 다운로드를 요청했어요. 저장이 안 되면 아래 백업 텍스트를 복사해 주세요.'}
  catch{saveMessage='다운로드를 시작하지 못했어요. 아래 백업 텍스트를 복사해 주세요.'}
@@ -1898,7 +2082,7 @@ function saveManagerMarkup(){
  return `<h2>저장 및 백업</h2><p>진행과 누적 기록은 이 브라우저에 저장됩니다. 다른 주소·기기에서는 백업 파일을 가져와 주세요.</p><div class="save-summary">${run?esc(pairs[run.real+'-'+run.fantasy].name)+' · 구역 '+(run.stage+1)+'/'+campaignLength(run):'진행 중인 도전 없음'}<br/>누적 승리 ${meta.wins} · 도전 ${meta.attempts}</div>${saveIssue?`<p class="save-error" role="alert">${esc(saveIssue)}</p>`:'<p class="save-ok">자동 저장 사용 중 · 브라우저 데이터 삭제 시 기록도 사라집니다.</p>'}${saveMessage?`<p role="status">${esc(saveMessage)}</p>`:''}<div class="save-actions"><button class="btn primary" data-act="exportSave">백업 파일 내보내기</button><button class="btn calm" data-act="retrySave">현재 기록 저장 재시도</button></div><label class="save-file">백업 파일 가져오기<input id="backup-file" type="file" accept=".json,application/json"/></label><details class="save-text"><summary>파일 저장이 안 되나요? 백업 텍스트 보기</summary><textarea id="backup-output" readonly aria-label="현재 기록 백업 텍스트">${esc(backupText())}</textarea><button class="btn small" data-act="selectBackupText">텍스트 전체 선택</button></details><details class="save-text"><summary>백업 텍스트 붙여넣기</summary><textarea id="backup-input" maxlength="524288" spellcheck="false" aria-label="복원할 백업 텍스트"></textarea><button class="btn calm" data-act="previewBackupText">내용 확인</button></details>`;
 }
 function restoreSaveMarkup(){const x=restoreCandidate,r=x?.run;if(!x)return '';return `<h2>이 기록으로 복원할까요?</h2><div class="save-summary">${r?esc(pairs[r.real+'-'+r.fantasy].name)+' · 구역 '+(r.stage+1)+'/'+campaignLength(r)+' · 체력 '+r.hp+'/'+r.maxHp:'진행 중인 도전 없음'}<br/>누적 승리 ${x.meta.wins} · 도전 ${x.meta.attempts}</div><p>현재 진행과 누적 기록, 화면 설정을 위 내용으로 교체합니다. 지금 기록이 필요하면 먼저 백업해 주세요.</p><div class="save-actions"><button class="btn calm" data-act="cancelRestore">취소</button><button class="btn primary" data-act="commitRestore">이 기록으로 복원</button></div>`}
-function releaseAboutMarkup(){return `<h2>겸직금지!</h2><p class="release-tag">공개 테스트 · v0.7.0</p><p>낮에는 직장인, 밤에는 던전 출근. 현실과 판타지 직업을 조합하고 카드를 모아 인사부장 마왕에게 퇴사를 통보하세요.</p><p>직업 4종 · 갈림길 12개 구역 · 싱글플레이 카드 로그라이트</p><h3>기록과 개인정보</h3><p>게임에는 계정·클라우드 저장·게임 분석 전송 기능이 없습니다. 기록은 이 브라우저에 저장됩니다. 배포 후 호스팅 서비스의 접속 로그는 게임 저장과 별도로 처리될 수 있습니다.</p><h3>제작</h3><p>ALDOL · AI 도구를 활용해 제작한 일러스트를 포함합니다. 글꼴 출처와 라이선스는 규칙 안내에서 확인할 수 있어요.</p><h3>버그 제보</h3><p>버전, 기기·브라우저, 문제가 생긴 행동과 스크린샷을 함께 알려 주세요. 백업 파일에는 플레이 기록이 포함되므로 필요할 때만 첨부해 주세요.</p>`}
+function releaseAboutMarkup(){return `<h2>겸직금지!</h2><p class="release-tag">공개 테스트 · v0.8.0</p><p>낮에는 직장인, 밤에는 던전 출근. 현실과 판타지 직업을 조합하고 카드를 모아 인사부장 마왕에게 퇴사를 통보하세요.</p><p>직업 9종 · 갈림길 12개 구역 · 싱글플레이 카드 로그라이트</p><h3>기록과 개인정보</h3><p>게임에는 계정·클라우드 저장·게임 분석 전송 기능이 없습니다. 기록은 이 브라우저에 저장됩니다. 배포 후 호스팅 서비스의 접속 로그는 게임 저장과 별도로 처리될 수 있습니다.</p><h3>제작</h3><p>ALDOL · AI 도구를 활용해 제작한 일러스트를 포함합니다. 글꼴 출처와 라이선스는 규칙 안내에서 확인할 수 있어요.</p><h3>버그 제보</h3><p>버전, 기기·브라우저, 문제가 생긴 행동과 스크린샷을 함께 알려 주세요. 백업 파일에는 플레이 기록이 포함되므로 필요할 때만 첨부해 주세요.</p>`}
 function handleReleaseAction(act){
  if(act==='saveManager'){restoreSerial++;restoreCandidate=null;saveMessage='';modal='saveManager';render();return true}
  if(act==='releaseAbout'){modal='releaseAbout';render();return true}
@@ -2237,6 +2421,7 @@ document.querySelector('#app').addEventListener('click',ev=>{
  if(act==='confirmReward'){const i=Number(el.dataset.index);if(modal!=='card'||inspected?.source!=='reward'||i!==inspected.index||state?.rewardOptions[i]!==inspected.id)return;modal='';inspected=null;pickReward(i);return}
  if(act==='confirmPending'){executeTransaction();return}
  if(act==='restart'){restart();return}
+ if(act==='toTitle'){quitToTitle();return}
  if(act==='tutReplay'){meta.tutorialDone=false;saveMeta();modal='';if(state){state.tutorial={step:0};log('🎓 튜토리얼을 다시 시작해.'+(state.phase==='battle'?'':' 다음 전투에서 안내할게.'));save()}render();return}
  if(modal)return;
  if(act==='selectTraining'&&state?.phase==='training'&&trainingOptions().includes(el.dataset.id)){trainingChoice={run:state,id:el.dataset.id};render();return}
@@ -2259,9 +2444,11 @@ document.querySelector('#app').addEventListener('click',ev=>{
  if(act==='chooseNode'){chooseNode(Number(el.dataset.index));maybeJobBrief();return}
  if(act==='pickRelic'){pickRelic(Number(el.dataset.index));return}
  if(act==='leaveNode'){if(state?.phase==='shop')nextStage();return}
- if(act==='start'){if(mobileDevice())requestGameFullscreen();newRun();return}
- if(act==='resume'){if(!state&&savedRun){if(mobileDevice())requestGameFullscreen();state=savedRun;savedRun=null;pickReal=state.real;pickFantasy=state.fantasy;ensureTarget();save();render();maybeJobBrief()}return}
- if(act==='importRun'){const imp=importCandidate();if(!imp)return;if(mobileDevice())requestGameFullscreen();state=imp.run;pickReal=state.real;pickFantasy=state.fantasy;if(state.phase==='battle')ensureTarget();log('💾 '+imp.label+' 기록을 복사해 가져왔어. 원본 저장은 그대로야.');save();render();return}
+ if(act==='newGame'){careerOpen=true;render();return}
+ if(act==='backToTitle'){careerOpen=false;render();return}
+ if(act==='start'){careerOpen=false;if(mobileDevice())requestGameFullscreen();newRun();return}
+ if(act==='resume'){if(!state&&savedRun){careerOpen=false;if(mobileDevice())requestGameFullscreen();state=savedRun;savedRun=null;pickReal=state.real;pickFantasy=state.fantasy;ensureTarget();save();render();maybeJobBrief()}return}
+ if(act==='importRun'){const imp=importCandidate();if(!imp)return;careerOpen=false;if(mobileDevice())requestGameFullscreen();state=imp.run;pickReal=state.real;pickFantasy=state.fantasy;if(state.phase==='battle')ensureTarget();log('💾 '+imp.label+' 기록을 복사해 가져왔어. 원본 저장은 그대로야.');save();render();return}
  if(act==='endTurn'){selectedCard=null;endWithFx();return}
  if(act==='reward'){pickReward(Number(el.dataset.index));return}
 });
