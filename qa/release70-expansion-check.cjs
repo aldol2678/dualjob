@@ -14,12 +14,16 @@ check('first-career prototype: 12-zone map, supply choice, actual combat and bac
  const card=s.rewardOptions.find(k=>k==='soulLien');assert(card);g.pickReward(s.rewardOptions.indexOf(card));assert.equal(s.stage,5);assert(s.deck.includes(card));assert.equal(s.supplyOffers,undefined);
  g.takeFloorDecision(5,0);g.chooseNode(2);s.hand=[card];s.energy=3;s.enemies[0].debt=4;g.playCard(0,0);assert(s.enemies[0].hp<s.enemies[0].maxHp);assert(g.parseBackup(g.backupText()));
 });
-check('all four careers: 55 playable cards, 20 relics, eligible pools and classic isolation',()=>{
- assert.equal(Object.keys(g.cards).length,56);assert.equal(Object.keys(g.relics).length,20);
+check('all nine careers: 87 playable cards, 31 relics, eligible pools and classic isolation',()=>{
+ assert.equal(Object.keys(g.cards).length,88);assert.equal(Object.keys(g.relics).length,31);
+ // Classic (pre-expansion) runs can only hold the original four pairs; the new
+ // pairs are v0.8.0 expansion content, so in classic mode only their
+ // pre-existing base job's release-free cards remain.
+ const classicKeys={'accountant-warlock':20,'accountant-alchemist':20,'chef-warlock':20,'chef-alchemist':20,'courier-warlock':11,'courier-alchemist':11,'courier-spirit':3,'accountant-spirit':11,'chef-spirit':11};
  for(const pair of Object.keys(g.pairs)){
   const s=start(pair);assert.equal(g.allCardKeys().length,27);assert.equal(g.allCardKeys().filter(k=>g.cards[k].family==='fusion').length,2);
-  assert.equal(g.eligibleRelics().length,15);assert(g.eligibleRelics().every(k=>!g.relics[k].pair||g.relics[k].pair===pair));
-  delete s.campaignId;assert.equal(g.campaignLength(),9);assert.equal(g.allCardKeys().length,20);assert.equal(g.eligibleRelics().length,12);assert(g.allCardKeys().every(k=>!g.cards[k].release));
+  assert.equal(g.eligibleRelics().length,19);assert(g.eligibleRelics().every(k=>!g.relics[k].pair||g.relics[k].pair===pair));
+  delete s.campaignId;assert.equal(g.campaignLength(),9);assert.equal(g.allCardKeys().length,classicKeys[pair]);assert.equal(g.eligibleRelics().length,12);assert(g.allCardKeys().every(k=>!g.cards[k].release));
  }
 });
 check('new card effects: resource consumption, retention, conditional draw and area effects',()=>{
