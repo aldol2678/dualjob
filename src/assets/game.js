@@ -999,6 +999,7 @@ function spawnEnemy(){
   chooseIntent();log('🚪 '+routeRooms()[state.stage].label+' · '+encounter.name);log(encounter.hint);
 }
 function newRun(){
+ if(window.AldolAnalytics)AldolAnalytics.play();
  meta.attempts=(meta.attempts||0)+1;const key=pickReal+'-'+pickFantasy;if(!meta.combos.includes(key))meta.combos.push(key);saveMeta();
  trainingChoice=null;
  state={version:4,campaignId:'expansion07',contentRevision:21,trainingId:null,trainingTurn:freshTrainingTurn(),workFatigue:0,dualTurnUsed:false,lastDual:null,overtimes:0,tutorial:meta.tutorialDone?null:{step:0},phase:'map',stage:0,real:pickReal,fantasy:pickFantasy,maxHp:72,hp:72,block:0,energy:3,gold:30,
